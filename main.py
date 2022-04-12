@@ -219,6 +219,15 @@ def p_condicion2(p):
     '''condicion2   :   OTHERWISE bloque
                     |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
 
+def p_escritura(p):
+    '''escritura    :   OUTPUT RIGHTARROW exp escritura2 SEMICOLON
+                    |   OUTPUT RIGHTARROW CTE_STRING escritura2 SEMICOLON'''
+
+def p_escritura2(p):
+    '''escritura2   :   COMMA exp escritura2
+                    |   COMMA CTE_STRING escritura2
+                    |   empty'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
