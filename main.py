@@ -30,6 +30,8 @@ tokens = [
     "RIGHTPARENTHESIS",
     "LEFTCURLYBRACKET",
     "RIGHTCURLYBRACKET",
+    "LEFTBRACKET",
+    "RIGHTBRACKET",
     "CTE_STRING",
     "CTE_FLOAT",
     "CTE_INT",
@@ -124,6 +126,24 @@ def p_constructor(p):
 
 
     """VARS"""
+# <VARS>
+def p_vars(p):
+    """vars :   VAR tipoCompuesto ID vars2 SEMICOLON vars4
+            |   VAR tipoSimple ID vars3 SEMICOLON vars4"""
+
+def p_vars2(p):
+    '''vars2 :  COMMA ID vars2
+             |  empty'''
+
+def p_vars3(p):
+    '''vars3 :  LEFTBRACKET CTE_INT RIGHTBRACKET vars3
+             |  COMMA ID vars3
+             |  empty'''
+
+def p_vars4(p):
+    '''vars4 :  tipoCompuesto ID vars2 SEMICOLON vars4
+             |  tipoSimple ID vars3 SEMICOLON vars4
+             |  empty'''
 
 
 # <TipoCompuesto>
@@ -139,9 +159,9 @@ def p_tipoSimple(p):
     """
 
 # <Instr>
-def p_tipoSimple(p):
-    """instr : instr void ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
-    | instr tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
+def p_instr(p):
+    """instr : INSTR VOID ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
+    | INSTR tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     """
 
 # <Params>
