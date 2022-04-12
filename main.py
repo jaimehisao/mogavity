@@ -228,6 +228,9 @@ def p_escritura2(p):
                     |   COMMA CTE_STRING escritura2
                     |   empty'''
 
+def p_lectura(p):
+    '''lectura  :   INPUT LEFTARROW variable semicolon'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
