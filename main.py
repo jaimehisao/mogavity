@@ -248,6 +248,10 @@ def p_cicloW(p):
 def p_cicloFor(p):
     '''cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque'''
 
+# <Assign>
+def p_assign(p):
+    '''assign   :   ID EQUALS CTE_INT'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
