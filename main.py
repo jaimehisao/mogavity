@@ -200,6 +200,11 @@ def p_estatuto(p):
                 |   return
     """
 
+# <Asignación>
+def p_asignacion(p):
+    '''asignacion   :   variable EQUALS exp SEMICOLON'''
+
+
 
 def p_error(p):
     """
