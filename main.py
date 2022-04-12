@@ -204,7 +204,11 @@ def p_estatuto(p):
 def p_asignacion(p):
     '''asignacion   :   variable EQUALS exp SEMICOLON'''
 
-
+# <Variable>
+def p_variable(p):
+    '''variable :   ID DOT ID
+                |   ID LEFTBRACKET exp RIGHTBRACKET
+                |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET'''
 
 def p_error(p):
     """
