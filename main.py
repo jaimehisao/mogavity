@@ -190,7 +190,14 @@ def p_bloque2(p):
 
 # <Estatuto>
 def p_estatuto(p):
-    """estatuto :
+    """estatuto :   asignacion
+                |   condicion
+                |   escritura
+                |   lectura
+                |   llamada
+                |   cicloW
+                |   cicloFor
+                |   return
     """
 
 
