@@ -240,6 +240,10 @@ def p_llamada2(p):
     '''llamada2 :   COMMA exp
                 |   empty'''
 
+# <CicloW>
+def p_cicloW(p):
+    '''cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
