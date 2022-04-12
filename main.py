@@ -210,6 +210,15 @@ def p_variable(p):
                 |   ID LEFTBRACKET exp RIGHTBRACKET
                 |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET'''
 
+# <Condicion>
+def p_condicion(p):
+    '''condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
+                    |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
+
+def p_condicion2(p):
+    '''condicion2   :   OTHERWISE bloque
+                    |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
