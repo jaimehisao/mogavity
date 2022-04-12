@@ -244,6 +244,10 @@ def p_llamada2(p):
 def p_cicloW(p):
     '''cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque'''
 
+# <CicloFor>
+def p_cicloFor(p):
+    '''cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
