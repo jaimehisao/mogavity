@@ -181,10 +181,12 @@ def p_params1(p):
     """PARAMS2"""
 
 # <Bloque>
-def p_bloque(p): #TODO falta el caso de muchos estatutos
-    """bloque : LEFTCURLYBRACE estatuto RIGHTCURLYBRACE
-    | LEFTCURLYBRACE RIGHTCURLYBRACE
-    """
+def p_bloque(p):
+    """bloque : LEFTCURLYBRACE bloque2 RIGHTCURLYBRACE"""
+
+def p_bloque2(p):
+    '''bloque2  :   estatuto bloque2
+                |   empty'''
 
 # <Estatuto>
 def p_estatuto(p):
