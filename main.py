@@ -219,6 +219,7 @@ def p_condicion2(p):
     '''condicion2   :   OTHERWISE bloque
                     |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
 
+# <Escritura>
 def p_escritura(p):
     '''escritura    :   OUTPUT RIGHTARROW exp escritura2 SEMICOLON
                     |   OUTPUT RIGHTARROW CTE_STRING escritura2 SEMICOLON'''
@@ -227,9 +228,17 @@ def p_escritura2(p):
     '''escritura2   :   COMMA exp escritura2
                     |   COMMA CTE_STRING escritura2
                     |   empty'''
-
+# <Lectura>
 def p_lectura(p):
     '''lectura  :   INPUT LEFTARROW variable semicolon'''
+
+# <Llamada>
+def p_llamada(p):
+    '''llamada  :   ID LEFTPARENTHESIS exp llamada2 RIGHTPARENTHESIS SEMICOLON'''
+
+def p_llamada2(p):
+    '''llamada2 :   COMMA exp
+                |   empty'''
 
 def p_error(p):
     """
