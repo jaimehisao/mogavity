@@ -252,6 +252,13 @@ def p_cicloFor(p):
 def p_assign(p):
     '''assign   :   ID EQUALS CTE_INT'''
 
+# <Update>
+def p_update(p):
+    '''update   :   ID PLUSEQUAL CTE_INT
+                |   ID MINUSEQUAL CTE_INT
+                |   ID TIMESEQUAL CTE_INT
+                |   ID DIVIDEEQUAL CTE_INT'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
