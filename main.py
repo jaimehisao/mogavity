@@ -335,6 +335,12 @@ def p_error(p):
 lexer = lex.lex()
 parser = yacc.yacc()
 
+try:
+    f = open("mogavity/test.txt", 'r')
+    r = f.read()
+    f.close()
+except FileNotFoundError:
+    print("No hay archivo para probar")
 
-def parse(r):
-    parser.parse(r)
+parser.parse(r)
+print("Código correcto")
