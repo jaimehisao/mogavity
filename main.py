@@ -100,6 +100,10 @@ def p_programa(p):
     | PROGRAM ID SEMICOLON instr bloque
     | PROGRAM ID SEMICOLON bloque
     """
+# epsilon
+def p_empty(p):
+    '''empty :'''
+    pass
 
 # <CLASS>
 def p_class(p):
