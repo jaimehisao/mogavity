@@ -259,6 +259,10 @@ def p_update(p):
                 |   ID TIMESEQUAL CTE_INT
                 |   ID DIVIDEEQUAL CTE_INT'''
 
+# <Return>
+def p_return(p):
+    '''return   :   RETURN exp SEMICOLON'''
+
 def p_error(p):
     """
     If there is an error, the parser will resort to this instruction to inform of it.
