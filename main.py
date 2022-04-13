@@ -39,7 +39,40 @@ tokens = [
     "DOT",
     "SEMICOLON",
     "COLON",
+    "COMMA",
 ]
+# Tokens
+t_PLUS          =   r'\+' 
+t_MINUS         =   r'-'
+t_TIMES         =   r'\*'
+t_DIVIDE        =   r'/'
+t_LESSTHAN      =   r'<'
+t_GREATERTHAN   =   r'>'
+t_EQUALS        =   r'=='
+t_NOTEQUAL      =   r'!='
+t_ASSIGNMENT    =   r'\='
+t_EQUALGREATERTHAN  =   r'>='
+t_EQUALLESSTHAN     =   r'<='
+t_MINUSEQUAL        =   r'-='
+t_PLUSEQUAL         =   r'\+='
+t_TIMESEQUAL        =   r'\*='
+t_DIVIDEEQUAL       =   r'/='
+t_LEFTARROW         =   r'<-'
+t_RIGHTARROW        =   r'->'
+t_LEFTPARENTHESIS   =   r'\('
+t_RIGHTPARENTHESIS  =   r'\)'
+t_LEFTCURLYBRACKET  =   r'\{'
+t_RIGHTCURLYBRACKET =   r'\}'
+t_LEFTBRACKET       =   r'\['
+t_RIGHTBRACKET      =   r'\]'
+t_CTE_STRING        =   r'"([^\\"\n]+|\\.)*"'
+t_CTE_FLOAT         =   r'[+-]?[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
+t_CTE_INT           =   r'[0-9]+'
+t_CTE_CHAR          =   r'[a-zA-Z0-9]'
+t_DOT               =   r'\.'
+t_SEMICOLON         =   r';'
+t_COLON             =   r':'
+t_COMMA             =   r','
 
 # Reserved Keywords
 reserved = {
