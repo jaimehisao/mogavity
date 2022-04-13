@@ -202,7 +202,7 @@ def p_estatuto(p):
 
 # <Asignación>
 def p_asignacion(p):
-    '''asignacion   :   variable EQUALS exp SEMICOLON'''
+    '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
 
 # <Variable>
 def p_variable(p):
@@ -250,7 +250,7 @@ def p_cicloFor(p):
 
 # <Assign>
 def p_assign(p):
-    '''assign   :   ID EQUALS CTE_INT'''
+    '''assign   :   ID ASSIGNMENT CTE_INT'''
 
 # <Update>
 def p_update(p):
@@ -262,6 +262,57 @@ def p_update(p):
 # <Return>
 def p_return(p):
     '''return   :   RETURN exp SEMICOLON'''
+
+# <Exp>
+def p_exp(p):
+    '''exp  :   expA expOR'''
+def p_expOR(p):
+    '''expOR    :   OR expA expOR
+                |   empty'''
+
+# <ExpA>
+def p_expA(p):
+    '''expA :   expB expAND'''
+def p_expAND(p):
+    '''expAND   :   AND expB expAND
+                |   empty'''
+
+# <ExpB>
+def p_expB(p):
+    '''expB :   expC expLOOP'''
+def p_expLOOP(p):
+    '''expLOOP  :   LESSTHAN expB
+                |   GREATERTHAN expB
+                |   EQUALLESSTHAN expB
+                |   EQUALGREATERTHAN expB
+                |   EQUALS expB
+                |   NOTEQUAL expB
+                |   empty'''
+
+# <ExpC>
+def p_expC(p):
+    '''expC :   termino expPM'''
+def p_expPM(p):
+    '''expPM    :   PLUS expC
+                |   MINUS expC
+                |   empty'''
+
+# <Termino>
+def p_termino(p):
+    '''termino  :   factor expMD'''
+def p_expMD(p):
+    '''expMD    :   TIMES termino
+                |   DIVIDE termino
+                |   empty'''
+
+# <Factor>
+def p_factor(p):
+    '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
+                |   CTE_INT
+                |   CTE_FLOAT
+                |   CTE_CHAR
+                |   variable
+                |   llamada'''
 
 def p_error(p):
     """
