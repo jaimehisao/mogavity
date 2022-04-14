@@ -96,6 +96,7 @@ reserved = {
     "attr": "ATTR",
     "methods": "METHODS",
     "var": "VAR",
+    "return": "RETURN",
     "otherwise": "OTHERWISE"
 }
 
@@ -120,18 +121,17 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
-
-
-"""PARSER"""
-
 # GRAMMARS
+lexer = lex.lex()
 
 # <PROGRAMA>
 def p_programa(p):
-    """programa : PROGRAM ID SEMICOLON class vars instr bloque
-    | PROGRAM ID SEMICOLON vars instr bloque
-    | PROGRAM ID SEMICOLON instr bloque
-    | PROGRAM ID SEMICOLON bloque
+    """programa : PROGRAM ID SEMICOLON class vars instr MAIN bloque
+    | PROGRAM ID SEMICOLON class instr MAIN bloque
+    | PROGRAM ID SEMICOLON vars instr MAIN bloque
+    | PROGRAM ID SEMICOLON vars MAIN bloque
+    | PROGRAM ID SEMICOLON instr MAIN bloque
+    | PROGRAM ID SEMICOLON MAIN bloque
     """
 # epsilon
 def p_empty(p):
@@ -140,19 +140,10 @@ def p_empty(p):
 
 # <CLASS>
 def p_class(p):
-    """
-    class: CLASS ID INHERITS ID LEFTCURLYBRACKET ATTR COLON vars constructor colon constructor method colon INSTR RIGHTCURLYBRACKET
-    | CLASS ID INHERITS ID LEFTCURLYBRACKET ATTR COLON vars constructor colon constructor method colon INSTR RIGHTCURLYBRACKET
-    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars constructor colon constructor method colon INSTR RIGHTCURLYBRACKET
-    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars method colon INSTR RIGHTCURLYBRACKET
-    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars constructor colon constructor RIGHTCURLYBRACKET
-    | CLASS ID INHERITS ID LEFTCURLYBRACKET ATTR COLON vars constructor colon constructor method colon INSTR RIGHTCURLYBRACKET
-
-
-    programa : PROGRAM ID SEMICOLON class vars instr bloque
-    | PROGRAM ID SEMICOLON vars instr bloque
-    | PROGRAM ID SEMICOLON instr bloque
-    | PROGRAM ID SEMICOLON bloque
+    """class : CLASS ID INHERITS ID LEFTCURLYBRACKET ATTR COLON vars constructor COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
+    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars constructor COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
+    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars METHODS COLON instr RIGHTCURLYBRACKET
+    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars constructor COLON constructor RIGHTCURLYBRACKET
     """
 
 # <CONSTRUCTOR>
@@ -161,8 +152,6 @@ def p_constructor(p):
     | ID LEFTPARENTHESIS RIGHTPARENTHESIS bloque
     """
 
-
-    """VARS"""
 # <VARS>
 def p_vars(p):
     """vars :   VAR tipoCompuesto ID vars2 SEMICOLON vars4
@@ -190,9 +179,9 @@ def p_tipoCompuesto(p):
 
 # <Tiposimple>
 def p_tipoSimple(p):
-    """tipoSimple : int
-    | float
-    | char
+    """tipoSimple : INT
+    | FLOAT
+    | CHAR
     """
 
 # <Instr>
@@ -219,7 +208,7 @@ def p_params1(p):
 
 # <Bloque>
 def p_bloque(p):
-    """bloque : LEFTCURLYBRACE bloque2 RIGHTCURLYBRACE"""
+    """bloque : LEFTCURLYBRACKET bloque2 RIGHTCURLYBRACKET"""
 
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
@@ -243,7 +232,8 @@ def p_asignacion(p):
 
 # <Variable>
 def p_variable(p):
-    '''variable :   ID DOT ID
+    '''variable :   ID
+                |   ID DOT ID
                 |   ID LEFTBRACKET exp RIGHTBRACKET
                 |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET'''
 
@@ -267,14 +257,15 @@ def p_escritura2(p):
                     |   empty'''
 # <Lectura>
 def p_lectura(p):
-    '''lectura  :   INPUT LEFTARROW variable semicolon'''
+    '''lectura  :   INPUT LEFTARROW variable SEMICOLON'''
 
 # <Llamada>
 def p_llamada(p):
-    '''llamada  :   ID LEFTPARENTHESIS exp llamada2 RIGHTPARENTHESIS SEMICOLON'''
+    '''llamada  :   ID LEFTPARENTHESIS llamada2 RIGHTPARENTHESIS SEMICOLON'''
 
 def p_llamada2(p):
-    '''llamada2 :   COMMA exp
+    '''llamada2 :   exp llamada2
+                |   COMMA exp llamada2
                 |   empty'''
 
 # <CicloW>
@@ -365,11 +356,10 @@ def p_error(p):
     print(f"Syntax error: {token}")
     exit()
 
-lexer = lex.lex()
 parser = yacc.yacc()
 
 try:
-    f = open("mogavity/test.txt", 'r')
+    f = open("test.txt", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
