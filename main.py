@@ -7,6 +7,10 @@ Usage for the Compiler´s Design Course
 import ply.yacc as yacc
 import ply.lex as lex
 
+import variable_table
+
+var_table = variable_table.VariableTable()
+
 tokens = [
     "ID",
     "PLUS",
@@ -355,6 +359,32 @@ def p_error(p):
 
     print(f"Syntax error: {token}")
     exit()
+
+
+########################################################
+#################PUNTOS NEURALGICOS#####################
+########################################################
+
+# Agregar Variable en Tabla
+def p_new_variable(p):
+    'new_variable: '
+
+    # Aqui tenemos que manejar el scope de las variables (dejaremos eso pte)
+
+    # Buscamos la variable para ver si ya existe
+    if var_table.check_if_exists(p[-1]):
+        # Exists
+        print('Error, variable already exists!')
+    else:
+        var_table.add(p[-1]) # Okay entonces no se puede hacer de jalon el agregarla y ponerle el tipo entonces hay que hacer la asignacion del tipo con otro punto neuralgico
+
+    # Agregar tipo a la variable que recien agregamos a la tabla
+
+
+# Verificar el tipo de la variable
+
+
+
 
 parser = yacc.yacc()
 
