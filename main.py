@@ -46,37 +46,37 @@ tokens = [
     "COMMA",
 ]
 # Tokens
-t_PLUS          =   r'\+' 
-t_MINUS         =   r'-'
-t_TIMES         =   r'\*'
-t_DIVIDE        =   r'/'
-t_LESSTHAN      =   r'<'
-t_GREATERTHAN   =   r'>'
-t_EQUALS        =   r'=='
-t_NOTEQUAL      =   r'!='
-t_ASSIGNMENT    =   r'\='
-t_EQUALGREATERTHAN  =   r'>='
-t_EQUALLESSTHAN     =   r'<='
-t_MINUSEQUAL        =   r'-='
-t_PLUSEQUAL         =   r'\+='
-t_TIMESEQUAL        =   r'\*='
-t_DIVIDEEQUAL       =   r'/='
-t_LEFTARROW         =   r'<-'
-t_RIGHTARROW        =   r'->'
-t_LEFTPARENTHESIS   =   r'\('
-t_RIGHTPARENTHESIS  =   r'\)'
-t_LEFTCURLYBRACKET  =   r'\{'
-t_RIGHTCURLYBRACKET =   r'\}'
-t_LEFTBRACKET       =   r'\['
-t_RIGHTBRACKET      =   r'\]'
-t_CTE_STRING        =   r'"([^\\"\n]+|\\.)*"'
-t_CTE_FLOAT         =   r'[+-]?[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
-t_CTE_INT           =   r'[0-9]+'
-t_CTE_CHAR          =   r'[a-zA-Z0-9]'
-t_DOT               =   r'\.'
-t_SEMICOLON         =   r';'
-t_COLON             =   r':'
-t_COMMA             =   r','
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+t_LESSTHAN = r'<'
+t_GREATERTHAN = r'>'
+t_EQUALS = r'=='
+t_NOTEQUAL = r'!='
+t_ASSIGNMENT = r'\='
+t_EQUALGREATERTHAN = r'>='
+t_EQUALLESSTHAN = r'<='
+t_MINUSEQUAL = r'-='
+t_PLUSEQUAL = r'\+='
+t_TIMESEQUAL = r'\*='
+t_DIVIDEEQUAL = r'/='
+t_LEFTARROW = r'<-'
+t_RIGHTARROW = r'->'
+t_LEFTPARENTHESIS = r'\('
+t_RIGHTPARENTHESIS = r'\)'
+t_LEFTCURLYBRACKET = r'\{'
+t_RIGHTCURLYBRACKET = r'\}'
+t_LEFTBRACKET = r'\['
+t_RIGHTBRACKET = r'\]'
+t_CTE_STRING = r'"([^\\"\n]+|\\.)*"'
+t_CTE_FLOAT = r'[+-]?[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
+t_CTE_INT = r'[0-9]+'
+t_CTE_CHAR = r'[a-zA-Z0-9]'
+t_DOT = r'\.'
+t_SEMICOLON = r';'
+t_COLON = r':'
+t_COMMA = r','
 
 # Reserved Keywords
 reserved = {
@@ -106,6 +106,7 @@ reserved = {
 
 tokens = tokens + list(reserved.values())
 
+
 def t_ID(t):
     r"[a-zA-Z]+(_?[a-zA-Z0-9]+)*"
     t.type = reserved.get(t.value, "ID")
@@ -125,8 +126,10 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
+
 # GRAMMARS
 lexer = lex.lex()
+
 
 # <PROGRAMA>
 def p_programa(p):
@@ -137,10 +140,13 @@ def p_programa(p):
     | PROGRAM ID SEMICOLON instr MAIN bloque
     | PROGRAM ID SEMICOLON MAIN bloque
     """
+
+
 # epsilon
 def p_empty(p):
     '''empty :'''
     pass
+
 
 # <CLASS>
 def p_class(p):
@@ -150,29 +156,34 @@ def p_class(p):
     | CLASS ID LEFTCURLYBRACKET ATTR COLON vars constructor COLON constructor RIGHTCURLYBRACKET
     """
 
+
 # <CONSTRUCTOR>
 def p_constructor(p):
     """constructor : ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | ID LEFTPARENTHESIS RIGHTPARENTHESIS bloque
     """
 
+
 # <VARS>
 def p_vars(p):
-    """vars :   VAR tipoCompuesto ID vars2 SEMICOLON vars4
-            |   VAR tipoSimple ID vars3 SEMICOLON vars4"""
+    """vars :   VAR tipoCompuesto ID p_new_variable vars2 SEMICOLON vars4
+            |   VAR tipoSimple ID p_new_variable vars3 SEMICOLON vars4"""
+
 
 def p_vars2(p):
     '''vars2 :  COMMA ID vars2
              |  empty'''
 
+
 def p_vars3(p):
     '''vars3 :  LEFTBRACKET CTE_INT RIGHTBRACKET vars3
-             |  COMMA ID vars3
+             |  COMMA ID p_new_variable vars3
              |  empty'''
 
+
 def p_vars4(p):
-    '''vars4 :  tipoCompuesto ID vars2 SEMICOLON vars4
-             |  tipoSimple ID vars3 SEMICOLON vars4
+    '''vars4 :  tipoCompuesto ID p_new_variable vars2 SEMICOLON vars4
+             |  tipoSimple ID p_new_variable vars3 SEMICOLON vars4
              |  empty'''
 
 
@@ -181,6 +192,7 @@ def p_tipoCompuesto(p):
     """tipoCompuesto : ID
     """
 
+
 # <Tiposimple>
 def p_tipoSimple(p):
     """tipoSimple : INT
@@ -188,11 +200,13 @@ def p_tipoSimple(p):
     | CHAR
     """
 
+
 # <Instr>
 def p_instr(p):
     """instr : INSTR VOID ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | INSTR tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     """
+
 
 # <Params>
 def p_params(p):
@@ -200,6 +214,7 @@ def p_params(p):
     | tipoSimple ID COMMA params1
     |
     """
+
 
 # <Params1>
 def p_params1(p):
@@ -210,13 +225,16 @@ def p_params1(p):
 
     """PARAMS2"""
 
+
 # <Bloque>
 def p_bloque(p):
     """bloque : LEFTCURLYBRACKET bloque2 RIGHTCURLYBRACKET"""
 
+
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
                 |   empty'''
+
 
 # <Estatuto>
 def p_estatuto(p):
@@ -230,9 +248,11 @@ def p_estatuto(p):
                 |   return
     """
 
+
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
+
 
 # <Variable>
 def p_variable(p):
@@ -241,48 +261,60 @@ def p_variable(p):
                 |   ID LEFTBRACKET exp RIGHTBRACKET
                 |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET'''
 
+
 # <Condicion>
 def p_condicion(p):
     '''condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
 
+
 def p_condicion2(p):
     '''condicion2   :   OTHERWISE bloque
                     |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
+
 
 # <Escritura>
 def p_escritura(p):
     '''escritura    :   OUTPUT RIGHTARROW exp escritura2 SEMICOLON
                     |   OUTPUT RIGHTARROW CTE_STRING escritura2 SEMICOLON'''
 
+
 def p_escritura2(p):
     '''escritura2   :   COMMA exp escritura2
                     |   COMMA CTE_STRING escritura2
                     |   empty'''
+
+
 # <Lectura>
 def p_lectura(p):
     '''lectura  :   INPUT LEFTARROW variable SEMICOLON'''
 
+
 # <Llamada>
 def p_llamada(p):
     '''llamada  :   ID LEFTPARENTHESIS llamada2 RIGHTPARENTHESIS SEMICOLON'''
+
 
 def p_llamada2(p):
     '''llamada2 :   exp llamada2
                 |   COMMA exp llamada2
                 |   empty'''
 
+
 # <CicloW>
 def p_cicloW(p):
     '''cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque'''
+
 
 # <CicloFor>
 def p_cicloFor(p):
     '''cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque'''
 
+
 # <Assign>
 def p_assign(p):
     '''assign   :   ID ASSIGNMENT CTE_INT'''
+
 
 # <Update>
 def p_update(p):
@@ -291,27 +323,37 @@ def p_update(p):
                 |   ID TIMESEQUAL CTE_INT
                 |   ID DIVIDEEQUAL CTE_INT'''
 
+
 # <Return>
 def p_return(p):
     '''return   :   RETURN exp SEMICOLON'''
 
+
 # <Exp>
 def p_exp(p):
     '''exp  :   expA expOR'''
+
+
 def p_expOR(p):
     '''expOR    :   OR expA expOR
                 |   empty'''
 
+
 # <ExpA>
 def p_expA(p):
     '''expA :   expB expAND'''
+
+
 def p_expAND(p):
     '''expAND   :   AND expB expAND
                 |   empty'''
 
+
 # <ExpB>
 def p_expB(p):
     '''expB :   expC expLOOP'''
+
+
 def p_expLOOP(p):
     '''expLOOP  :   LESSTHAN expB
                 |   GREATERTHAN expB
@@ -321,21 +363,28 @@ def p_expLOOP(p):
                 |   NOTEQUAL expB
                 |   empty'''
 
+
 # <ExpC>
 def p_expC(p):
     '''expC :   termino expPM'''
+
+
 def p_expPM(p):
     '''expPM    :   PLUS expC
                 |   MINUS expC
                 |   empty'''
 
+
 # <Termino>
 def p_termino(p):
     '''termino  :   factor expMD'''
+
+
 def p_expMD(p):
     '''expMD    :   TIMES termino
                 |   DIVIDE termino
                 |   empty'''
+
 
 # <Factor>
 def p_factor(p):
@@ -345,6 +394,7 @@ def p_factor(p):
                 |   CTE_CHAR
                 |   variable
                 |   llamada'''
+
 
 def p_error(p):
     """
@@ -376,14 +426,13 @@ def p_new_variable(p):
         # Exists
         print('Error, variable already exists!')
     else:
-        var_table.add(p[-1]) # Okay entonces no se puede hacer de jalon el agregarla y ponerle el tipo entonces hay que hacer la asignacion del tipo con otro punto neuralgico
+        var_table.add(p[
+                          -1])  # Okay entonces no se puede hacer de jalon el agregarla y ponerle el tipo entonces hay que hacer la asignacion del tipo con otro punto neuralgico
 
     # Agregar tipo a la variable que recien agregamos a la tabla
 
 
 # Verificar el tipo de la variable
-
-
 
 
 parser = yacc.yacc()
