@@ -7,7 +7,7 @@ class Function:
     type: str
 
 
-class VariableTable:
+class FunctionDirectory:
     def __init__(self):
         self.function_table = {}
 
