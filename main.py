@@ -9,7 +9,7 @@ import ply.lex as lex
 
 import variable_table
 
-var_table = variable_table.VariableTable()
+var_table = variable_table.SymbolTable()
 
 tokens = [
     "ID",
@@ -412,7 +412,7 @@ def p_error(p):
 
 
 ########################################################
-#################PUNTOS NEURALGICOS#####################
+################ PUNTOS NEURALGICOS ####################
 ########################################################
 
 # Agregar Variable en Tabla
@@ -426,10 +426,32 @@ def p_new_variable(p):
         # Exists
         print('Error, variable already exists!')
     else:
-        var_table.add(p[
-                          -1])  # Okay entonces no se puede hacer de jalon el agregarla y ponerle el tipo entonces hay que hacer la asignacion del tipo con otro punto neuralgico
+        var_table.add(variable_table.Variable(id = p[-1]))  # Okay entonces no se puede hacer de jalon el agregarla y ponerle el tipo entonces hay que hacer la asignacion del tipo con otro punto neuralgico
 
     # Agregar tipo a la variable que recien agregamos a la tabla
+
+
+def p_new_variable_set_type(p):
+    """As the variable type comes BEFORE the name, we have no way of knowing if we will actually
+     need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
+    pass
+
+
+def p_new_class():
+    pass
+
+def p_new_constructor():
+    pass
+
+def p_new_array():
+    pass
+
+def p_new_function():
+    pass
+
+def p_new_param_get_type():
+    pass
+
 
 
 # Verificar el tipo de la variable

@@ -7,9 +7,15 @@ class Variable:
     type: str
 
 
-class VariableTable:
+class SymbolTable:
     def __init__(self):
         self.variable_table = {}
+
+    def add(self, identifier):
+        if identifier in self.function_table.keys():
+            print('Variable ' + identifier + ' already exists!')
+        else:
+            self.variable_table[id] = Variable(identifier)
 
     def add(self, identifier, var_type):
         if identifier in self.function_table.keys():
