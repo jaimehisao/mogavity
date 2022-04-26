@@ -8,8 +8,12 @@ import ply.yacc as yacc
 import ply.lex as lex
 
 import variable_table
+import class_directory
+import function_directory
 
 var_table = variable_table.SymbolTable()
+class_table = class_directory.ClassTable()
+func_table = function_directory.FunctionDirectory()
 
 tokens = [
     "ID",
@@ -200,13 +204,16 @@ def p_tipoSimple(p):
     | CHAR
     """
 
-
+# TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
-    | INSTR tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
+    """instr : INSTR VOID ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    | INSTR tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
     """
 
+def p_instr2(p):
+    """instr2 : vars
+              | empty"""
 
 # <Params>
 def p_params(p):
@@ -415,6 +422,10 @@ def p_error(p):
 ################ PUNTOS NEURALGICOS ####################
 ########################################################
 
+def p_new_program(p):
+    'new_program : '
+    global func_table
+
 # Agregar Variable en Tabla
 def p_new_variable(p):
     'new_variable: '
@@ -437,7 +448,14 @@ def p_new_variable_set_type(p):
     pass
 
 
-def p_new_class():
+def p_new_class(p):
+    'new_class: '
+    # Buscamos que la clase no exista
+    if class_table.check_if_exists(p[-1]):
+        # True
+        print("Error, class already exists")
+    else:
+        class_table.add(class_directory.Class(id = p[-1]))
     pass
 
 def p_new_constructor():
