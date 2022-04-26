@@ -36,3 +36,6 @@ class FunctionDirectory:
             return True
         else:
             return False
+
+    def add_elements(self, identifier, elem_type):
+        self.function_table = {'identifier' : identifier, 'type' : elem_type}
