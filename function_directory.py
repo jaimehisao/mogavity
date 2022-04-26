@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 @dataclass()
 class Function:
     id: str
@@ -9,8 +8,7 @@ class Function:
 
 class FunctionDirectory:
     def __init__(self):
-        self.function_table = {}
-        self.function_table["global"] = {}
+        self.function_table = {"global": {}}
 
     def add(self, identifier, func_type):
         if identifier in self.function_table.keys():
