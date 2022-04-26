@@ -6,6 +6,7 @@ Usage for the Compiler´s Design Course
 """
 import ply.yacc as yacc
 import ply.lex as lex
+import sys
 
 import variable_table
 import class_directory
@@ -470,6 +471,10 @@ def p_new_function():
 def p_new_param_get_type():
     pass
 
+
+def error(message: str):
+    print(message)  # use raise?
+    sys.exit()
 
 
 # Verificar el tipo de la variable
