@@ -1,25 +1,42 @@
 from dataclasses import dataclass
+import sys
+
 
 @dataclass()
 class Function:
     id: str
-    type: str
+    return_type: str
 
 
 class FunctionDirectory:
     def __init__(self):
-        self.function_table = {"global": {}}
+        self.function_table = {"global": {}}  # Initialize with global scope already
 
-    def add(self, identifier, func_type):
+    def add_function(self, identifier):
+        """
+        Add new function scope to the Function Table
+        """
         if identifier in self.function_table.keys():
-            print('Function ' + identifier + ' already exists!')
+            error('Function ' + identifier + ' already exists!')
         else:
-            self.function_table[id] = Function(identifier, func_type)
+            self.function_table[identifier] = {}
+            print("Scope " + identifier + "Created!")
+
+    def add_global_variable(self, identifier, data_type):
+        self.function_table['global']['vars'][identifier] = {'data_type': data_type,
+                                                             'address': None}
+
+    def add_function_variables(self):
+        """This is called after vars is detected inside a function, we will need a way to manage the scope"""
+
+
 
     def remove(self, identifier):
+        """Removes Scope from the table"""
         self.function_table.pop(identifier)
 
     def check_if_exists(self, identifier):
+        """Will verify if the given scope exists in the function table"""
         if identifier in self.function_table.keys():
             return True
         else:
@@ -30,7 +47,12 @@ class FunctionDirectory:
 
     def check_for_vars(self, identifier):
         if "vars" in self.function_table[identifier].keys():
-            print("Vars Table exists for this function")
+            error("Vars Table already exists for this function")
             return True
         else:
             return False
+
+
+def error(message: str):
+    print(message)  # use raise?
+    sys.exit()
