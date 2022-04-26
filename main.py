@@ -138,12 +138,12 @@ lexer = lex.lex()
 
 # <PROGRAMA>
 def p_programa(p):
-    """programa : PROGRAM ID SEMICOLON class vars instr MAIN bloque
-    | PROGRAM ID SEMICOLON class instr MAIN bloque
-    | PROGRAM ID SEMICOLON vars instr MAIN bloque
-    | PROGRAM ID SEMICOLON vars MAIN bloque
-    | PROGRAM ID SEMICOLON instr MAIN bloque
-    | PROGRAM ID SEMICOLON MAIN bloque
+    """programa : PROGRAM new_program ID save_program SEMICOLON class vars instr MAIN bloque
+    | PROGRAM new_program ID save_program SEMICOLON class instr MAIN bloque
+    | PROGRAM new_program ID save_program SEMICOLON vars instr MAIN bloque
+    | PROGRAM new_program ID save_program SEMICOLON vars MAIN bloque
+    | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque
+    | PROGRAM new_program ID save_program SEMICOLON MAIN bloque
     """
 
 
@@ -429,7 +429,7 @@ def p_new_program(p):
 
 def p_save_program(p):
     'save_program :'
-    func_table
+    func_table.add_elements(p[-1], "program")
 
 # Agregar Variable en Tabla
 def p_new_variable(p):

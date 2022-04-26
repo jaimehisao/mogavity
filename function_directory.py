@@ -52,7 +52,11 @@ class FunctionDirectory:
         else:
             return False
 
+    def add_elements(self, identifier, elem_type):
+        self.function_table = {'identifier' : identifier, 'type' : elem_type}
+
 
 def error(message: str):
     print(message)  # use raise?
     sys.exit()
+
