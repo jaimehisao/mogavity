@@ -12,14 +12,14 @@ class FunctionDirectory:
     def __init__(self):
         self.function_table = {"global": {}}  # Initialize with global scope already
 
-    def add_function(self, identifier):
+    def add_function(self, identifier, return_type):
         """
         Add new function scope to the Function Table
         """
         if identifier in self.function_table.keys():
             error('Function ' + identifier + ' already exists!')
         else:
-            self.function_table[identifier] = {}
+            self.function_table[identifier] = {'return_type': return_type}
             print("Scope " + identifier + "Created!")
 
     def add_global_variable(self, identifier, data_type):
