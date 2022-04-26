@@ -427,6 +427,10 @@ def p_new_program(p):
     'new_program : '
     global func_table
 
+def p_save_program(p):
+    'save_program :'
+    func_table
+
 # Agregar Variable en Tabla
 def p_new_variable(p):
     'new_variable: '
