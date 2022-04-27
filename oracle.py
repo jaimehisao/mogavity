@@ -1,4 +1,6 @@
 """
+oracle.py - Serves as the only authority for semantics in the Mogavity language
+Created on: 25/04/22 by Jaime Hisao Yesaki Hinojosa
 1 y 2
 Int = 0
 Float = 1
