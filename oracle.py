@@ -21,9 +21,8 @@ OR = 8
 Results 
 -1 = Error
 """
-
 n = 9  # Probolema con ineficiencia de espacio utilizado
-semantic_oracle = distance = [[[0 for k in range(n)] for j in range(n)] for i in range(n)]
+semantic_oracle = distance = [[[0 for k in range(9)] for j in range(3)] for i in range(3)]
 semantic_oracle[0][0][0] = 0   # Int y Int (Sum)
 semantic_oracle[0][0][1] = 0   # Int y Int (Subtract)
 semantic_oracle[0][0][2] = 0   # Int y Int (Multiply)
@@ -105,5 +104,3 @@ semantic_oracle[1][2][5] = -1  # Float y Char (Less Than)
 semantic_oracle[1][2][6] = -1  # Float y Char (Not Equal)
 semantic_oracle[1][2][7] = -1  # Float y Char (AND)
 semantic_oracle[1][1][8] = -1  # Float y Char (OR)
-
-
