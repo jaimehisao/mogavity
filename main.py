@@ -207,8 +207,8 @@ def p_tipoSimple(p):
 # TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
-    | INSTR tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
     """
     global current_scope
     current_scope = p[3]
@@ -449,7 +449,9 @@ def p_new_variable_set_type(p):
     """As the variable type comes BEFORE the name, we have no way of knowing if we will actually
      need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
 
-
+def p_new_function(p):
+    'new_function :'
+    func_table.add_function(p[-1], p[-2])
 """
 def p_new_constructor(p):
     'new_constructor :'
