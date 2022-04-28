@@ -12,6 +12,9 @@ from function_directory import FunctionDirectory
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
 
+global current_scope
+current_scope = 'global'
+
 tokens = [
     "ID",
     "PLUS",
@@ -207,6 +210,8 @@ def p_instr(p):
     """instr : INSTR VOID ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
     | INSTR tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
     """
+    global current_scope
+    current_scope = p[3]
 
 def p_instr2(p):
     """instr2 : vars
@@ -418,8 +423,6 @@ def p_error(p):
 ########################################################
 ################ PUNTOS NEURALGICOS ####################
 ########################################################
-global current_scope
-current_scope = 'global'
 
 def p_new_program(p):
     'new_program : '
