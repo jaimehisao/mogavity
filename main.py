@@ -6,15 +6,11 @@ Usage for the Compiler´s Design Course
 """
 import ply.yacc as yacc
 import ply.lex as lex
-import sys
+import sys, logging
+from function_directory import FunctionDirectory
 
-import variable_table
-import class_directory
-import function_directory
-
-var_table = variable_table.SymbolTable()
-class_table = class_directory.ClassTable()
-func_table = function_directory.FunctionDirectory()
+# class_table = class_directory.ClassTable()
+func_table = FunctionDirectory()
 
 tokens = [
     "ID",
@@ -171,38 +167,38 @@ def p_constructor(p):
 
 # <VARS>
 def p_vars(p):
-    """vars :   VAR tipoCompuesto ID p_new_variable vars2 SEMICOLON vars4
-            |   VAR tipoSimple ID p_new_variable vars3 SEMICOLON vars4"""
+    """vars :   VAR tipoCompuesto new_variable_set_type ID new_variable vars2 SEMICOLON vars4
+            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON vars4"""
 
 
 def p_vars2(p):
-    '''vars2 :  COMMA ID vars2
+    '''vars2 :  COMMA ID new_variable vars2
              |  empty'''
 
 
 def p_vars3(p):
     '''vars3 :  LEFTBRACKET CTE_INT RIGHTBRACKET vars3
-             |  COMMA ID p_new_variable vars3
+             |  COMMA ID new_variable vars3
              |  empty'''
 
 
 def p_vars4(p):
-    '''vars4 :  tipoCompuesto ID p_new_variable vars2 SEMICOLON vars4
-             |  tipoSimple ID p_new_variable vars3 SEMICOLON vars4
+    '''vars4 :  tipoCompuesto ID new_variable vars2 SEMICOLON vars4
+             |  tipoSimple ID new_variable vars3 SEMICOLON vars4
              |  empty'''
 
 
 # <TipoCompuesto>
 def p_tipoCompuesto(p):
-    """tipoCompuesto : ID
+    """tipoCompuesto : ID new_variable_set_type
     """
 
 
 # <Tiposimple>
 def p_tipoSimple(p):
-    """tipoSimple : INT
-    | FLOAT
-    | CHAR
+    """tipoSimple : INT new_variable_set_type
+    | FLOAT new_variable_set_type
+    | CHAR new_variable_set_type
     """
 
 # TODO: Actualizar el diagrama instr
@@ -422,58 +418,48 @@ def p_error(p):
 ########################################################
 ################ PUNTOS NEURALGICOS ####################
 ########################################################
+global current_scope
+current_scope = 'global'
 
 def p_new_program(p):
     'new_program : '
     global func_table
 
+
 def p_save_program(p):
     'save_program :'
-    func_table.add_elements(p[-1], "program")
+    print()
+    #func_table.add_elements(p[-1], "program")
+
 
 # Agregar Variable en Tabla
 def p_new_variable(p):
-    'new_variable: '
-
-    # Aqui tenemos que manejar el scope de las variables (dejaremos eso pte)
-
-    # Buscamos la variable para ver si ya existe
-    if var_table.check_if_exists(p[-1]):
-        # Exists
-        print('Error, variable already exists!')
-    else:
-        var_table.add(variable_table.Variable(id = p[-1]))  # Okay entonces no se puede hacer de jalon el agregarla y ponerle el tipo entonces hay que hacer la asignacion del tipo con otro punto neuralgico
-
-    # Agregar tipo a la variable que recien agregamos a la tabla
+    'new_variable : '
+    func_table.add_variable(p[-1], current_scope, func_table.tmp_type)
 
 
 def p_new_variable_set_type(p):
+    'new_variable_set_type : '
+    global tmp_type
+    tmp_type = p[-1]
+    # TODO we have a situation here pending to resolve
     """As the variable type comes BEFORE the name, we have no way of knowing if we will actually
      need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
-    pass
 
 
-def p_new_class(p):
-    'new_class: '
-    # Buscamos que la clase no exista
-    if class_table.check_if_exists(p[-1]):
-        # True
-        print("Error, class already exists")
-    else:
-        class_table.add(class_directory.Class(id = p[-1]))
-    pass
+"""
+def p_new_constructor(p):
+    'new_constructor :'
 
-def p_new_constructor():
-    pass
+def p_new_array(p):
+    'new_array : '
 
-def p_new_array():
-    pass
+def p_new_function(p):
+    'new_function : '
 
-def p_new_function():
-    pass
-
-def p_new_param_get_type():
-    pass
+def p_new_param_get_type(p):
+    'new_param_get_type : '
+"""
 
 
 def error(message: str):
@@ -485,7 +471,7 @@ def error(message: str):
 
 
 parser = yacc.yacc()
-
+r = None
 try:
     f = open("test.txt", 'r')
     r = f.read()
@@ -494,4 +480,6 @@ except FileNotFoundError:
     print("No hay archivo para probar")
 
 parser.parse(r)
-print("Código correcto")
+#parser.parse(r, debug=1)
+print("Código Aceptado")
+print(func_table.function_table)
