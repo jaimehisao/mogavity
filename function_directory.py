@@ -56,9 +56,10 @@ class FunctionDirectory:
             return True
         else:
             return False
-
-    def add_vars(self, identifier, vars_table):
-        self.function_table[identifier]["vars"] = vars_table
+            
+    # CREO QUE NO NECESITAMOS ESTA FUNCION
+    # def add_vars(self, identifier, vars_table):
+    #     self.function_table[identifier]["vars"] = vars_table
 
     def check_for_vars(self, identifier):
         if "vars" in self.function_table[identifier].keys():
