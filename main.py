@@ -451,7 +451,7 @@ def p_new_variable_set_type(p):
 
 def p_new_function(p):
     'new_function :'
-    func_table.add_function(p[-1], p[-2])
+    func_table.add_function(p[-1], tmp_type)
 """
 def p_new_constructor(p):
     'new_constructor :'
