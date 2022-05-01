@@ -28,7 +28,7 @@ class FunctionDirectory:
         if identifier in self.function_table.keys():
             error('Function ' + identifier + ' already exists!')
         else:
-            self.function_table[identifier] = Function(identifier, return_type, {})
+            self.function_table[identifier] = Function(identifier, return_type)
             print("Scope " + identifier + "Created!")
 
     def add_global_variable(self, identifier, data_type):
@@ -57,8 +57,9 @@ class FunctionDirectory:
         else:
             return False
 
-    def add_vars(self, identifier, vars_table):
-        self.function_table[identifier]["vars"] = vars_table
+    # CREO QUE NO NECESITAMOS ESTA FUNCION
+    # def add_vars(self, identifier, vars_table):
+    #     self.function_table[identifier]["vars"] = vars_table
 
     def check_for_vars(self, identifier):
         if "vars" in self.function_table[identifier].keys():

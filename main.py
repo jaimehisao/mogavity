@@ -12,6 +12,9 @@ from function_directory import FunctionDirectory
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
 
+global current_scope
+current_scope = 'global'
+
 tokens = [
     "ID",
     "PLUS",
@@ -204,9 +207,11 @@ def p_tipoSimple(p):
 # TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
-    | INSTR tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
     """
+    global current_scope
+    current_scope = p[3]
 
 def p_instr2(p):
     """instr2 : vars
@@ -418,8 +423,6 @@ def p_error(p):
 ########################################################
 ################ PUNTOS NEURALGICOS ####################
 ########################################################
-global current_scope
-current_scope = 'global'
 
 def p_new_program(p):
     'new_program : '
@@ -447,7 +450,9 @@ def p_new_variable_set_type(p):
      need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
 
 
-
+def p_new_function(p):
+    'new_function :'
+    func_table.add_function(p[-1], tmp_type)
 
 
 """
