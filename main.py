@@ -274,6 +274,10 @@ def p_estatuto(p):
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
+    exp = stackO.pop()
+    exp_type = stack_type.pop()
+    new_quad = quad.generate_quad('=', exp, None, p[1])
+    quads.append(new_quad)
 
 
 # <Variable>
