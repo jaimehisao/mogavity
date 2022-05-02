@@ -6,4 +6,4 @@ Para este avance tenemos los tokens establecidos y los igualamos a sus valores c
 Para este avance definimos nuestro function directory. Implementamos una clase llamada function_directory la cual tiene métodos que nos van a ayudar para los puntos neuralgicos. Dentro de function_directory, también implementamos la tabla para las variables. Además, empezamos a establecer los puntos neuralgicos para operaciones básicas para las variables y funciones. Al igual, creamos y terminamos el cubo semántico. 
 
 ## Avance #3 Generación de Código para expresiones aritméticas y estatutos secuenciales 01/05/2022
-Para este avance establecimos los quadruplos y las pilas. Pudimos empezar a implementar la generación de código para las expresiones aritméticas, expresiones de operadores relacionales y lógicos. Para los estatuos secuenciales hasta el momento tenemos el de lectura. 
+Para este avance establecimos los quadruplos y las pilas. Pudimos empezar a implementar la generación de código para las expresiones aritméticas, expresiones de operadores relacionales y lógicos. Para los estatuos secuenciales hasta el momento tenemos el de lectura y asignación. 
