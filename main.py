@@ -4,14 +4,27 @@ Created by Clarissa V, and Hisao Y
 March 2022
 Usage for the Compiler´s Design Course
 """
+from xmlrpc.client import Boolean
 import ply.yacc as yacc
 import ply.lex as lex
 import sys, logging
 from function_directory import FunctionDirectory
 import quadruples_generator
+from quadruple import Quadruple
+from temporal import Temporal
+from Stack import Stack
 
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
+quad = Quadruple()
+temp = Temporal()
+
+poper = Stack()
+stackO = Stack()
+stack_type = Stack()
+stackJumps = Stack()
+
+quads = []
 
 global current_scope
 current_scope = 'global'
@@ -262,6 +275,11 @@ def p_estatuto(p):
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT add_operator_to_stack exp SEMICOLON'''
+    '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
+    exp = stackO.pop()
+    exp_type = stack_type.pop()
+    new_quad = quad.generate_quad('=', exp, None, p[1])
+    quads.append(new_quad)
 
 
 # <Variable>
@@ -298,6 +316,8 @@ def p_escritura2(p):
 # <Lectura>
 def p_lectura(p):
     '''lectura  :   INPUT LEFTARROW variable SEMICOLON'''
+    new_quad = quad.generate_quad('INPUT', None, None, p[3])
+    quads.append(new_quad)
 
 
 # <Llamada>
@@ -341,27 +361,28 @@ def p_return(p):
 
 # <Exp>
 def p_exp(p):
-    '''exp  :   expA expOR'''
+    '''exp  :   expA np_add_op_or expOR'''
 
 
 def p_expOR(p):
     '''expOR    :   OR expA expOR
                 |   empty'''
-
+    poper.push(p[1])
 
 # <ExpA>
 def p_expA(p):
-    '''expA :   expB expAND'''
+    '''expA :   expB np_add_op_and expAND'''
 
 
 def p_expAND(p):
     '''expAND   :   AND expB expAND
                 |   empty'''
+    poper.push(p[1])
 
 
 # <ExpB>
 def p_expB(p):
-    '''expB :   expC expLOOP'''
+    '''expB :   expC np_add_op_loop expLOOP'''
 
 
 def p_expLOOP(p):
@@ -372,29 +393,31 @@ def p_expLOOP(p):
                 |   EQUALS add_operator_to_stack expB
                 |   NOTEQUAL add_operator_to_stack expB
                 |   empty'''
+    poper.push(p[1])
 
 
 # <ExpC>
 def p_expC(p):
-    '''expC :   termino expPM'''
+    '''expC :   termino np_add_op_pm expPM'''
 
 
 def p_expPM(p):
     '''expPM    :   PLUS add_operator_to_stack expC
                 |   MINUS add_operator_to_stack expC
                 |   empty'''
+    poper.push(p[1])
 
 
 # <Termino>
 def p_termino(p):
-    '''termino  :   factor expMD'''
+    '''termino  :   factor np_add_op_md expMD'''
 
 
 def p_expMD(p):
     '''expMD    :   TIMES add_operator_to_stack termino
                 |   DIVIDE add_operator_to_stack termino
                 |   empty'''
-
+    poper.push(p[1])
 
 # <Factor>
 def p_factor(p):
@@ -402,7 +425,7 @@ def p_factor(p):
                 |   CTE_INT
                 |   CTE_FLOAT
                 |   CTE_CHAR
-                |   variable
+                |   variable np_save_id
                 |   llamada'''
 
 
@@ -501,6 +524,105 @@ def p_new_function(p):
     'new_function :'
     func_table.add_function(p[-1], tmp_type)
 
+def p_np_save_id(p):
+    'np_save_id :'
+    stackO.push(p[-1])
+    # TODO: get the ID of variable
+
+def np_add_op_pm(p):
+    'np_add_op_pm :'
+
+    if poper.top() == '+' or '-':
+        right_op = stackO.pop()
+        right_type = stack_type.pop()
+        left_op = stackO.pop()
+        left_type = stack_type.pop()
+        op = poper.pop()
+        result_type = Boolean
+        if result_type != -1 :
+            res = temp.get_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            quads.append(new_quad)
+            stackO.push(res)
+            stack_type.push(res.type)
+        else:
+            error("Type Mismatched")
+
+def np_add_op_md(p):
+    'np_add_op_md :'
+
+    if poper.top() == '*' or '/':
+        right_op = stackO.pop()
+        right_type = stack_type.pop()
+        left_op = stackO.pop()
+        left_type = stack_type.pop()
+        op = poper.pop()
+        result_type = Boolean
+        if result_type != -1 :
+            res = temp.get_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            quads.append(new_quad)
+            stackO.push(res)
+            stack_type.push(res.type)
+        else:
+            error("Type Mismatched")
+
+def np_add_op_loop(p):
+    'np_add_op_loop :'
+
+    if poper.top() == '<=' or '<' or '>' or '>=' or '==' or '!=':
+        right_op = stackO.pop()
+        right_type = stack_type.pop()
+        left_op = stackO.pop()
+        left_type = stack_type.pop()
+        op = poper.pop()
+        result_type = Boolean
+        if result_type != -1 :
+            res = temp.get_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            quads.append(new_quad)
+            stackO.push(res)
+            stack_type.push(res.type)
+        else:
+            error("Type Mismatched")
+
+def np_add_op_and(p):
+    'np_add_op_and :'
+
+    if poper.top() == 'AND':
+        right_op = stackO.pop()
+        right_type = stack_type.pop()
+        left_op = stackO.pop()
+        left_type = stack_type.pop()
+        op = poper.pop()
+        result_type = Boolean
+        if result_type != -1 :
+            res = temp.get_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            quads.append(new_quad)
+            stackO.push(res)
+            stack_type.push(res.type)
+        else:
+            error("Type Mismatched")
+
+def np_add_op_or(p):
+    'np_add_op_or :'
+
+    if poper.top() == 'OR':
+        right_op = stackO.pop()
+        right_type = stack_type.pop()
+        left_op = stackO.pop()
+        left_type = stack_type.pop()
+        op = poper.pop()
+        result_type = Boolean
+        if result_type != -1 :
+            res = temp.get_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            quads.append(new_quad)
+            stackO.push(res)
+            stack_type.push(res.type)
+        else:
+            error("Type Mismatched")
 
 """
 def p_new_constructor(p):

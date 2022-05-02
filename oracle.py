@@ -104,3 +104,5 @@ semantic_oracle[1][2][5] = -1  # Float y Char (Less Than)
 semantic_oracle[1][2][6] = -1  # Float y Char (Not Equal)
 semantic_oracle[1][2][7] = -1  # Float y Char (AND)
 semantic_oracle[1][1][8] = -1  # Float y Char (OR)
+
+# TODO: functions to check semantics with oracle
