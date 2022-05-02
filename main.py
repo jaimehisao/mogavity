@@ -8,6 +8,7 @@ import ply.yacc as yacc
 import ply.lex as lex
 import sys, logging
 from function_directory import FunctionDirectory
+import quadruples_generator
 
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
@@ -260,7 +261,7 @@ def p_estatuto(p):
 
 # <Asignación>
 def p_asignacion(p):
-    '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
+    '''asignacion   :   variable ASSIGNMENT add_operator_to_stack exp SEMICOLON'''
 
 
 # <Variable>
@@ -327,10 +328,10 @@ def p_assign(p):
 
 # <Update>
 def p_update(p):
-    '''update   :   ID PLUSEQUAL CTE_INT
-                |   ID MINUSEQUAL CTE_INT
-                |   ID TIMESEQUAL CTE_INT
-                |   ID DIVIDEEQUAL CTE_INT'''
+    '''update   :   ID PLUSEQUAL add_operator_to_stack CTE_INT
+                |   ID MINUSEQUAL add_operator_to_stack CTE_INT
+                |   ID TIMESEQUAL add_operator_to_stack CTE_INT
+                |   ID DIVIDEEQUAL add_operator_to_stack CTE_INT'''
 
 
 # <Return>
@@ -364,12 +365,12 @@ def p_expB(p):
 
 
 def p_expLOOP(p):
-    '''expLOOP  :   LESSTHAN expB
-                |   GREATERTHAN expB
-                |   EQUALLESSTHAN expB
-                |   EQUALGREATERTHAN expB
-                |   EQUALS expB
-                |   NOTEQUAL expB
+    '''expLOOP  :   LESSTHAN add_operator_to_stack expB
+                |   GREATERTHAN add_operator_to_stack expB
+                |   EQUALLESSTHAN add_operator_to_stack expB
+                |   EQUALGREATERTHAN add_operator_to_stack expB
+                |   EQUALS add_operator_to_stack expB
+                |   NOTEQUAL add_operator_to_stack expB
                 |   empty'''
 
 
@@ -379,8 +380,8 @@ def p_expC(p):
 
 
 def p_expPM(p):
-    '''expPM    :   PLUS expC
-                |   MINUS expC
+    '''expPM    :   PLUS add_operator_to_stack expC
+                |   MINUS add_operator_to_stack expC
                 |   empty'''
 
 
@@ -390,8 +391,8 @@ def p_termino(p):
 
 
 def p_expMD(p):
-    '''expMD    :   TIMES termino
-                |   DIVIDE termino
+    '''expMD    :   TIMES add_operator_to_stack termino
+                |   DIVIDE add_operator_to_stack termino
                 |   empty'''
 
 
@@ -448,6 +449,52 @@ def p_new_variable_set_type(p):
     # TODO we have a situation here pending to resolve
     """As the variable type comes BEFORE the name, we have no way of knowing if we will actually
      need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
+
+
+## Puntos Neuralgicos de Cuadruplos
+
+def p_add_var_to_stack(p):
+    "add_var_to_stack : "
+    quadruples_generator.operand_stack.append(p[-1])
+    print("operandos ", quadruples_generator.operand_stack.__contains__())
+
+
+def p_add_operator_to_stack(p):
+    "add_operator_to_stack : "
+    quadruples_generator.operator_stack.append(p[-1])
+    """
+        if p[-1] == 'ASSIGNMENT':
+        quadruples_generator.operator_stack.append("=")
+    elif p[-1] == "PLUS":
+        quadruples_generator.operator_stack.append("+")
+    elif p[-1] == "MINUS":
+        quadruples_generator.operator_stack.append("-")"""
+
+    print("operadores ")
+    print(quadruples_generator.operator_stack)
+
+
+def p_add_type_to_stack(p):
+    "add_type_to_stack : "
+    quadruples_generator.type_stack.append(p[-1])
+    print("tipos ", quadruples_generator.type_stack.__contains__())
+
+#  TODO Should we check that the size of the stacks are the same?
+
+"""
+asignacion
+                |   condicion
+                |   escritura
+                |   lectura
+                |   llamada
+                |   cicloW
+                |   cicloFor
+                |   return
+                """
+
+#  Verify that the left variable exists when calling it.
+
+
 
 
 def p_new_function(p):
