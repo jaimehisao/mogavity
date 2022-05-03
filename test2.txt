@@ -1,0 +1,15 @@
+program test;
+
+var Perro dog;
+int perros, gatos, totales;
+
+instr void ejemplo() {
+    perros = 1;
+    gatos = 1;
+    totales = perros + gatos;
+}
+
+main {
+    ejemplo();
+    return 0;
+}
