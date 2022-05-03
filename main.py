@@ -161,6 +161,7 @@ def p_programa(p):
     | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque
     | PROGRAM new_program ID save_program SEMICOLON MAIN bloque
     """
+    print('here xd')
 
 
 # epsilon
@@ -183,6 +184,7 @@ def p_constructor(p):
     """constructor : ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | ID LEFTPARENTHESIS RIGHTPARENTHESIS bloque
     """
+
 
 
 # <VARS>
@@ -225,24 +227,29 @@ def p_tipoSimple(p):
 # TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
-    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
+    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     """
     global current_scope
     current_scope = p[3]
+    print('????' + current_scope)
 
-
+"""
 def p_instr2(p):
-    """instr2 : vars
-              | empty"""
+    "instr2 : vars
+              | empty"
+"""
+
 
 
 # <Params>
 def p_params(p):
     """params : tipoSimple ID
     | tipoSimple ID COMMA params1
-    |
+    | empty
     """
+    print('hereee234324232')
+    print(p[-1])
 
 
 # <Params1>
@@ -251,18 +258,20 @@ def p_params1(p):
     | instr tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | empty
     """
+    print('here222')
 
-    """PARAMS2"""
 
 
 # <Bloque>
 def p_bloque(p):
     """bloque : LEFTCURLYBRACKET bloque2 RIGHTCURLYBRACKET"""
+    print('here')
 
 
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
                 |   empty'''
+    print('here')
 
 
 # <Estatuto>
@@ -281,7 +290,7 @@ def p_estatuto(p):
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
-
+    print('asignacion')
     exp = stackO.pop()
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
@@ -291,116 +300,120 @@ def p_asignacion(p):
 
 # <Variable>
 def p_variable(p):
-    '''variable :   ID
+    """variable :   ID
                 |   ID DOT ID
                 |   ID LEFTBRACKET exp RIGHTBRACKET
-                |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET'''
+                |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET"""
 
 
 # <Condicion>
 def p_condicion(p):
-    '''condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
-                    |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
+    """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
+                    |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
+    print('here?2342423')
 
 
 def p_condicion2(p):
-    '''condicion2   :   OTHERWISE bloque
-                    |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2'''
+    """condicion2   :   OTHERWISE bloque
+                    |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
+    print('here again')
 
 
 # <Escritura>
 def p_escritura(p):
-    '''escritura    :   OUTPUT RIGHTARROW exp escritura2 SEMICOLON
-                    |   OUTPUT RIGHTARROW CTE_STRING escritura2 SEMICOLON'''
+    """escritura    :   OUTPUT RIGHTARROW exp escritura2 SEMICOLON
+                    |   OUTPUT RIGHTARROW CTE_STRING escritura2 SEMICOLON"""
 
 
 def p_escritura2(p):
-    '''escritura2   :   COMMA exp escritura2
+    """escritura2   :   COMMA exp escritura2
                     |   COMMA CTE_STRING escritura2
-                    |   empty'''
+                    |   empty"""
 
 
 # <Lectura>
 def p_lectura(p):
-    '''lectura  :   INPUT LEFTARROW variable SEMICOLON'''
+    """lectura  :   INPUT LEFTARROW variable SEMICOLON"""
     new_quad = quad.generate_quad('INPUT', None, None, p[3])
     quads.append(new_quad)
 
 
 # <Llamada>
 def p_llamada(p):
-    '''llamada  :   ID LEFTPARENTHESIS llamada2 RIGHTPARENTHESIS SEMICOLON'''
+    """llamada  :   ID LEFTPARENTHESIS llamada2 RIGHTPARENTHESIS SEMICOLON"""
 
 
 def p_llamada2(p):
-    '''llamada2 :   exp llamada2
+    """llamada2 :   exp llamada2
                 |   COMMA exp llamada2
-                |   empty'''
+                |   empty"""
 
 
 # <CicloW>
 def p_cicloW(p):
-    '''cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque'''
+    """cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
+    print('w')
 
 
 # <CicloFor>
 def p_cicloFor(p):
-    '''cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque'''
+    """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque"""
+    print('f')
 
 
 # <Assign>
 def p_assign(p):
-    '''assign   :   ID ASSIGNMENT CTE_INT'''
+    """assign   :   ID ASSIGNMENT CTE_INT"""
 
 
 # <Update>
 def p_update(p):
-    '''update   :   ID PLUSEQUAL CTE_INT
+    """update   :   ID PLUSEQUAL CTE_INT
                 |   ID MINUSEQUAL CTE_INT
                 |   ID TIMESEQUAL CTE_INT
-                |   ID DIVIDEEQUAL CTE_INT'''
+                |   ID DIVIDEEQUAL CTE_INT"""
 
 
 # <Return>
 def p_return(p):
-    '''return   :   RETURN exp SEMICOLON'''
+    """return   :   RETURN exp SEMICOLON"""
 
 
 # <Exp>
 def p_exp(p):
-    '''exp  :   expA add_operator_or expOR'''
+    """exp  :   expA add_operator_or expOR"""
 
 
 def p_expOR(p):
-    '''expOR    :   OR expA expOR
-                |   empty'''
+    """expOR    :   OR expA expOR
+                |   empty"""
     poper.push(p[1])
 
 
 # <ExpA>
 def p_expA(p):
-    '''expA :   expB add_operator_and expAND'''
+    """expA :   expB add_operator_and expAND"""
 
 
 def p_expAND(p):
-    '''expAND   :   AND expB expAND
-                |   empty'''
+    """expAND   :   AND expB expAND
+                |   empty"""
     poper.push(p[1])
 
 
 # <ExpB>
 def p_expB(p):
-    '''expB :   expC add_operator_loop expLOOP'''
+    """expB :   expC add_operator_loop expLOOP"""
 
 
 def p_expLOOP(p):
-    '''expLOOP  :   LESSTHAN expB
+    """expLOOP  :   LESSTHAN expB
                 |   GREATERTHAN expB
                 |   EQUALLESSTHAN expB
                 |   EQUALGREATERTHAN expB
                 |   EQUALS expB
                 |   NOTEQUAL expB
-                |   empty'''
+                |   empty"""
     poper.push(p[1])
 
 
@@ -410,25 +423,29 @@ def p_expC(p):
 
 
 def p_expPM(p):
-    '''expPM    :   PLUS expC
+    """expPM    :   PLUS expC
                 |   MINUS expC
-                |   empty'''
+                |   empty"""
     poper.push(p[1])
+    print('xd2' + p[-1])
     print(poper)
 
 
+### LLEGA A TERMINO, ENTRA A FACTOR Y LUEGO EJECUTA EL PUNTO NEURALGICO, Y PUFFF
 # <Termino>
 def p_termino(p):
     '''termino  :   factor add_operator_multiplydivide expMD'''
+    print('xd'+ p[-1])
 
 
 def p_expMD(p):
     '''expMD    :   TIMES termino
                 |   DIVIDE termino
                 |   empty'''
-    print('lol', p[1])
-    poper.push(p[1])
-    logging.info('here')
+    if p[1] is not None:
+        poper.push(p[1])
+
+    print('here')
 
 
 # <Factor>
@@ -437,8 +454,9 @@ def p_factor(p):
                 |   CTE_INT
                 |   CTE_FLOAT
                 |   CTE_CHAR
-                |   variable np_save_id
+                |   variable save_id
                 |   llamada'''
+    print('factor', p[-1])
 
 
 def p_error(p):
@@ -482,26 +500,6 @@ def p_new_variable_set_type(p):
     global tmp_type
     if p[-1] is not None:
         tmp_type = p[-1]
-    # TODO we have a situation here pending to resolve
-    """As the variable type comes BEFORE the name, we have no way of knowing if we will actually
-     need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
-
-
-#  TODO Should we check that the size of the stacks are the same?
-
-"""
-asignacion
-                |   condicion
-                |   escritura
-                |   lectura
-                |   llamada
-                |   cicloW
-                |   cicloFor
-                |   return
-                """
-
-
-#  Verify that the left variable exists when calling it.
 
 
 def p_new_function(p):
@@ -509,15 +507,18 @@ def p_new_function(p):
     func_table.add_function(p[-1], tmp_type)
 
 
-def p_np_save_id(p):
-    """np_save_id :"""
+def p_save_id(p):
+    """save_id :"""
+    print(p[-1])
     stackO.push(p[-1])
+    print("save id")
+    stackO.show_all()
     # TODO: get the ID of variable
 
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
-    print('poper ' + poper)
+    print('poper2 ' + poper)
     if poper.top() == '+' or '-':
         right_op = stackO.pop()
         right_type = stack_type.pop()
@@ -537,7 +538,7 @@ def p_add_operator_plusminus(p):
 
 
 def p_add_operator_multiplydivide(p):
-    """add_operator_multiplydivide :"""
+    """add_operator_multiplydivide : """
     print('poper ', p[-1])
     poper.show_all()
 
@@ -547,6 +548,7 @@ def p_add_operator_multiplydivide(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
+        print(right_op, right_type, left_op, left_type, op)
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
             res = temp.get_temp()
@@ -621,20 +623,6 @@ def p_add_operator_or(p):
         else:
             error("Type Mismatched")
 
-
-"""
-def p_new_constructor(p):
-    'new_constructor :'
-
-def p_new_array(p):
-    'new_array : '
-
-def p_new_function(p):
-    'new_function : '
-
-def p_new_param_get_type(p):
-    'new_param_get_type : '
-"""
 
 
 def error(message: str):
