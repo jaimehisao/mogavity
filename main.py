@@ -13,6 +13,7 @@ import quadruples_generator
 from quadruple import Quadruple
 from temporal import Temporal
 from Stack import Stack
+import oracle
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -220,6 +221,7 @@ def p_tipoSimple(p):
     | CHAR new_variable_set_type
     """
 
+
 # TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
@@ -229,9 +231,11 @@ def p_instr(p):
     global current_scope
     current_scope = p[3]
 
+
 def p_instr2(p):
     """instr2 : vars
               | empty"""
+
 
 # <Params>
 def p_params(p):
@@ -277,8 +281,10 @@ def p_estatuto(p):
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
+
     exp = stackO.pop()
-    exp_type = stack_type.pop()
+    # exp_type = stack_type.pop()
+    _ = stack_type.pop()
     new_quad = quad.generate_quad('=', exp, None, p[1])
     quads.append(new_quad)
 
@@ -370,6 +376,7 @@ def p_expOR(p):
                 |   empty'''
     poper.push(p[1])
 
+
 # <ExpA>
 def p_expA(p):
     '''expA :   expB add_operator_and expAND'''
@@ -407,6 +414,7 @@ def p_expPM(p):
                 |   MINUS expC
                 |   empty'''
     poper.push(p[1])
+    print(poper)
 
 
 # <Termino>
@@ -418,7 +426,10 @@ def p_expMD(p):
     '''expMD    :   TIMES termino
                 |   DIVIDE termino
                 |   empty'''
+    print('lol', p[1])
     poper.push(p[1])
+    logging.info('here')
+
 
 # <Factor>
 def p_factor(p):
@@ -450,34 +461,30 @@ def p_error(p):
 ########################################################
 
 def p_new_program(p):
-    'new_program : '
+    """new_program : """
     global func_table
 
 
 def p_save_program(p):
-    'save_program :'
+    """save_program :"""
     print()
-    #func_table.add_elements(p[-1], "program")
+    # func_table.add_elements(p[-1], "program")
 
 
 # Agregar Variable en Tabla
 def p_new_variable(p):
-    'new_variable : '
-    func_table.add_variable(p[-1], current_scope, func_table.tmp_type)
+    """new_variable : """
+    func_table.add_variable(p[-1], current_scope, tmp_type)
 
 
 def p_new_variable_set_type(p):
-    'new_variable_set_type : '
+    """new_variable_set_type : """
     global tmp_type
-    tmp_type = p[-1]
+    if p[-1] is not None:
+        tmp_type = p[-1]
     # TODO we have a situation here pending to resolve
     """As the variable type comes BEFORE the name, we have no way of knowing if we will actually
      need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
-
-
-
-
-
 
 
 #  TODO Should we check that the size of the stacks are the same?
@@ -493,31 +500,33 @@ asignacion
                 |   return
                 """
 
+
 #  Verify that the left variable exists when calling it.
 
 
-
-
 def p_new_function(p):
-    'new_function :'
+    """new_function :"""
     func_table.add_function(p[-1], tmp_type)
 
+
 def p_np_save_id(p):
-    'np_save_id :'
+    """np_save_id :"""
     stackO.push(p[-1])
     # TODO: get the ID of variable
 
-def p_add_operator_plusminus(p):
-    'add_operator_plusminus :'
 
+def p_add_operator_plusminus(p):
+    """add_operator_plusminus : """
+    print('poper ' + poper)
     if poper.top() == '+' or '-':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = Boolean
-        if result_type != -1 :
+        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        if result_type != -1:
+            print("si baila mija con en senor")
             res = temp.get_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, res)
             quads.append(new_quad)
@@ -526,8 +535,11 @@ def p_add_operator_plusminus(p):
         else:
             error("ERROR: Type mismatch at " + p.lineno())
 
+
 def p_add_operator_multiplydivide(p):
-    'add_operator_multiplydivide :'
+    """add_operator_multiplydivide :"""
+    print('poper ', p[-1])
+    poper.show_all()
 
     if poper.top() == '*' or '/':
         right_op = stackO.pop()
@@ -535,8 +547,8 @@ def p_add_operator_multiplydivide(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = Boolean
-        if result_type != -1 :
+        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        if result_type != -1:
             res = temp.get_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, res)
             quads.append(new_quad)
@@ -545,8 +557,10 @@ def p_add_operator_multiplydivide(p):
         else:
             error("Type Mismatched")
 
+
 def p_add_operator_loop(p):
-    'add_operator_loop :'
+    """add_operator_loop :"""
+    print('poper ' + poper)
 
     if poper.top() == '<=' or '<' or '>' or '>=' or '==' or '!=':
         right_op = stackO.pop()
@@ -554,8 +568,8 @@ def p_add_operator_loop(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = Boolean
-        if result_type != -1 :
+        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        if result_type != -1:
             res = temp.get_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, res)
             quads.append(new_quad)
@@ -564,8 +578,10 @@ def p_add_operator_loop(p):
         else:
             error("Type Mismatched")
 
+
 def p_add_operator_and(p):
-    'add_operator_and :'
+    """add_operator_and :"""
+    print('poper ' + poper)
 
     if poper.top() == 'AND':
         right_op = stackO.pop()
@@ -573,8 +589,8 @@ def p_add_operator_and(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = Boolean
-        if result_type != -1 :
+        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        if result_type != -1:
             res = temp.get_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, res)
             quads.append(new_quad)
@@ -583,8 +599,10 @@ def p_add_operator_and(p):
         else:
             error("Type Mismatched")
 
+
 def p_add_operator_or(p):
-    'add_operator_or :'
+    """add_operator_or :"""
+    print('poper ' + poper)
 
     if poper.top() == 'OR':
         right_op = stackO.pop()
@@ -592,15 +610,17 @@ def p_add_operator_or(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = Boolean
-        if result_type != -1 :
+        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        if result_type != -1:
             res = temp.get_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, res)
             quads.append(new_quad)
             stackO.push(res)
             stack_type.push(res.type)
+            print(quads)
         else:
             error("Type Mismatched")
+
 
 """
 def p_new_constructor(p):
@@ -628,13 +648,13 @@ def error(message: str):
 parser = yacc.yacc()
 r = None
 try:
-    f = open("test.txt", 'r')
+    f = open("test2.txt", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
     print("No hay archivo para probar")
 
 parser.parse(r)
-#parser.parse(r, debug=1)
+# parser.parse(r, debug=1)
 print("Código Aceptado")
 print(func_table.function_table)
