@@ -14,6 +14,8 @@ from quadruple import Quadruple
 from temporal import Temporal
 from Stack import Stack
 
+logging.basicConfig(level=logging.DEBUG)
+
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
 quad = Quadruple()
@@ -274,7 +276,6 @@ def p_estatuto(p):
 
 # <Asignación>
 def p_asignacion(p):
-    '''asignacion   :   variable ASSIGNMENT add_operator_to_stack exp SEMICOLON'''
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
     exp = stackO.pop()
     exp_type = stack_type.pop()
@@ -348,10 +349,10 @@ def p_assign(p):
 
 # <Update>
 def p_update(p):
-    '''update   :   ID PLUSEQUAL add_operator_to_stack CTE_INT
-                |   ID MINUSEQUAL add_operator_to_stack CTE_INT
-                |   ID TIMESEQUAL add_operator_to_stack CTE_INT
-                |   ID DIVIDEEQUAL add_operator_to_stack CTE_INT'''
+    '''update   :   ID PLUSEQUAL CTE_INT
+                |   ID MINUSEQUAL CTE_INT
+                |   ID TIMESEQUAL CTE_INT
+                |   ID DIVIDEEQUAL CTE_INT'''
 
 
 # <Return>
@@ -361,7 +362,7 @@ def p_return(p):
 
 # <Exp>
 def p_exp(p):
-    '''exp  :   expA np_add_op_or expOR'''
+    '''exp  :   expA add_operator_or expOR'''
 
 
 def p_expOR(p):
@@ -371,7 +372,7 @@ def p_expOR(p):
 
 # <ExpA>
 def p_expA(p):
-    '''expA :   expB np_add_op_and expAND'''
+    '''expA :   expB add_operator_and expAND'''
 
 
 def p_expAND(p):
@@ -382,40 +383,40 @@ def p_expAND(p):
 
 # <ExpB>
 def p_expB(p):
-    '''expB :   expC np_add_op_loop expLOOP'''
+    '''expB :   expC add_operator_loop expLOOP'''
 
 
 def p_expLOOP(p):
-    '''expLOOP  :   LESSTHAN add_operator_to_stack expB
-                |   GREATERTHAN add_operator_to_stack expB
-                |   EQUALLESSTHAN add_operator_to_stack expB
-                |   EQUALGREATERTHAN add_operator_to_stack expB
-                |   EQUALS add_operator_to_stack expB
-                |   NOTEQUAL add_operator_to_stack expB
+    '''expLOOP  :   LESSTHAN expB
+                |   GREATERTHAN expB
+                |   EQUALLESSTHAN expB
+                |   EQUALGREATERTHAN expB
+                |   EQUALS expB
+                |   NOTEQUAL expB
                 |   empty'''
     poper.push(p[1])
 
 
 # <ExpC>
 def p_expC(p):
-    '''expC :   termino np_add_op_pm expPM'''
+    '''expC :   termino add_operator_plusminus expPM'''
 
 
 def p_expPM(p):
-    '''expPM    :   PLUS add_operator_to_stack expC
-                |   MINUS add_operator_to_stack expC
+    '''expPM    :   PLUS expC
+                |   MINUS expC
                 |   empty'''
     poper.push(p[1])
 
 
 # <Termino>
 def p_termino(p):
-    '''termino  :   factor np_add_op_md expMD'''
+    '''termino  :   factor add_operator_multiplydivide expMD'''
 
 
 def p_expMD(p):
-    '''expMD    :   TIMES add_operator_to_stack termino
-                |   DIVIDE add_operator_to_stack termino
+    '''expMD    :   TIMES termino
+                |   DIVIDE termino
                 |   empty'''
     poper.push(p[1])
 
@@ -474,33 +475,10 @@ def p_new_variable_set_type(p):
      need it when the ID comes, so we store it temporarily for future use and just overwrite it when the time comes."""
 
 
-## Puntos Neuralgicos de Cuadruplos
-
-def p_add_var_to_stack(p):
-    "add_var_to_stack : "
-    quadruples_generator.operand_stack.append(p[-1])
-    print("operandos ", quadruples_generator.operand_stack.__contains__())
 
 
-def p_add_operator_to_stack(p):
-    "add_operator_to_stack : "
-    quadruples_generator.operator_stack.append(p[-1])
-    """
-        if p[-1] == 'ASSIGNMENT':
-        quadruples_generator.operator_stack.append("=")
-    elif p[-1] == "PLUS":
-        quadruples_generator.operator_stack.append("+")
-    elif p[-1] == "MINUS":
-        quadruples_generator.operator_stack.append("-")"""
-
-    print("operadores ")
-    print(quadruples_generator.operator_stack)
 
 
-def p_add_type_to_stack(p):
-    "add_type_to_stack : "
-    quadruples_generator.type_stack.append(p[-1])
-    print("tipos ", quadruples_generator.type_stack.__contains__())
 
 #  TODO Should we check that the size of the stacks are the same?
 
@@ -529,8 +507,8 @@ def p_np_save_id(p):
     stackO.push(p[-1])
     # TODO: get the ID of variable
 
-def np_add_op_pm(p):
-    'np_add_op_pm :'
+def p_add_operator_plusminus(p):
+    'add_operator_plusminus :'
 
     if poper.top() == '+' or '-':
         right_op = stackO.pop()
@@ -546,10 +524,10 @@ def np_add_op_pm(p):
             stackO.push(res)
             stack_type.push(res.type)
         else:
-            error("Type Mismatched")
+            error("ERROR: Type mismatch at " + p.lineno())
 
-def np_add_op_md(p):
-    'np_add_op_md :'
+def p_add_operator_multiplydivide(p):
+    'add_operator_multiplydivide :'
 
     if poper.top() == '*' or '/':
         right_op = stackO.pop()
@@ -567,8 +545,8 @@ def np_add_op_md(p):
         else:
             error("Type Mismatched")
 
-def np_add_op_loop(p):
-    'np_add_op_loop :'
+def p_add_operator_loop(p):
+    'add_operator_loop :'
 
     if poper.top() == '<=' or '<' or '>' or '>=' or '==' or '!=':
         right_op = stackO.pop()
@@ -586,8 +564,8 @@ def np_add_op_loop(p):
         else:
             error("Type Mismatched")
 
-def np_add_op_and(p):
-    'np_add_op_and :'
+def p_add_operator_and(p):
+    'add_operator_and :'
 
     if poper.top() == 'AND':
         right_op = stackO.pop()
@@ -605,8 +583,8 @@ def np_add_op_and(p):
         else:
             error("Type Mismatched")
 
-def np_add_op_or(p):
-    'np_add_op_or :'
+def p_add_operator_or(p):
+    'add_operator_or :'
 
     if poper.top() == 'OR':
         right_op = stackO.pop()
