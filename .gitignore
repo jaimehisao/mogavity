@@ -1,0 +1,6 @@
+.coverage
+.idea/
+__pycache__
+coverage.xml
+venv/
+tests
