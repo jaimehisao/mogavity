@@ -161,7 +161,7 @@ def p_programa(p):
     | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque
     | PROGRAM new_program ID save_program SEMICOLON MAIN bloque
     """
-    print('here xd')
+    #print('here xd')
 
 
 # epsilon
@@ -222,18 +222,18 @@ def p_tipoSimple(p):
     | FLOAT new_variable_set_type
     | CHAR new_variable_set_type
     """
-    print("here tipo simple")
+    #print("here tipo simple")
 
 # TODO: Actualizar el diagrama instr
 # TODO: Volver a agregar instr2 cuando resolvamos el bug
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS np_print bloque
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     """
     global current_scope
     current_scope = p[3]
-    print('????' + current_scope)
+    #print('????' + current_scope)
 
 """
 def p_instr2(p):
@@ -249,10 +249,10 @@ def p_params(p):
     | tipoSimple ID COMMA params1
     | empty
     """
-    print('hereee234324232')
-    print(p[-1])
-    if p[1] is None:
-        print("here params none")
+   # print('hereee234324232')
+   # print(p[-1])
+   # if p[1] is None:
+       # print("here params none")
 
 
 # <Params1>
@@ -261,20 +261,20 @@ def p_params1(p):
     | instr tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | empty
     """
-    print('here222')
+    #print('here222')
 
 
 
 # <Bloque>
 def p_bloque(p):
     """bloque : LEFTCURLYBRACKET bloque2 RIGHTCURLYBRACKET"""
-    print('here bloque')
+    #print('here bloque')
 
 
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
                 |   empty'''
-    print('here')
+    #print('here')
 
 
 # <Estatuto>
@@ -294,8 +294,8 @@ def p_estatuto(p):
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
     print('asignacion')
-    print(p[1])
-    print(stackO.top())
+    #print(p[1])
+    #print(stackO.top())
     exp = stackO.pop()
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
@@ -317,13 +317,13 @@ def p_variable(p):
 def p_condicion(p):
     """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
-    print('here?2342423')
+    #print('here?2342423')
 
 
 def p_condicion2(p):
     """condicion2   :   OTHERWISE bloque
                     |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
-    print('here again')
+    #print('here again')
 
 
 # <Escritura>
@@ -359,13 +359,13 @@ def p_llamada2(p):
 # <CicloW>
 def p_cicloW(p):
     """cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
-    print('w')
+    #print('w')
 
 
 # <CicloFor>
 def p_cicloFor(p):
     """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque"""
-    print('f')
+    #print('f')
 
 
 # <Assign>
@@ -428,17 +428,20 @@ def p_expLOOP(p):
 def p_expC(p):
     '''expC :   termino add_operator_plusminus expPM'''
 
-
+# TODO: Agregué un punto neuralgico justo despues de operador PLUS para ver si esa es la lógica para poder generar correctamente los cuadruplos aritmeticos
+# al parecer sí funciona pero tenemos el bug del oraculo SOS que no me deja ver si es correcta la implementación
 def p_expPM(p):
-    """expPM    :   PLUS expC
+    """expPM    :   PLUS save_op expC
                 |   MINUS expC
                 |   empty"""
-    poper.push(p[1])
-    #print('xd2' + p[-1])
+    # if p[1] is not None:
+    #     poper.push(p[1])
+    #     print('xd not none' + poper.top())
+    # print("xd2")
     #print(poper)
 
 
-### LLEGA A TERMINO, ENTRA A FACTOR Y LUEGO EJECUTA EL PUNTO NEURALGICO, Y PUFFF
+### LLEGA A TERMINO, ENTRA A FACTOR Y LUEGO EJECUTA EL PUNTO NEURALGICO, Y PUFFF (RESOLVED)
 # <Termino>
 def p_termino(p):
     '''termino  :   factor add_operator_multiplydivide expMD'''
@@ -452,7 +455,7 @@ def p_expMD(p):
     if p[1] is not None:
         poper.push(p[1])
 
-    print('here')
+    #print('here')
 
 
 # <Factor>
@@ -520,11 +523,19 @@ def p_save_id(p):
     stackO.push(p[-1])
     # TODO: get the ID of variable
 
+def p_save_op(p):
+    """save_op :"""
+    poper.push(p[-1])
+    print("xd not none +")
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
-    #print('poper2 ')
+    print("ENTRE ADDDDDDD")
+    if poper.top() is not None:
+        print("ADD")
+    #print('poper' + poper.top())
     if poper.top() == '+' or poper.top() == '-':
+        print("Entre???")
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -544,7 +555,7 @@ def p_add_operator_plusminus(p):
 
 def p_add_operator_multiplydivide(p):
     """add_operator_multiplydivide : """
-    print('poper md', p[-1])
+    #print('poper md', p[-1])
     #poper.size()
     
     if poper.top() == '*' or poper.top() == '/':
