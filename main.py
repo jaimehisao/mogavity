@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
-quad = Quadruple()
+quad = Quadruple(0,"","","","")
 temp = Temporal()
 
 poper = Stack()
@@ -222,12 +222,13 @@ def p_tipoSimple(p):
     | FLOAT new_variable_set_type
     | CHAR new_variable_set_type
     """
-
+    print("here tipo simple")
 
 # TODO: Actualizar el diagrama instr
+# TODO: Volver a agregar instr2 cuando resolvamos el bug
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS np_print bloque
     | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     """
     global current_scope
@@ -250,6 +251,8 @@ def p_params(p):
     """
     print('hereee234324232')
     print(p[-1])
+    if p[1] is None:
+        print("here params none")
 
 
 # <Params1>
@@ -265,7 +268,7 @@ def p_params1(p):
 # <Bloque>
 def p_bloque(p):
     """bloque : LEFTCURLYBRACKET bloque2 RIGHTCURLYBRACKET"""
-    print('here')
+    print('here bloque')
 
 
 def p_bloque2(p):
@@ -291,11 +294,15 @@ def p_estatuto(p):
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
     print('asignacion')
+    print(p[1])
+    print(stackO.top())
     exp = stackO.pop()
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     new_quad = quad.generate_quad('=', exp, None, p[1])
+    new_quad.print_quad()
     quads.append(new_quad)
+    
 
 
 # <Variable>
@@ -304,7 +311,7 @@ def p_variable(p):
                 |   ID DOT ID
                 |   ID LEFTBRACKET exp RIGHTBRACKET
                 |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET"""
-
+    p[0] = p[1]
 
 # <Condicion>
 def p_condicion(p):
@@ -427,15 +434,15 @@ def p_expPM(p):
                 |   MINUS expC
                 |   empty"""
     poper.push(p[1])
-    print('xd2' + p[-1])
-    print(poper)
+    #print('xd2' + p[-1])
+    #print(poper)
 
 
 ### LLEGA A TERMINO, ENTRA A FACTOR Y LUEGO EJECUTA EL PUNTO NEURALGICO, Y PUFFF
 # <Termino>
 def p_termino(p):
     '''termino  :   factor add_operator_multiplydivide expMD'''
-    print('xd'+ p[-1])
+    #print('xd'+ p[-1])
 
 
 def p_expMD(p):
@@ -451,12 +458,12 @@ def p_expMD(p):
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
-                |   CTE_INT
-                |   CTE_FLOAT
-                |   CTE_CHAR
+                |   CTE_INT save_id
+                |   CTE_FLOAT save_id
+                |   CTE_CHAR save_id
                 |   variable save_id
                 |   llamada'''
-    print('factor', p[-1])
+    print('factor', p[1])
 
 
 def p_error(p):
@@ -509,17 +516,15 @@ def p_new_function(p):
 
 def p_save_id(p):
     """save_id :"""
-    print(p[-1])
+    print("np_saveid" + p[-1])
     stackO.push(p[-1])
-    print("save id")
-    stackO.show_all()
     # TODO: get the ID of variable
 
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
-    print('poper2 ' + poper)
-    if poper.top() == '+' or '-':
+    #print('poper2 ')
+    if poper.top() == '+' or poper.top() == '-':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -539,10 +544,11 @@ def p_add_operator_plusminus(p):
 
 def p_add_operator_multiplydivide(p):
     """add_operator_multiplydivide : """
-    print('poper ', p[-1])
-    poper.show_all()
-
-    if poper.top() == '*' or '/':
+    print('poper md', p[-1])
+    #poper.size()
+    
+    if poper.top() == '*' or poper.top() == '/':
+        print("entraste?")
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -562,9 +568,9 @@ def p_add_operator_multiplydivide(p):
 
 def p_add_operator_loop(p):
     """add_operator_loop :"""
-    print('poper ' + poper)
+    #print('poper ' + poper)
 
-    if poper.top() == '<=' or '<' or '>' or '>=' or '==' or '!=':
+    if poper.top() == '<=' or poper.top() == '<' or poper.top() == '>' or poper.top() == '>=' or poper.top() == '==' or poper.top() == '!=':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -583,7 +589,7 @@ def p_add_operator_loop(p):
 
 def p_add_operator_and(p):
     """add_operator_and :"""
-    print('poper ' + poper)
+    #print('poper ' + poper)
 
     if poper.top() == 'AND':
         right_op = stackO.pop()
@@ -604,7 +610,7 @@ def p_add_operator_and(p):
 
 def p_add_operator_or(p):
     """add_operator_or :"""
-    print('poper ' + poper)
+    #print('poper ' + poper)
 
     if poper.top() == 'OR':
         right_op = stackO.pop()
@@ -623,6 +629,9 @@ def p_add_operator_or(p):
         else:
             error("Type Mismatched")
 
+def p_np_print(p):
+    """np_print :"""
+    print("sos aqui")
 
 
 def error(message: str):
