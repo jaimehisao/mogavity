@@ -21,6 +21,7 @@ OR = 8
 Results 
 -1 = Error
 """
+import sys
 n = 9  # Probolema con ineficiencia de espacio utilizado
 semantic_oracle = distance = [[[0 for k in range(9)] for j in range(3)] for i in range(3)]
 semantic_oracle[0][0][0] = 0   # Int y Int (Sum)
@@ -106,3 +107,56 @@ semantic_oracle[1][2][7] = -1  # Float y Char (AND)
 semantic_oracle[1][1][8] = -1  # Float y Char (OR)
 
 # TODO: functions to check semantics with oracle
+
+
+def convert_string_name_to_number_type(name):
+    """
+    If you need the Oracle type equivalent for a type, eg. Int, Float. You can use this
+    function to obtain the int "pointer" to the oracle table. Eg. Int = 0
+    :param name: the type in string you wish to convert.
+    :return: the given type converted to Integer.
+    """
+    if name is not None:
+        if name == "int":
+            return 0
+        elif name == "float":
+            return 1
+        elif name == "char":
+            return 2
+
+
+def convert_string_name_to_number_operand(name):
+    """
+    If you need the Oracle operand equivalent for an operand, eg. +, -. You can use this
+    function to obtain the int "pointer" to the oracle table. Eg. + = 0
+    :param name: the operand in string you wish to convert. (symbol)
+    :return: the given operand converted to Integer.
+    """
+    if name is not None:
+        if name == "+":
+            return 0
+        elif name == "-":
+            return 1
+        elif name == "*":
+            return 2
+        elif name == "/":
+            return 3
+        elif name == ">":
+            return 4
+        elif name == "<":
+            return 5
+        elif name == "!=":
+            return 6
+        elif name == "AND":
+            return 7
+        elif name == "OR":
+            return 8
+        else:
+            error("Operator" + name + " not supported.")
+
+
+# TODO put them all together and use the logger library
+def error(message: str):
+    print(message)  # use raise?
+    sys.exit()
+
