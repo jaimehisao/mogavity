@@ -394,7 +394,8 @@ def p_exp(p):
 def p_expOR(p):
     """expOR    :   OR expA expOR
                 |   empty"""
-    poper.push(p[1])
+    if p[1] is not None:
+        poper.push(p[1])
 
 
 # <ExpA>
@@ -405,7 +406,8 @@ def p_expA(p):
 def p_expAND(p):
     """expAND   :   AND expB expAND
                 |   empty"""
-    poper.push(p[1])
+    if p[1] is not None:
+        poper.push(p[1])
 
 
 # <ExpB>
@@ -421,7 +423,8 @@ def p_expLOOP(p):
                 |   EQUALS expB
                 |   NOTEQUAL expB
                 |   empty"""
-    poper.push(p[1])
+    if p[1] is not None:
+        poper.push(p[1])
 
 
 # <ExpC>
@@ -503,6 +506,7 @@ def p_save_program(p):
 def p_new_variable(p):
     """new_variable : """
     func_table.add_variable(p[-1], current_scope, tmp_type)
+    stack_type.push(tmp_type) # Agregamos el tipo de la variable a la pila de tipos
 
 
 def p_new_variable_set_type(p):
@@ -537,10 +541,15 @@ def p_add_operator_plusminus(p):
     if poper.top() == '+' or poper.top() == '-':
         print("Entre???")
         right_op = stackO.pop()
+        print("right_op " + right_op)
         right_type = stack_type.pop()
+        print("right_type " + right_type)
         left_op = stackO.pop()
+        print("left_op " + left_op)
         left_type = stack_type.pop()
+        print("left_type " + left_type)
         op = poper.pop()
+        print("op " + op)
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
             print("si baila mija con en senor")
