@@ -68,6 +68,13 @@ class FunctionDirectory:
         else:
             return False
 
+    def get_var_type(self, identifier, scope):
+        print()
+        if identifier in self.function_table[scope].variable_table.keys():
+            return self.function_table[scope].variable_table[identifier].type
+        else:
+            error("Variable has not been declared")
+
     def add_elements(self, identifier, elem_type):
         self.function_table = {'identifier' : identifier, 'type' : elem_type}
 
