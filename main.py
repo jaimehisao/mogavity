@@ -15,6 +15,8 @@ from temporal import Temporal
 from Stack import Stack
 import oracle
 
+
+from pprint import pprint
 logging.basicConfig(level=logging.DEBUG)
 
 # class_table = class_directory.ClassTable()
@@ -228,19 +230,15 @@ def p_tipoSimple(p):
 # TODO: Volver a agregar instr2 cuando resolvamos el bug
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
-    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
     """
-    global current_scope
-    current_scope = p[3]
-    #print('????' + current_scope)
 
-"""
+
 def p_instr2(p):
-    "instr2 : vars
-              | empty"
-"""
-
+    """instr2 : vars
+              | empty"""
+    pass
 
 
 # <Params>
@@ -249,11 +247,7 @@ def p_params(p):
     | tipoSimple ID COMMA params1
     | empty
     """
-   # print('hereee234324232')
-   # print(p[-1])
-   # if p[1] is None:
-       # print("here params none")
-
+    pass
 
 # <Params1>
 def p_params1(p):
@@ -506,6 +500,7 @@ def p_save_program(p):
 def p_new_variable(p):
     """new_variable : """
     func_table.add_variable(p[-1], current_scope, tmp_type)
+    func_table.print_all_variable_tables()
 
 def p_new_variable_set_type(p):
     """new_variable_set_type : """
@@ -516,6 +511,8 @@ def p_new_variable_set_type(p):
 
 def p_new_function(p):
     """new_function :"""
+    global current_scope
+    current_scope = p[-1]
     func_table.add_function(p[-1], tmp_type)
 
 
@@ -531,10 +528,12 @@ def p_save_id(p):
         stack_type.push(var_type)
     # TODO: check for float
 
+
 def p_save_op(p):
     """save_op :"""
     poper.push(p[-1])
     print("xd not none +")
+
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
@@ -659,6 +658,13 @@ def p_add_operator_or(p):
 def p_np_print(p):
     """np_print :"""
     print("sos aqui")
+
+
+def p_change_scope(p):
+    """change_scope : """
+    global current_scope
+    current_scope = p[-1]
+    print("")
 
 
 def error(message: str):
