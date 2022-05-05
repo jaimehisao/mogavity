@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import sys
+import logging
 
 
 @dataclass()
@@ -15,6 +16,8 @@ class Variable:
     type: str
     address: int
 
+constants_table = {}  # We have this dictionary to hold our constants
+
 
 class FunctionDirectory:
     def __init__(self):
@@ -26,18 +29,20 @@ class FunctionDirectory:
         Add new function scope to the Function Table
         """
         if identifier in self.function_table.keys():
+            logging.error('Function ' + identifier + ' already exists!')  # Might be redundant but important in case
+            # we export the logs to a file
             error('Function ' + identifier + ' already exists!')
         else:
             self.function_table[identifier] = Function(identifier, return_type)
-            print("Scope " + identifier + "Created!")
+            logging.info("Scope " + identifier + " created!")
 
     def add_global_variable(self, identifier, data_type):
         self.function_table['global']['vars'][identifier] = {'data_type': data_type,
                                                              'address': None}
 
-    def add_variable(self, identifier, scope, type):
-        print(identifier, scope, type)
-        self.function_table[scope].variable_table[identifier] = Variable(identifier, type, 0) ## TODO fill address when we handle that
+    def add_variable(self, identifier, scope, _type):
+        logging.info("Added variable with ID " + identifier + " in scope " + scope +" and type "+ _type)
+        self.function_table[scope].variable_table[identifier] = Variable(identifier, _type, 0) ## TODO fill address when we handle that
 
 
         # TODO cleanup pending on certain functions
@@ -45,6 +50,8 @@ class FunctionDirectory:
 
     def add_function_variables(self):
         """This is called after vars is detected inside a function, we will need a way to manage the scope"""
+        pass
+
 
     def remove(self, identifier):
         """Removes Scope from the table"""
@@ -56,10 +63,6 @@ class FunctionDirectory:
             return True
         else:
             return False
-
-    # CREO QUE NO NECESITAMOS ESTA FUNCION
-    # def add_vars(self, identifier, vars_table):
-    #     self.function_table[identifier]["vars"] = vars_table
 
     def check_for_vars(self, identifier):
         if "vars" in self.function_table[identifier].keys():

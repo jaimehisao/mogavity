@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
-quad = Quadruple(0,"","","","")
+quad = Quadruple()
 temp = Temporal()
 
 poper = Stack()
@@ -161,7 +161,7 @@ def p_programa(p):
     | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque
     | PROGRAM new_program ID save_program SEMICOLON MAIN bloque
     """
-    #print('here xd')
+    print('here xd')
 
 
 # epsilon
@@ -222,10 +222,9 @@ def p_tipoSimple(p):
     | FLOAT new_variable_set_type
     | CHAR new_variable_set_type
     """
-    #print("here tipo simple")
+
 
 # TODO: Actualizar el diagrama instr
-# TODO: Volver a agregar instr2 cuando resolvamos el bug
 # <Instr>
 def p_instr(p):
     """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
@@ -233,7 +232,7 @@ def p_instr(p):
     """
     global current_scope
     current_scope = p[3]
-    #print('????' + current_scope)
+    print('????' + current_scope)
 
 """
 def p_instr2(p):
@@ -249,10 +248,8 @@ def p_params(p):
     | tipoSimple ID COMMA params1
     | empty
     """
-   # print('hereee234324232')
-   # print(p[-1])
-   # if p[1] is None:
-       # print("here params none")
+    print('hereee234324232')
+    print(p[-1])
 
 
 # <Params1>
@@ -261,20 +258,20 @@ def p_params1(p):
     | instr tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | empty
     """
-    #print('here222')
+    print('here222')
 
 
 
 # <Bloque>
 def p_bloque(p):
     """bloque : LEFTCURLYBRACKET bloque2 RIGHTCURLYBRACKET"""
-    #print('here bloque')
+    print('here')
 
 
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
                 |   empty'''
-    #print('here')
+    print('here')
 
 
 # <Estatuto>
@@ -294,15 +291,11 @@ def p_estatuto(p):
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
     print('asignacion')
-    #print(p[1])
-    #print(stackO.top())
     exp = stackO.pop()
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     new_quad = quad.generate_quad('=', exp, None, p[1])
-    new_quad.print_quad()
     quads.append(new_quad)
-    
 
 
 # <Variable>
@@ -311,19 +304,19 @@ def p_variable(p):
                 |   ID DOT ID
                 |   ID LEFTBRACKET exp RIGHTBRACKET
                 |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET"""
-    p[0] = p[1]
+
 
 # <Condicion>
 def p_condicion(p):
     """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
-    #print('here?2342423')
+    print('here?2342423')
 
 
 def p_condicion2(p):
     """condicion2   :   OTHERWISE bloque
                     |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
-    #print('here again')
+    print('here again')
 
 
 # <Escritura>
@@ -359,13 +352,13 @@ def p_llamada2(p):
 # <CicloW>
 def p_cicloW(p):
     """cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
-    #print('w')
+    print('w')
 
 
 # <CicloFor>
 def p_cicloFor(p):
     """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque"""
-    #print('f')
+    print('f')
 
 
 # <Assign>
@@ -428,24 +421,21 @@ def p_expLOOP(p):
 def p_expC(p):
     '''expC :   termino add_operator_plusminus expPM'''
 
-# TODO: Agregué un punto neuralgico justo despues de operador PLUS para ver si esa es la lógica para poder generar correctamente los cuadruplos aritmeticos
-# al parecer sí funciona pero tenemos el bug del oraculo SOS que no me deja ver si es correcta la implementación
+
 def p_expPM(p):
-    """expPM    :   PLUS save_op expC
+    """expPM    :   PLUS expC
                 |   MINUS expC
                 |   empty"""
-    # if p[1] is not None:
-    #     poper.push(p[1])
-    #     print('xd not none' + poper.top())
-    # print("xd2")
-    #print(poper)
+    poper.push(p[1])
+    print('xd2' + p[-1])
+    print(poper)
 
 
-### LLEGA A TERMINO, ENTRA A FACTOR Y LUEGO EJECUTA EL PUNTO NEURALGICO, Y PUFFF (RESOLVED)
+### LLEGA A TERMINO, ENTRA A FACTOR Y LUEGO EJECUTA EL PUNTO NEURALGICO, Y PUFFF
 # <Termino>
 def p_termino(p):
     '''termino  :   factor add_operator_multiplydivide expMD'''
-    #print('xd'+ p[-1])
+    print('xd'+ p[-1])
 
 
 def p_expMD(p):
@@ -455,18 +445,18 @@ def p_expMD(p):
     if p[1] is not None:
         poper.push(p[1])
 
-    #print('here')
+    print('here')
 
 
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
-                |   CTE_INT save_id
-                |   CTE_FLOAT save_id
-                |   CTE_CHAR save_id
+                |   CTE_INT
+                |   CTE_FLOAT
+                |   CTE_CHAR
                 |   variable save_id
                 |   llamada'''
-    print('factor', p[1])
+    print('factor', p[-1])
 
 
 def p_error(p):
@@ -519,23 +509,17 @@ def p_new_function(p):
 
 def p_save_id(p):
     """save_id :"""
-    print("np_saveid" + p[-1])
+    print(p[-1])
     stackO.push(p[-1])
+    print("save id")
+    stackO.show_all()
     # TODO: get the ID of variable
 
-def p_save_op(p):
-    """save_op :"""
-    poper.push(p[-1])
-    print("xd not none +")
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
-    print("ENTRE ADDDDDDD")
-    if poper.top() is not None:
-        print("ADD")
-    #print('poper' + poper.top())
-    if poper.top() == '+' or poper.top() == '-':
-        print("Entre???")
+    print('poper2 ' + poper)
+    if poper.top() == '+' or '-':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -555,11 +539,10 @@ def p_add_operator_plusminus(p):
 
 def p_add_operator_multiplydivide(p):
     """add_operator_multiplydivide : """
-    #print('poper md', p[-1])
-    #poper.size()
-    
-    if poper.top() == '*' or poper.top() == '/':
-        print("entraste?")
+    print('poper ', p[-1])
+    poper.show_all()
+
+    if poper.top() == '*' or '/':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -579,9 +562,9 @@ def p_add_operator_multiplydivide(p):
 
 def p_add_operator_loop(p):
     """add_operator_loop :"""
-    #print('poper ' + poper)
+    print('poper ' + poper)
 
-    if poper.top() == '<=' or poper.top() == '<' or poper.top() == '>' or poper.top() == '>=' or poper.top() == '==' or poper.top() == '!=':
+    if poper.top() == '<=' or '<' or '>' or '>=' or '==' or '!=':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -600,7 +583,7 @@ def p_add_operator_loop(p):
 
 def p_add_operator_and(p):
     """add_operator_and :"""
-    #print('poper ' + poper)
+    print('poper ' + poper)
 
     if poper.top() == 'AND':
         right_op = stackO.pop()
@@ -621,7 +604,7 @@ def p_add_operator_and(p):
 
 def p_add_operator_or(p):
     """add_operator_or :"""
-    #print('poper ' + poper)
+    print('poper ' + poper)
 
     if poper.top() == 'OR':
         right_op = stackO.pop()
@@ -640,9 +623,6 @@ def p_add_operator_or(p):
         else:
             error("Type Mismatched")
 
-def p_np_print(p):
-    """np_print :"""
-    print("sos aqui")
 
 
 def error(message: str):

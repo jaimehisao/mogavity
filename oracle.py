@@ -155,6 +155,11 @@ def convert_string_name_to_number_operand(name):
             error("Operator" + name + " not supported.")
 
 
+def use_oracle(left_type, right_type, operand):
+    return semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][convert_string_name_to_number_operand(operand)]
+
+
+
 # TODO put them all together and use the logger library
 def error(message: str):
     print(message)  # use raise?
