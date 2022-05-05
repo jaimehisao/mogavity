@@ -116,6 +116,7 @@ def convert_string_name_to_number_type(name):
     :param name: the type in string you wish to convert.
     :return: the given type converted to Integer.
     """
+    print(name)
     if name is not None:
         if name == "int":
             return 0
@@ -154,6 +155,18 @@ def convert_string_name_to_number_operand(name):
         else:
             error("Operator" + name + " not supported.")
 
+def convert_number_type_to_string_name(num):
+    if num is not None:
+        if num == 0:
+            return "int"
+        elif num == 1:
+            return "float"
+        elif num == 2:
+            return "char"
+        elif num == 3:
+            return "bool"
+        else:
+            error("Number type " + str(num) + " not supported")
 
 def use_oracle(left_type, right_type, operand):
     return semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][convert_string_name_to_number_operand(operand)]

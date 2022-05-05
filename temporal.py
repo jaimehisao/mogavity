@@ -9,5 +9,5 @@ class Temporal:
 
     def get_temp(self, _type):
         self.id += 1
-        temp = ("t" + self.id, _type)
+        temp = ("t" + str(self.id), _type)
         return temp

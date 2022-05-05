@@ -387,7 +387,8 @@ def p_exp(p):
 def p_expOR(p):
     """expOR    :   OR expA expOR
                 |   empty"""
-    poper.push(p[1])
+    if p[1] is not None:
+        poper.push(p[1])
 
 
 # <ExpA>
@@ -398,7 +399,8 @@ def p_expA(p):
 def p_expAND(p):
     """expAND   :   AND expB expAND
                 |   empty"""
-    poper.push(p[1])
+    if p[1] is not None:
+        poper.push(p[1])
 
 
 # <ExpB>
@@ -414,7 +416,8 @@ def p_expLOOP(p):
                 |   EQUALS expB
                 |   NOTEQUAL expB
                 |   empty"""
-    poper.push(p[1])
+    if p[1] is not None:
+        poper.push(p[1])
 
 
 # <ExpC>
@@ -494,7 +497,6 @@ def p_new_variable(p):
     """new_variable : """
     func_table.add_variable(p[-1], current_scope, tmp_type)
 
-
 def p_new_variable_set_type(p):
     """new_variable_set_type : """
     global tmp_type
@@ -510,10 +512,13 @@ def p_new_function(p):
 def p_save_id(p):
     """save_id :"""
     print(p[-1])
-    stackO.push(p[-1])
-    print("save id")
-    stackO.show_all()
-    # TODO: get the ID of variable
+    if p[-1].isdigit():
+        stack_type.push("int")
+    else:
+        var_type = func_table.get_var_type(p[-1], current_scope)
+        print("vartype " + var_type)
+        stack_type.push(var_type)
+    # TODO: check for float
 
 
 def p_add_operator_plusminus(p):
@@ -521,18 +526,25 @@ def p_add_operator_plusminus(p):
     print('poper2 ' + poper)
     if poper.top() == '+' or '-':
         right_op = stackO.pop()
+        print("right_op " + right_op)
         right_type = stack_type.pop()
+        print("right_type " + right_type)
         left_op = stackO.pop()
+        print("left_op " + left_op)
         left_type = stack_type.pop()
+        print("left_type " + left_type)
         op = poper.pop()
+        print("op " + op)
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
             print("si baila mija con en senor")
-            res = temp.get_temp()
-            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(tmp_type)
+            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res)
-            stack_type.push(res.type)
+            stackO.push(res[0])
+            stack_type.push(res[1])
         else:
             error("ERROR: Type mismatch at " + p.lineno())
 
@@ -551,7 +563,8 @@ def p_add_operator_multiplydivide(p):
         print(right_op, right_type, left_op, left_type, op)
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
-            res = temp.get_temp()
+            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(tmp_type)
             new_quad = quad.generate_quad(op, left_op, right_op, res)
             quads.append(new_quad)
             stackO.push(res)
