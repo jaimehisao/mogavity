@@ -3,6 +3,7 @@ import string
 
 import sys
 
+
 class Quadruple:
     id: int
     operator: str

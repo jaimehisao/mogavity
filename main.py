@@ -15,6 +15,8 @@ from temporal import Temporal
 from Stack import Stack
 import oracle
 
+from error_handling import info, error, warning
+
 
 from pprint import pprint
 logging.basicConfig(level=logging.DEBUG)
@@ -287,7 +289,6 @@ def p_estatuto(p):
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
-    print('asignacion')
     #print(p[1])
     #print(stackO.top())
     exp = stackO.pop()
@@ -455,7 +456,7 @@ def p_factor(p):
                 |   CTE_CHAR save_id
                 |   variable save_id
                 |   llamada'''
-    print('factor', p[1])
+    pass
 
 
 def p_error(p):
@@ -468,8 +469,7 @@ def p_error(p):
         token = "end of file"
     else:
         token = f"({p.value}) on line {p.lineno}"
-
-    print(f"Syntax error: {token}")
+    error("Syntax error on " + token)
     exit()
 
 
@@ -510,13 +510,11 @@ def p_new_function(p):
 
 def p_save_id(p):
     """save_id :"""
-    print("np_saveid" + p[-1])
     stackO.push(p[-1])
     if p[-1].isdigit():
         stack_type.push("int")
     else:
         var_type = func_table.get_var_type(p[-1], current_scope)
-        print("vartype " + var_type)
         stack_type.push(var_type)
     # TODO: check for float
 
@@ -529,23 +527,15 @@ def p_save_op(p):
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
-    print("ENTRE ADDDDDDD")
-    if poper.top() is not None:
-        print("ADD")
-    #print('poper' + poper.top())
+    """if poper.top() is not None:
+        print("ADD")"""
     if poper.top() == '+' or poper.top() == '-':
-        print("Entre???")
         right_op = stackO.pop()
-        print("right_op " + right_op)
         right_type = stack_type.pop()
-        print("right_type " + right_type)
         left_op = stackO.pop()
-        print("left_op " + left_op)
         left_type = stack_type.pop()
-        print("left_type " + left_type)
         op = poper.pop()
-        print("op " + op)
-        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
@@ -556,7 +546,7 @@ def p_add_operator_plusminus(p):
             stackO.push(res[0])
             stack_type.push(res[1])
         else:
-            error("ERROR: Type mismatch at " + p.lineno())
+            error("Type mismatch at " + p.lineno())
 
 
 def p_add_operator_multiplydivide(p):
@@ -570,7 +560,8 @@ def p_add_operator_multiplydivide(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        #  print(right_op, right_type, left_op, left_type, op)
+        result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
@@ -594,7 +585,7 @@ def p_add_operator_loop(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
@@ -618,7 +609,7 @@ def p_add_operator_and(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
@@ -642,7 +633,7 @@ def p_add_operator_or(p):
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
+        result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
@@ -653,7 +644,7 @@ def p_add_operator_or(p):
             stackO.push(res[0])
             stack_type.push(res[1])
         else:
-            error("Type Mismatched")
+            error("Operator type mismatched at line: " + p.lineno)
 
 def p_generate_write_quad(p):
     """generate_write_quad :"""
@@ -686,12 +677,6 @@ def p_change_scope(p):
     """change_scope : """
     global current_scope
     current_scope = p[-1]
-    print("")
-
-
-def error(message: str):
-    print(message)  # use raise?
-    sys.exit()
 
 
 # Verificar el tipo de la variable
@@ -704,9 +689,13 @@ try:
     r = f.read()
     f.close()
 except FileNotFoundError:
-    print("No hay archivo para probar")
+    error("No hay archivo para probar")
 
 parser.parse(r)
 # parser.parse(r, debug=1)
 print("Código Aceptado")
 print(func_table.function_table)
+
+
+#  TODO implement warning when a variable is unused.
+#  TODO implement warning when function is unused.

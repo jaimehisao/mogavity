@@ -3,4 +3,4 @@
 __pycache__
 coverage.xml
 venv/
-tests
+tests/

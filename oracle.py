@@ -22,42 +22,44 @@ Results
 -1 = Error
 """
 import sys
+from error_handling import error, info
+
 n = 9  # Probolema con ineficiencia de espacio utilizado
 semantic_oracle = distance = [[[0 for k in range(9)] for j in range(3)] for i in range(3)]
-semantic_oracle[0][0][0] = 0   # Int y Int (Sum)
-semantic_oracle[0][0][1] = 0   # Int y Int (Subtract)
-semantic_oracle[0][0][2] = 0   # Int y Int (Multiply)
-semantic_oracle[0][0][3] = 0   # Int y Int (Divide)
-semantic_oracle[0][0][4] = 4   # Int y Int (Greater Than)
-semantic_oracle[0][0][5] = 4   # Int y Int (Less Than)
-semantic_oracle[0][0][6] = 4   # Int y Int (Not Equal)
+semantic_oracle[0][0][0] = 0  # Int y Int (Sum)
+semantic_oracle[0][0][1] = 0  # Int y Int (Subtract)
+semantic_oracle[0][0][2] = 0  # Int y Int (Multiply)
+semantic_oracle[0][0][3] = 0  # Int y Int (Divide)
+semantic_oracle[0][0][4] = 4  # Int y Int (Greater Than)
+semantic_oracle[0][0][5] = 4  # Int y Int (Less Than)
+semantic_oracle[0][0][6] = 4  # Int y Int (Not Equal)
 semantic_oracle[0][0][7] = -1  # Int y Int (AND)
 semantic_oracle[0][0][8] = -1  # Int y Int (OR)
-semantic_oracle[1][1][0] = 1   # Float y Float (Sum)
-semantic_oracle[1][1][1] = 1   # Float y Float (Subtract)
-semantic_oracle[1][1][2] = 1   # Float y Float (Multiply)
-semantic_oracle[1][1][3] = 1   # Float y Float (Divide)
-semantic_oracle[1][1][4] = 4   # Float y Float (Greater Than)
-semantic_oracle[1][1][5] = 4   # Float y Float (Less Than)
-semantic_oracle[1][1][6] = 4   # Float y Float (Not Equal)
+semantic_oracle[1][1][0] = 1  # Float y Float (Sum)
+semantic_oracle[1][1][1] = 1  # Float y Float (Subtract)
+semantic_oracle[1][1][2] = 1  # Float y Float (Multiply)
+semantic_oracle[1][1][3] = 1  # Float y Float (Divide)
+semantic_oracle[1][1][4] = 4  # Float y Float (Greater Than)
+semantic_oracle[1][1][5] = 4  # Float y Float (Less Than)
+semantic_oracle[1][1][6] = 4  # Float y Float (Not Equal)
 semantic_oracle[1][1][7] = -1  # Float y Float (AND)
 semantic_oracle[1][1][8] = -1  # Float y Float (OR)
-semantic_oracle[0][1][0] = 0   # Int y Float (Sum)
-semantic_oracle[0][1][1] = 0   # Int y Float (Subtract)
-semantic_oracle[0][1][2] = 1   # Int y Float (Multiply)
-semantic_oracle[0][1][3] = 0   # Int y Float (Divide)
-semantic_oracle[0][1][4] = 4   # Int y Float (Greater Than)
-semantic_oracle[0][1][5] = 4   # Int y Float (Less Than)
-semantic_oracle[0][1][6] = 4   # Int y Float (Not Equal)
+semantic_oracle[0][1][0] = 0  # Int y Float (Sum)
+semantic_oracle[0][1][1] = 0  # Int y Float (Subtract)
+semantic_oracle[0][1][2] = 1  # Int y Float (Multiply)
+semantic_oracle[0][1][3] = 0  # Int y Float (Divide)
+semantic_oracle[0][1][4] = 4  # Int y Float (Greater Than)
+semantic_oracle[0][1][5] = 4  # Int y Float (Less Than)
+semantic_oracle[0][1][6] = 4  # Int y Float (Not Equal)
 semantic_oracle[0][1][7] = -1  # Int y Float (AND)
 semantic_oracle[0][1][8] = -1  # Int y Float (OR)
-semantic_oracle[1][0][0] = 0   # Float y Int (Sum)
-semantic_oracle[1][0][1] = 0   # Float y Int (Subtract)
-semantic_oracle[1][0][2] = 1   # Float y Int (Multiply)
-semantic_oracle[1][0][3] = 0   # Float y Int (Divide)
-semantic_oracle[1][0][4] = 4   # Float y Int (Greater Than)
-semantic_oracle[1][0][5] = 4   # Float y Int (Less Than)
-semantic_oracle[1][0][6] = 4   # Float y Int (Not Equal)
+semantic_oracle[1][0][0] = 0  # Float y Int (Sum)
+semantic_oracle[1][0][1] = 0  # Float y Int (Subtract)
+semantic_oracle[1][0][2] = 1  # Float y Int (Multiply)
+semantic_oracle[1][0][3] = 0  # Float y Int (Divide)
+semantic_oracle[1][0][4] = 4  # Float y Int (Greater Than)
+semantic_oracle[1][0][5] = 4  # Float y Int (Less Than)
+semantic_oracle[1][0][6] = 4  # Float y Int (Not Equal)
 semantic_oracle[1][0][7] = -1  # Float y Int (AND)
 semantic_oracle[1][0][8] = -1  # Float y Int (OR)
 semantic_oracle[2][2][0] = -1  # Char y Char (Sum)
@@ -106,6 +108,7 @@ semantic_oracle[1][2][6] = -1  # Float y Char (Not Equal)
 semantic_oracle[1][2][7] = -1  # Float y Char (AND)
 semantic_oracle[1][1][8] = -1  # Float y Char (OR)
 
+
 # TODO: functions to check semantics with oracle
 
 
@@ -116,7 +119,6 @@ def convert_string_name_to_number_type(name):
     :param name: the type in string you wish to convert.
     :return: the given type converted to Integer.
     """
-    print(name)
     if name is not None:
         if name == "int":
             return 0
@@ -155,6 +157,7 @@ def convert_string_name_to_number_operand(name):
         else:
             error("Operator" + name + " not supported.")
 
+
 def convert_number_type_to_string_name(num):
     if num is not None:
         if num == 0:
@@ -166,15 +169,9 @@ def convert_number_type_to_string_name(num):
         elif num == 3:
             return "bool"
         else:
-            error("Number type " + str(num) + " not supported")
+            error("Resulting type " + str(num) + " not supported!")
+
 
 def use_oracle(left_type, right_type, operand):
-    return semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][convert_string_name_to_number_operand(operand)]
-
-
-
-# TODO put them all together and use the logger library
-def error(message: str):
-    print(message)  # use raise?
-    sys.exit()
-
+    return convert_string_name_to_number_type(semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][
+            convert_string_name_to_number_operand(operand)])
