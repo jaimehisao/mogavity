@@ -322,13 +322,12 @@ def p_condicion2(p):
 
 # <Escritura>
 def p_escritura(p):
-    """escritura    :   OUTPUT RIGHTARROW exp escritura2 SEMICOLON
-                    |   OUTPUT RIGHTARROW CTE_STRING escritura2 SEMICOLON"""
-
+    """escritura    :   OUTPUT RIGHTARROW exp generate_write_quad escritura2 SEMICOLON
+                    |   OUTPUT RIGHTARROW CTE_STRING generate_write_quad escritura2 SEMICOLON"""
 
 def p_escritura2(p):
-    """escritura2   :   COMMA exp escritura2
-                    |   COMMA CTE_STRING escritura2
+    """escritura2   :   COMMA exp generate_write_quad escritura2
+                    |   COMMA CTE_STRING generate_write_quad escritura2
                     |   empty"""
 
 
@@ -447,7 +446,7 @@ def p_expMD(p):
 
     #print('here')
 
-
+#TODO: Update factor diagram
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
@@ -655,6 +654,28 @@ def p_add_operator_or(p):
             stack_type.push(res[1])
         else:
             error("Type Mismatched")
+
+def p_generate_write_quad(p):
+    """generate_write_quad :"""
+    print("WRTIE ESCRIBIRRRR FASFDSAD")
+    print(p[-1])
+    # When it is a string we can directly generate the quad
+    if isinstance(p[-1], str):
+        print("ENTER STRING")
+        new_quad = quad.generate_quad("OUTPUT",None, None, p[-1])
+        new_quad.print_quad()
+        quads.append(new_quad)
+    # If it is not a string, then it is an exp and we should already have it in stackO, remebering that it is a temporal
+    else:
+        print("ENTER EXPPPP")
+        res = stackO.pop()
+        # We don't really need the type, do we?
+        stack_type.pop()
+        # We generate the quad
+        new_quad = quad.generate_quad("OUTPUT",None, None, res)
+        new_quad.print_quad()
+        quads.append(new_quad)
+
 
 def p_np_print(p):
     """np_print :"""
