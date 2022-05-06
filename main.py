@@ -386,10 +386,8 @@ def p_exp(p):
 
 
 def p_expOR(p):
-    """expOR    :   OR expA expOR
+    """expOR    :   OR save_op expA expOR
                 |   empty"""
-    if p[1] is not None:
-        poper.push(p[1])
 
 
 # <ExpA>
@@ -398,10 +396,8 @@ def p_expA(p):
 
 
 def p_expAND(p):
-    """expAND   :   AND expB expAND
+    """expAND   :   AND save_op expB expAND
                 |   empty"""
-    if p[1] is not None:
-        poper.push(p[1])
 
 
 # <ExpB>
@@ -410,15 +406,13 @@ def p_expB(p):
 
 
 def p_expLOOP(p):
-    """expLOOP  :   LESSTHAN expB
-                |   GREATERTHAN expB
-                |   EQUALLESSTHAN expB
-                |   EQUALGREATERTHAN expB
-                |   EQUALS expB
-                |   NOTEQUAL expB
+    """expLOOP  :   LESSTHAN save_op expB
+                |   GREATERTHAN save_op expB
+                |   EQUALLESSTHAN save_op expB
+                |   EQUALGREATERTHAN save_op expB
+                |   EQUALS save_op expB
+                |   NOTEQUAL save_op expB
                 |   empty"""
-    if p[1] is not None:
-        poper.push(p[1])
 
 
 # <ExpC>
@@ -429,7 +423,7 @@ def p_expC(p):
 # al parecer sí funciona pero tenemos el bug del oraculo SOS que no me deja ver si es correcta la implementación
 def p_expPM(p):
     """expPM    :   PLUS save_op expC
-                |   MINUS expC
+                |   MINUS save_op expC
                 |   empty"""
     # if p[1] is not None:
     #     poper.push(p[1])
@@ -446,11 +440,10 @@ def p_termino(p):
 
 
 def p_expMD(p):
-    '''expMD    :   TIMES termino
-                |   DIVIDE termino
+    '''expMD    :   TIMES save_op termino
+                |   DIVIDE save_op termino
                 |   empty'''
-    if p[1] is not None:
-        poper.push(p[1])
+ 
 
     #print('here')
 
@@ -531,8 +524,8 @@ def p_save_id(p):
 
 def p_save_op(p):
     """save_op :"""
-    poper.push(p[-1])
-    print("xd not none +")
+    if p[-1] is not None:
+        poper.push(p[-1])
 
 
 def p_add_operator_plusminus(p):
@@ -573,21 +566,21 @@ def p_add_operator_multiplydivide(p):
     #poper.size()
 
     if poper.top() == '*' or poper.top() == '/':
-        print("entraste?")
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
-        print(right_op, right_type, left_op, left_type, op)
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
+            print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(tmp_type)
-            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res)
-            stack_type.push(res.type)
+            stackO.push(res[0])
+            stack_type.push(res[1])
         else:
             error("Type Mismatched")
 
@@ -604,11 +597,14 @@ def p_add_operator_loop(p):
         op = poper.pop()
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
-            res = temp.get_temp()
-            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            print("si baila mija con en senor")
+            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(tmp_type)
+            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res)
-            stack_type.push(res.type)
+            stackO.push(res[0])
+            stack_type.push(res[1])
         else:
             error("Type Mismatched")
 
@@ -625,11 +621,14 @@ def p_add_operator_and(p):
         op = poper.pop()
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
-            res = temp.get_temp()
-            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            print("si baila mija con en senor")
+            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(tmp_type)
+            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res)
-            stack_type.push(res.type)
+            stackO.push(res[0])
+            stack_type.push(res[1])
         else:
             error("Type Mismatched")
 
@@ -646,12 +645,14 @@ def p_add_operator_or(p):
         op = poper.pop()
         result_type = oracle.semantic_oracle[oracle.convert_string_name_to_number_type(left_type)][oracle.convert_string_name_to_number_type(right_type)][oracle.convert_string_name_to_number_operand(op)]
         if result_type != -1:
-            res = temp.get_temp()
-            new_quad = quad.generate_quad(op, left_op, right_op, res)
+            print("si baila mija con en senor")
+            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(tmp_type)
+            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res)
-            stack_type.push(res.type)
-            print(quads)
+            stackO.push(res[0])
+            stack_type.push(res[1])
         else:
             error("Type Mismatched")
 
