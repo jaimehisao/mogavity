@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-import variable_table
 import function_directory
 
 @dataclass()
 class Class:
     class_id: str
-    attrs: variable_table
+    # attrs: variable_table
     methods: function_directory
 
 class ClassDirectory:

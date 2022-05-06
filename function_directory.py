@@ -1,16 +1,21 @@
 import sys
 import logging
+import memory_manager
+
+from error_handling import error, warning, info
 
 
 class Function:
     id: str
     return_type: str
     variable_table = {}
+    memory_manager = memory_manager.MemoryManager
 
     def __init__(self, _id, return_type):
         self.variable_table = {}
         self.id = _id
         self.return_type = return_type
+        self.memory_manager = memory_manager.MemoryManager()
 
 
 class Variable:
@@ -50,11 +55,21 @@ class FunctionDirectory:
 
     def add_variable(self, identifier, scope, _type):
         logging.info("Added variable with ID " + identifier + " in scope " + scope + " and type " + _type)
-        self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
-                                                                         0)  ## TODO fill address when we handle that
+        if _type == "int":
+            self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
+                                                                             self.function_table[
+                                                                                 scope].memory_manager.assign_new_int_address())
+        elif _type == "float":
+            self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
+                                                                             self.function_table[
+                                                                                 scope].memory_manager.assign_new_float())
+        elif _type == "char":
+            self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
+                                                                             self.function_table[
+                                                                                 scope].memory_manager.assign_new_char())
 
     def print_variable_table(self, current_scope):
-        print(self.function_table[current_scope].variable_table)
+        info(str(self.function_table[current_scope].variable_table))
 
     def print_all_variable_tables(self):
         for key, value in self.function_table.items():
@@ -85,7 +100,6 @@ class FunctionDirectory:
             return False
 
     def get_var_type(self, identifier, scope):
-        print("SCOPEEEEE " + scope)
         var_in_global_scope_type = None
         var_in_local_scope_type = None
         # Check for variable in global scope
@@ -93,11 +107,10 @@ class FunctionDirectory:
             if identifier in self.function_table["global"].variable_table.keys():
                 var_in_global_scope_type = self.function_table["global"].variable_table[identifier].type
             else:
-                print("Var " + identifier + " is not in global scope!")
+                info("Var " + identifier + " is not in global scope!")
         # Check for variable in local scope
         if identifier in self.function_table[scope].variable_table.keys():
             var_in_local_scope_type = self.function_table[scope].variable_table[identifier].type
-
         if scope is "global":
             return var_in_local_scope_type
         else:
@@ -113,13 +126,3 @@ class FunctionDirectory:
 
     def add_elements(self, identifier, elem_type):
         self.function_table = {'identifier': identifier, 'type': elem_type}
-
-
-def error(message: str):
-    print(message)  # use raise?
-    sys.exit()
-
-
-def warning(message: str):
-    print("WARNING -> " + message)  # use raise?
-

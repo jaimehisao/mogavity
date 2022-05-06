@@ -3,10 +3,14 @@ program test;
 var Perro dog;
 int perros, gatos, totales;
 
-instr void ejemplo() {
+instr void ejemplo()
+    var int pastoraleman, perros;
+    char lol;
+    {
     perros = 1;
-    gatos = 1;
+    gatos = 2;
     totales = perros + gatos;
+    perros = perros + lol;
 }
 
 main {

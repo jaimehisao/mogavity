@@ -5,7 +5,7 @@ class Stack:
     # push es la función de agregar elementos a la pila
     # usamos la función append de List para agregar elemento
     def push(self, value):
-        print('added ' + value)
+        #print('added ' + value)
         self.stack.append(value)
 
     # pop es la función para eliminar el último elemento que se agregó a la pila
