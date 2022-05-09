@@ -16,5 +16,6 @@ instr void ejemplo()
 main {
     ejemplo();
     ejemplo2();
+    output -> 1+2,"hola mundo";
     return 0;
 }
