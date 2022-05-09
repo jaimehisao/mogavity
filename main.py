@@ -7,7 +7,7 @@ Usage for the Compiler´s Design Course
 from xmlrpc.client import Boolean
 import ply.yacc as yacc
 import ply.lex as lex
-import sys, logging
+import logging
 from function_directory import FunctionDirectory
 import quadruples_generator
 from quadruple import Quadruple
@@ -312,7 +312,7 @@ def p_variable(p):
 def p_condicion(p):
     """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque np_if_2
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque condicion2"""
-    #print('here?2342423')
+    # print('here?2342423')
 
 
 def p_condicion2(p):
@@ -654,7 +654,7 @@ def p_add_operator_or(p):
 #  Neuralgic Point for function detection
 def p_function_detection(p):
     """function_detection :"""
-    func_table.get_function(p[-1], "0") # str(p.lineno())
+    func_table.get_function(p[-1], "0")  # str(p.lineno())
     # Verify function exists
     # Start handling execution
     pass
@@ -703,6 +703,10 @@ def p_change_scope(p):
 
 # Verificar el tipo de la variable
 
+
+####################################
+######### PUNTOS DEL IF ############
+####################################
 def p_np_if_1(p):
     """np_if_1 : """
     print("IFIIFIFIFIF")
@@ -713,9 +717,10 @@ def p_np_if_1(p):
     if type_cond != "bool":
         error("Expected type bool")
     else:
-        new_quad = quad.generate_quad("GOTOF",cond,None, None)
+        new_quad = quad.generate_quad("GOTOF", cond, None, None)
         stackJumps.push(new_quad.id - 1)
         quads.append(new_quad)
+
 
 def p_np_if_2(p):
     """np_if_2 : """
@@ -724,6 +729,80 @@ def p_np_if_2(p):
     tmp_quad = quads[num_quad]
     tmp_quad.fill_quad(len(quads) + 1)
     tmp_quad.print_quad()
+
+
+####################################
+######### PUNTOS DEL FOR ###########
+####################################
+def p_np_for_1(p):
+    """np_for_1 : """
+    stackO.push(id) ####
+    stack_type.push(type) #####
+    # vailidate that tit is numeric, if not break (var we mean)
+
+
+    print("FORRRRRRRRR")
+
+def p_np_for_2(p):
+    """np_for_2 : """
+    print("FORRRRRRRRR")
+    exp_type = stack_type.pop()
+    if(exp_type != numeric tyoe):
+        error("Type mismatch")
+    else:
+        exp = stackO.pop()
+        vControl = stackO.top()
+        control_type = stack_type.top()
+        result_type = oracle.use_oracle(control_type, exp_type, "=")
+        #  Cubo semantico se encarga de errores aqui
+        quad.generate_quad("=", exp, vControl, None) ## Ahi va en none?
+
+
+def p_np_for_3(p):
+    """np_for_3 : """
+    print("FORRRRRRRRR")
+
+def p_np_for_4(p):
+    """np_for_4 : """
+    print("FORRRRRRRRR")
+
+
+####################################
+######## PUNTOS DEL WHILE ##########
+####################################
+def p_np_while_1(p):
+    """np_while_1 : """
+    print("FORRRRRRRRR")
+    stackJumps.push()  # cont
+    exp_type = stack_type.pop()
+    if (exp_type != bool):
+        error("Type Mismatch")
+    else:
+        result = stackO.pop()
+        new_quad = quad.generate_quad("GOTOF", result, None, None) #Pending to fill last
+        # GENERAR GOTO EN FALSO
+        stackJumps.push(new_quad.id - 1)
+
+
+def p_np_while_2(p):
+    """np_while_2 : """
+    print("FORRRRRRRRR")
+    stackJumps.push()  # cont
+    exp_type = stack_type.pop()
+    if exp_type != bool:
+        error("Type Mismatch")
+    else:
+        result = stackO.pop()
+        new_quad = quad.generate_quad("GOTOF", None, None, result)
+        stackJumps.push(new_quad.id - 1)
+
+
+def p_np_while_3(p):
+    """np_while_3 : """
+    end = stackJumps.pop()
+    ret = stackJumps.pop()
+    new_quad = quad.generate_quad("GOTO", None, None, ret)
+    fill(end, cont)
 
 
 parser = yacc.yacc()
@@ -738,7 +817,7 @@ except FileNotFoundError:
 parser.parse(r)
 # parser.parse(r, debug=1)
 print("Código Aceptado")
-print(func_table.function_table)
+#print(func_table.function_table)
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
