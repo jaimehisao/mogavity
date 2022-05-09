@@ -17,13 +17,13 @@ import oracle
 
 from error_handling import info, error, warning
 
-
 from pprint import pprint
+
 logging.basicConfig(level=logging.DEBUG)
 
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
-quad = Quadruple(0,"","","","")
+quad = Quadruple(0, "", "", "", "")
 temp = Temporal()
 
 poper = Stack()
@@ -165,7 +165,7 @@ def p_programa(p):
     | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque
     | PROGRAM new_program ID save_program SEMICOLON MAIN bloque
     """
-    #print('here xd')
+    # print('here xd')
 
 
 # epsilon
@@ -188,7 +188,6 @@ def p_constructor(p):
     """constructor : ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | ID LEFTPARENTHESIS RIGHTPARENTHESIS bloque
     """
-
 
 
 # <VARS>
@@ -226,7 +225,8 @@ def p_tipoSimple(p):
     | FLOAT new_variable_set_type
     | CHAR new_variable_set_type
     """
-    #print("here tipo simple")
+    # print("here tipo simple")
+
 
 # TODO: Actualizar el diagrama instr
 # TODO: Volver a agregar instr2 cuando resolvamos el bug
@@ -251,26 +251,26 @@ def p_params(p):
     """
     pass
 
+
 # <Params1>
 def p_params1(p):
     """params1 : tipoSimple ID ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | instr tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
     | empty
     """
-    #print('here222')
-
+    # print('here222')
 
 
 # <Bloque>
 def p_bloque(p):
     """bloque : LEFTCURLYBRACKET bloque2 RIGHTCURLYBRACKET"""
-    #print('here bloque')
+    # print('here bloque')
 
 
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
                 |   empty'''
-    #print('here')
+    # print('here')
 
 
 # <Estatuto>
@@ -289,15 +289,14 @@ def p_estatuto(p):
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
-    #print(p[1])
-    #print(stackO.top())
+    # print(p[1])
+    # print(stackO.top())
     exp = stackO.pop()
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     new_quad = quad.generate_quad('=', exp, None, p[1])
     new_quad.print_quad()
     quads.append(new_quad)
-
 
 
 # <Variable>
@@ -308,23 +307,25 @@ def p_variable(p):
                 |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET"""
     p[0] = p[1]
 
+
 # <Condicion>
 def p_condicion(p):
     """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
-    #print('here?2342423')
+    # print('here?2342423')
 
 
 def p_condicion2(p):
     """condicion2   :   OTHERWISE bloque
                     |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
-    #print('here again')
+    # print('here again')
 
 
 # <Escritura>
 def p_escritura(p):
     """escritura    :   OUTPUT RIGHTARROW exp generate_write_quad escritura2 SEMICOLON
                     |   OUTPUT RIGHTARROW CTE_STRING generate_write_quad escritura2 SEMICOLON"""
+
 
 def p_escritura2(p):
     """escritura2   :   COMMA exp generate_write_quad escritura2
@@ -353,13 +354,13 @@ def p_llamada2(p):
 # <CicloW>
 def p_cicloW(p):
     """cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
-    #print('w')
+    # print('w')
 
 
 # <CicloFor>
 def p_cicloFor(p):
     """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque"""
-    #print('f')
+    # print('f')
 
 
 # <Assign>
@@ -419,6 +420,7 @@ def p_expLOOP(p):
 def p_expC(p):
     '''expC :   termino add_operator_plusminus expPM'''
 
+
 # TODO: Agregué un punto neuralgico justo despues de operador PLUS para ver si esa es la lógica para poder generar correctamente los cuadruplos aritmeticos
 # al parecer sí funciona pero tenemos el bug del oraculo SOS que no me deja ver si es correcta la implementación
 def p_expPM(p):
@@ -429,25 +431,25 @@ def p_expPM(p):
     #     poper.push(p[1])
     #     print('xd not none' + poper.top())
     # print("xd2")
-    #print(poper)
+    # print(poper)
 
 
 ### LLEGA A TERMINO, ENTRA A FACTOR Y LUEGO EJECUTA EL PUNTO NEURALGICO, Y PUFFF (RESOLVED)
 # <Termino>
 def p_termino(p):
     '''termino  :   factor add_operator_multiplydivide expMD'''
-    #print('xd'+ p[-1])
+    # print('xd'+ p[-1])
 
 
 def p_expMD(p):
     '''expMD    :   TIMES save_op termino
                 |   DIVIDE save_op termino
                 |   empty'''
- 
 
-    #print('here')
+    # print('here')
 
-#TODO: Update factor diagram
+
+# TODO: Update factor diagram
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
@@ -493,6 +495,7 @@ def p_new_variable(p):
     """new_variable : """
     func_table.add_variable(p[-1], current_scope, tmp_type)
     func_table.print_all_variable_tables()
+
 
 def p_new_variable_set_type(p):
     """new_variable_set_type : """
@@ -551,8 +554,8 @@ def p_add_operator_plusminus(p):
 
 def p_add_operator_multiplydivide(p):
     """add_operator_multiplydivide : """
-    #print('poper md', p[-1])
-    #poper.size()
+    # print('poper md', p[-1])
+    # poper.size()
 
     if poper.top() == '*' or poper.top() == '/':
         right_op = stackO.pop()
@@ -577,7 +580,7 @@ def p_add_operator_multiplydivide(p):
 
 def p_add_operator_loop(p):
     """add_operator_loop :"""
-    #print('poper ' + poper)
+    # print('poper ' + poper)
 
     if poper.top() == '<=' or poper.top() == '<' or poper.top() == '>' or poper.top() == '>=' or poper.top() == '==' or poper.top() == '!=':
         right_op = stackO.pop()
@@ -601,7 +604,7 @@ def p_add_operator_loop(p):
 
 def p_add_operator_and(p):
     """add_operator_and :"""
-    #print('poper ' + poper)
+    # print('poper ' + poper)
 
     if poper.top() == 'AND':
         right_op = stackO.pop()
@@ -625,7 +628,7 @@ def p_add_operator_and(p):
 
 def p_add_operator_or(p):
     """add_operator_or :"""
-    #print('poper ' + poper)
+    # print('poper ' + poper)
 
     if poper.top() == 'OR':
         right_op = stackO.pop()
@@ -650,10 +653,11 @@ def p_add_operator_or(p):
 #  Neuralgic Point for function detection
 def p_function_detection(p):
     """function_detection :"""
-    func_table.get_function(p[-1], str(p.lineno()))
+    func_table.get_function(p[-1], "0") # str(p.lineno())
     # Verify function exists
     # Start handling execution
     pass
+
 
 def p_generate_write_quad(p):
     """generate_write_quad :"""
@@ -662,7 +666,7 @@ def p_generate_write_quad(p):
     # When it is a string we can directly generate the quad
     if isinstance(p[-1], str):
         print("ENTER STRING")
-        new_quad = quad.generate_quad("OUTPUT",None, None, p[-1])
+        new_quad = quad.generate_quad("OUTPUT", None, None, p[-1])
         new_quad.print_quad()
         quads.append(new_quad)
     # If it is not a string, then it is an exp and we should already have it in stackO, remebering that it is a temporal
@@ -672,9 +676,17 @@ def p_generate_write_quad(p):
         # We don't really need the type, do we?
         stack_type.pop()
         # We generate the quad
-        new_quad = quad.generate_quad("OUTPUT",None, None, res)
+        new_quad = quad.generate_quad("OUTPUT", None, None, res)
         new_quad.print_quad()
         quads.append(new_quad)
+
+
+"""
+One to start and one to end the program? Maybe this simplifies our execution flow when converting
+instructions in the virtual machine?
+
+Should we maybe add one when we call a function inside a function? 
+"""
 
 
 def p_np_print(p):
@@ -704,7 +716,6 @@ parser.parse(r)
 # parser.parse(r, debug=1)
 print("Código Aceptado")
 print(func_table.function_table)
-
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.

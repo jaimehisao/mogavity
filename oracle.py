@@ -173,5 +173,5 @@ def convert_number_type_to_string_name(num):
 
 
 def use_oracle(left_type, right_type, operand):
-    return convert_string_name_to_number_type(semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][
+    return convert_number_type_to_string_name(semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][
             convert_string_name_to_number_operand(operand)])
