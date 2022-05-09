@@ -341,7 +341,7 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   ID LEFTPARENTHESIS llamada2 RIGHTPARENTHESIS SEMICOLON"""
+    """llamada  :   ID function_detection LEFTPARENTHESIS llamada2 RIGHTPARENTHESIS SEMICOLON"""
 
 
 def p_llamada2(p):
@@ -645,7 +645,16 @@ def p_add_operator_or(p):
             stackO.push(res[0])
             stack_type.push(res[1])
         else:
-            error("Operator type mismatched at line: " + p.lineno)
+            error("Operator type mismatched at line: " + str(p.lineno()))
+
+
+#  Neuralgic Point for function detection
+def p_function_detection(p):
+    """function_detection :"""
+    func_table.get_function(p[-1], str(p.lineno()))
+    # Verify function exists
+    # Start handling execution
+    pass
 
 def p_generate_write_quad(p):
     """generate_write_quad :"""
