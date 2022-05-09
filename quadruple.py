@@ -23,6 +23,9 @@ class Quadruple:
         quad = Quadruple(self.id, op, left_op, right_op, res)
         return quad
 
+    def fill_quad(self, cont):
+        self.result = cont
+
     def print_quad(self):
         print("[" + str(self.id) + "," + str(self.operator) + "," + str(self.left_operator) + "," + str(self.right_operator) + "," + str(self.result) + "]")
 
