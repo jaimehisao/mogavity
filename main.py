@@ -310,8 +310,8 @@ def p_variable(p):
 
 # <Condicion>
 def p_condicion(p):
-    """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque
-                    |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
+    """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque np_if_2
+                    |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque condicion2"""
     #print('here?2342423')
 
 
@@ -536,6 +536,7 @@ def p_add_operator_plusminus(p):
         left_type = stack_type.pop()
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
+        print(result_type)
         if result_type != -1:
             print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
@@ -546,7 +547,7 @@ def p_add_operator_plusminus(p):
             stackO.push(res[0])
             stack_type.push(res[1])
         else:
-            error("Type mismatch at " + p.lineno())
+            error("Type mismatch at " + str(p.lineno))
 
 
 def p_add_operator_multiplydivide(p):
@@ -680,6 +681,28 @@ def p_change_scope(p):
 
 
 # Verificar el tipo de la variable
+
+def p_np_if_1(p):
+    """np_if_1 : """
+    print("IFIIFIFIFIF")
+    cond = stackO.pop()
+    type_cond = stack_type.pop()
+    # if type_cond then it is a malformed if
+    print(type_cond)
+    if type_cond != "bool":
+        error("Expected type bool")
+    else:
+        new_quad = quad.generate_quad("GOTOF",cond,None, None)
+        stackJumps.push(new_quad.id - 1)
+        quads.append(new_quad)
+
+def p_np_if_2(p):
+    """np_if_2 : """
+    num_quad = stackJumps.pop()
+    # fill_quad
+    tmp_quad = quads[num_quad]
+    tmp_quad.fill_quad(len(quads) + 1)
+    tmp_quad.print_quad()
 
 
 parser = yacc.yacc()

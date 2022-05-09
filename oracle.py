@@ -166,12 +166,12 @@ def convert_number_type_to_string_name(num):
             return "float"
         elif num == 2:
             return "char"
-        elif num == 3:
+        elif num == 4:
             return "bool"
         else:
             error("Resulting type " + str(num) + " not supported!")
 
 
 def use_oracle(left_type, right_type, operand):
-    return convert_string_name_to_number_type(semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][
-            convert_string_name_to_number_operand(operand)])
+    return semantic_oracle[convert_string_name_to_number_type(left_type)][convert_string_name_to_number_type(right_type)][
+            convert_string_name_to_number_operand(operand)]
