@@ -736,7 +736,10 @@ def p_np_if_2(p):
 ####################################
 def p_np_for_1(p):
     """np_for_1 : """
-    stackO.push(id) ####
+    _id = p[-1]
+    stackO.push(_id)
+    if not _id.isdigit():
+        error("For loop requires an Int type variable on line " + "0")
     stack_type.push(type) #####
     # vailidate that tit is numeric, if not break (var we mean)
 
@@ -747,15 +750,15 @@ def p_np_for_2(p):
     """np_for_2 : """
     print("FORRRRRRRRR")
     exp_type = stack_type.pop()
-    if(exp_type != numeric tyoe):
-        error("Type mismatch")
+    if exp_type.isdigit():
+        error("Type mismatch on for statement in line " + "0")  # TODO add line number
     else:
         exp = stackO.pop()
         vControl = stackO.top()
         control_type = stack_type.top()
         result_type = oracle.use_oracle(control_type, exp_type, "=")
         #  Cubo semantico se encarga de errores aqui
-        quad.generate_quad("=", exp, vControl, None) ## Ahi va en none?
+        quad.generate_quad("=", exp, vControl, None) ## TODO Ahi va en none?
 
 
 def p_np_for_3(p):
