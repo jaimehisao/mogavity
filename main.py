@@ -36,6 +36,11 @@ quads = []
 global current_scope
 current_scope = 'global'
 
+vControl = ""
+vFinal = ""
+for_op = ""
+for_updater = 0
+
 tokens = [
     "ID",
     "PLUS",
@@ -362,10 +367,10 @@ def p_cicloFor(p):
     """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque"""
     # print('f')
 
-
+#TODO: update assign diagram
 # <Assign>
 def p_assign(p):
-    """assign   :   ID ASSIGNMENT CTE_INT"""
+    """assign   :   ID ASSIGNMENT exp"""
 
 
 # <Update>
@@ -374,6 +379,16 @@ def p_update(p):
                 |   ID MINUSEQUAL CTE_INT
                 |   ID TIMESEQUAL CTE_INT
                 |   ID DIVIDEEQUAL CTE_INT"""
+    if p[2] == "+=":
+        for_op = "+"
+    elif p[2] == "-=":
+        for_op = "-"
+    elif p[2] == "*=":
+        for_op = "*"
+    else:
+        for_op = "/"
+
+    for_updater = p[3]
 
 
 # <Return>
@@ -744,37 +759,64 @@ def p_np_else(p):
 ####################################
 ######### PUNTOS DEL FOR ###########
 ####################################
-# def p_np_for_1(p):
-#     """np_for_1 : """
-#     stackO.push(id) ####
-#     stack_type.push(type) #####
-#     # vailidate that tit is numeric, if not break (var we mean)
+def p_np_for_1(p):
+    """np_for_1 : """
+    stackO.push(p[-1]) ####
+    id_type = func_table.get_var_type(p[-1], current_scope)
+    # vailidate that tit is numeric, if not break (var we mean)
+    if id_type == "int":
+        stack_type.push(id_type)
+    else:
+        error("Expected type int")
+
+def p_np_for_2(p):
+    """np_for_2 : """
+    exp_type = stack_type.pop()
+    if exp_type != "int" or exp_type != "float":
+        error("Type mismatch")
+    else:
+        exp = stackO.pop()
+        vControl = stackO.top()
+        control_type = stack_type.top()
+        result_type = oracle.use_oracle(control_type, exp_type, "=")
+        #  Cubo semantico se encarga de errores aqui
+        quad.generate_quad("=", exp, None, vControl) ## Ahi va en none?
 
 
-#     print("FORRRRRRRRR")
+def p_np_for_3(p):
+    """np_for_3 : """
+    exp_type = stack_type.pop()
+    if exp_type != "int" or exp_type != "float":
+        error("Type mismatch")
+    else:
+        exp = stackO.pop()
+        new_quad = quad.generate_quad("=", exp, None, vFinal)
+        quads.append(new_quad)
+        tmp_x = temp.get_temp(exp_type)
+        new_quad = quad.generate_quad("<", vControl, vFinal, tmp_x)
+        quads.append(new_quad)
+        stackJumps.push(len(quads) - 1)
+        new_quad = quad.generate_quad("GOTOF", tmp_x, None, None)
+        quads.append(new_quad)
+        stackJumps.push(len(quads) - 1)
 
-# def p_np_for_2(p):
-#     """np_for_2 : """
-#     print("FORRRRRRRRR")
-#     exp_type = stack_type.pop()
-#     if(exp_type != numeric tyoe):
-#         error("Type mismatch")
-#     else:
-#         exp = stackO.pop()
-#         vControl = stackO.top()
-#         control_type = stack_type.top()
-#         result_type = oracle.use_oracle(control_type, exp_type, "=")
-#         #  Cubo semantico se encarga de errores aqui
-#         quad.generate_quad("=", exp, vControl, None) ## Ahi va en none?
 
-
-# def p_np_for_3(p):
-#     """np_for_3 : """
-#     print("FORRRRRRRRR")
-
-# def p_np_for_4(p):
-#     """np_for_4 : """
-#     print("FORRRRRRRRR")
+def p_np_for_4(p):
+    """np_for_4 : """
+    tmp_y = temp.get_temp("float") 
+    new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y)
+    quads.append(new_quad)
+    new_quad = quad.generate_quad("=", tmp_y, None, vControl)
+    quads.append(new_quad)
+    new_quad = quad.generate_quad("=", tmp_y, None, stackO.pop()) #stackO.pop() has to be the original ID
+    quads.append(new_quad)
+    final = stackJumps.pop()
+    ret = stackJumps.pop()
+    new_quad = quad.generate_quad("GOTO", ret, None, None) 
+    quads.append(new_quad)
+    tmp_quad = quads[final]
+    tmp_quad.fill_quad(len(quads) + 1)
+    stack_type.pop()
 
 
 ####################################
