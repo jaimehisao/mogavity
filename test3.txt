@@ -8,6 +8,9 @@ main {
     if (a < b) {
         output -> "b es mayor que a";
     }
+    otherwise {
+        output -> "galo";
+    }
     output -> "hola mundo";
     return 0;
 }
