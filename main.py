@@ -353,7 +353,7 @@ def p_llamada2(p):
 
 # <CicloW>
 def p_cicloW(p):
-    """cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
+    """cicloW   :   WHILE np_while_1 LEFTPARENTHESIS exp RIGHTPARENTHESIS np_while_2 bloque np_while_3"""
     # print('w')
 
 
@@ -542,8 +542,8 @@ def p_add_operator_plusminus(p):
         print(result_type)
         if result_type != -1:
             print("si baila mija con en senor")
-            tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            res = temp.get_temp(tmp_type)
+           # tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(result_type)
             new_quad = quad.generate_quad(op, left_op, right_op, res[0])
             new_quad.print_quad()
             quads.append(new_quad)
@@ -737,7 +737,7 @@ def p_np_else(p):
     stackJumps.push(new_quad.id - 1)
     quads.append(new_quad)
     tmp_quad = quads[false]
-    tmp_quad.fill_quad(len(quads)+1)
+    tmp_quad.fill_quad(len(quads) + 1)
     tmp_quad.print_quad()
 
 
@@ -782,43 +782,39 @@ def p_np_else(p):
 ####################################
 def p_np_while_1(p):
     """np_while_1 : """
-    print("FORRRRRRRRR")
-    stackJumps.push()  # cont
-    exp_type = stack_type.pop()
-    if (exp_type != bool):
-        error("Type Mismatch")
-    else:
-        result = stackO.pop()
-        new_quad = quad.generate_quad("GOTOF", result, None, None) #Pending to fill last
-        # GENERAR GOTO EN FALSO
-        stackJumps.push(new_quad.id - 1)
+    print("WHHHHHIIILLLEEEE")
+    stackJumps.push(len(quads) + 1)  # cont
 
 
 def p_np_while_2(p):
     """np_while_2 : """
-    print("FORRRRRRRRR")
-    stackJumps.push()  # cont
-    exp_type = stack_type.pop()
-    if exp_type != bool:
-        error("Type Mismatch")
+    cond = stackO.pop()
+    type_cond = stack_type.pop()
+    if type_cond != "bool":
+        error("Expected type bool")
     else:
-        result = stackO.pop()
-        new_quad = quad.generate_quad("GOTOF", None, None, result)
+        new_quad = quad.generate_quad("GOTOF", cond, None, None)
         stackJumps.push(new_quad.id - 1)
+        quads.append(new_quad)
 
 
 def p_np_while_3(p):
     """np_while_3 : """
-    end = stackJumps.pop()
+    false = stackJumps.pop()
     ret = stackJumps.pop()
+    print(false)
     new_quad = quad.generate_quad("GOTO", None, None, ret)
-    fill(end, cont)
+    new_quad.print_quad()
+    quads.append(new_quad)
+    tmp_quad = quads[false]
+    tmp_quad.fill_quad(len(quads) + 1)
+    tmp_quad.print_quad()
 
 
 parser = yacc.yacc()
 r = None
 try:
-    f = open("test3.txt", 'r')
+    f = open("test4.txt", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
