@@ -317,7 +317,7 @@ def p_condicion(p):
 
 def p_condicion2(p):
     """condicion2   :   OTHERWISE np_else bloque np_if_2
-                    |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque np_if_2 condicion2"""
+                    |   np_if_2 ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque condicion2"""
     # print('here again')
 
 
