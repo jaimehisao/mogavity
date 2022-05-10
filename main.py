@@ -353,7 +353,7 @@ def p_llamada2(p):
 
 # <CicloW>
 def p_cicloW(p):
-    """cicloW   :   WHILE LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
+    """cicloW   :   WHILE np_while_1 LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
     # print('w')
 
 
@@ -539,7 +539,7 @@ def p_add_operator_plusminus(p):
         left_type = stack_type.pop()
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
-        print(result_type)
+        print("result type" + result_type)
         if result_type != -1:
             print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
@@ -550,7 +550,7 @@ def p_add_operator_plusminus(p):
             stackO.push(res[0])
             stack_type.push(res[1])
         else:
-            error("Type mismatch at " + str(p.lineno))
+            error("Type mismatch at " + str(p.lexer.lineno))
 
 
 def p_add_operator_multiplydivide(p):
@@ -654,7 +654,7 @@ def p_add_operator_or(p):
 #  Neuralgic Point for function detection
 def p_function_detection(p):
     """function_detection :"""
-    func_table.get_function(p[-1], "0")  # str(p.lineno())
+    func_table.get_function(p[-1], str(p.lexer.lineno))
     # Verify function exists
     # Start handling execution
     pass
@@ -713,7 +713,7 @@ def p_np_if_1(p):
     cond = stackO.pop()
     type_cond = stack_type.pop()
     # if type_cond then it is a malformed if
-    print(type_cond)
+    print("here?" + type_cond)
     if type_cond != "bool":
         error("Expected type bool")
     else:
@@ -739,26 +739,28 @@ def p_np_for_1(p):
     _id = p[-1]
     stackO.push(_id)
     if not _id.isdigit():
-        error("For loop requires an Int type variable on line " + "0")
-    stack_type.push(type) #####
+        error("For loop requires an Integer type variable on line " + str(p.lexer.lineno))
+    stack_type.push(func_table.get_var_type(_id, current_scope)) #####
     # vailidate that tit is numeric, if not break (var we mean)
 
 
     print("FORRRRRRRRR")
+
 
 def p_np_for_2(p):
     """np_for_2 : """
     print("FORRRRRRRRR")
     exp_type = stack_type.pop()
     if exp_type.isdigit():
-        error("Type mismatch on for statement in line " + "0")  # TODO add line number
+        error("Type mismatch on for statement in line " + p.lexer.lineno)  # TODO add line number
     else:
         exp = stackO.pop()
         vControl = stackO.top()
         control_type = stack_type.top()
-        result_type = oracle.use_oracle(control_type, exp_type, "=")
+        oracle.use_oracle(control_type, exp_type, "=")  # Assignment leads to nothing as we are just checking for
+        # type errors
         #  Cubo semantico se encarga de errores aqui
-        quad.generate_quad("=", exp, vControl, None) ## TODO Ahi va en none?
+        quad.generate_quad("=", exp, vControl, None)  # TODO Ahi va en none?
 
 
 def p_np_for_3(p):
@@ -775,8 +777,9 @@ def p_np_for_4(p):
 ####################################
 def p_np_while_1(p):
     """np_while_1 : """
-    print("FORRRRRRRRR")
-    stackJumps.push()  # cont
+    print("WHILE")
+    stackJumps.push(cont)  # cont
+    """
     exp_type = stack_type.pop()
     if (exp_type != bool):
         error("Type Mismatch")
@@ -785,6 +788,8 @@ def p_np_while_1(p):
         new_quad = quad.generate_quad("GOTOF", result, None, None) #Pending to fill last
         # GENERAR GOTO EN FALSO
         stackJumps.push(new_quad.id - 1)
+    """
+
 
 
 def p_np_while_2(p):
@@ -802,16 +807,26 @@ def p_np_while_2(p):
 
 def p_np_while_3(p):
     """np_while_3 : """
+    save_stack_object_reference = None
     end = stackJumps.pop()
+    print(end)
     ret = stackJumps.pop()
     new_quad = quad.generate_quad("GOTO", None, None, ret)
     fill(end, cont)
 
 
+# Compute column.
+#     input is the input text string
+#     token is a token instance
+def find_column(input, token):
+    line_start = input.rfind('\n', 0, token.lexpos) + 1
+    return (token.lexpos - line_start) + 1
+
+
 parser = yacc.yacc()
 r = None
 try:
-    f = open("test2.txt", 'r')
+    f = open("test4.txt", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:

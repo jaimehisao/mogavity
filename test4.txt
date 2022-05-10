@@ -1,0 +1,17 @@
+program test;
+
+var Perro dog;
+int perros, gatos, totales;
+
+instr void ejemplo(){
+    while(perros < gatos) {
+        output -> "hola mundo";
+    }
+}
+
+main {
+    ejemplo2();
+    ejemplo2();
+    output -> 1+2,"hola mundo";
+    return 0;
+}

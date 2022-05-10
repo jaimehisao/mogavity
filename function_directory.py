@@ -73,7 +73,8 @@ class FunctionDirectory:
 
     def print_all_variable_tables(self):
         for key, value in self.function_table.items():
-            print(key, ' : ', value.variable_table)
+            pass
+            #print(key, ' : ', value.variable_table)
 
         # TODO cleanup pending on certain functions
 
@@ -122,7 +123,12 @@ class FunctionDirectory:
             elif var_in_global_scope_type is not None:
                 return var_in_global_scope_type
             else:
-                error("Variable " + identifier + " has not been declared")
+                error("Variable " + identifier + " has not been declared previously!")
 
     def add_elements(self, identifier, elem_type):
         self.function_table = {'identifier': identifier, 'type': elem_type}
+
+    def get_function(self, identifier, line_no):
+        if identifier not in self.function_table.keys():
+            error("Function " + identifier + " on line " + line_no + " does not exist!")
+

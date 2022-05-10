@@ -10,7 +10,7 @@ class Perro {
     }
 }
 
-var Perro dog;
+var Perro dog;w
 int perros;
 
 instr void ejemplo() {
