@@ -7,3 +7,6 @@ Para este avance definimos nuestro function directory. Implementamos una clase l
 
 ## Avance #3 Generación de Código para expresiones aritméticas y estatutos secuenciales 01/05/2022
 Para este avance establecimos los quadruplos y las pilas. Pudimos empezar a implementar la generación de código para las expresiones aritméticas, expresiones de operadores relacionales y lógicos. Para los estatuos secuenciales hasta el momento tenemos el de lectura y asignación. 
+
+## Avance #4 Generación de Código para condiciones y ciclos 09/05/2022
+Corregimos errores que nos generaban tanto la tabla de funciones como el cubo semántico. Terminamos de completar la generación de código para las expresiones aritméticas, operadores lógicos y operadores relacionales. Al igual, terminamos de implementar la generación de código para las condiciones y el while. Implementamos el código para el ciclo de for, pero todavía no lo probamos. Aparte, empezamos a dividir la memoria y crear funciones para asignar las variables a memoria. 
