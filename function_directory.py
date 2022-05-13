@@ -1,4 +1,3 @@
-import sys
 import logging
 import memory_manager
 
@@ -56,7 +55,7 @@ class FunctionDirectory:
                                                              'address': None}
 
     def add_variable(self, identifier, scope, _type):
-        logging.info("Added variable with ID " + identifier + " in scope " + scope + " and type " + _type)
+        logging.info("Added variable with ID " + identifier + " in Scope " + scope + " and type " + _type)
         if _type == "int":
             self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
                                                                              self.function_table[
@@ -69,14 +68,16 @@ class FunctionDirectory:
             self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
                                                                              self.function_table[
                                                                                  scope].memory_manager.assign_new_char())
+        #print("x-x-x-x", self.function_table[scope].variable_table[identifier].id,
+              #self.function_table[scope].variable_table[identifier].type,
+              #self.function_table[scope].variable_table[identifier].address)
 
     def print_variable_table(self, current_scope):
         info(str(self.function_table[current_scope].variable_table))
 
     def print_all_variable_tables(self):
         for key, value in self.function_table.items():
-            pass
-            #print(key, ' : ', value.variable_table)
+            print(key, ' : ', value.variable_table)
 
         # TODO cleanup pending on certain functions
 
@@ -106,7 +107,7 @@ class FunctionDirectory:
         var_in_global_scope_type = None
         var_in_local_scope_type = None
         # Check for variable in global scope
-        if scope is not "global":
+        if scope != "global":
             if identifier in self.function_table["global"].variable_table.keys():
                 var_in_global_scope_type = self.function_table["global"].variable_table[identifier].type
             else:
@@ -114,7 +115,7 @@ class FunctionDirectory:
         # Check for variable in local scope
         if identifier in self.function_table[scope].variable_table.keys():
             var_in_local_scope_type = self.function_table[scope].variable_table[identifier].type
-        if scope is "global":
+        if scope == "global":
             return var_in_local_scope_type
         else:
             if var_in_global_scope_type is not None and var_in_local_scope_type is not None:
@@ -134,10 +135,14 @@ class FunctionDirectory:
         if identifier not in self.function_table.keys():
             error("Function " + identifier + " on line " + line_no + " does not exist!")
 
+    def get_variable_address(self, scope, identifier):
+        return self.function_table[scope].variable_table[identifier].address
+
     def get_constant(self, cte_value, scope):
         if cte_value not in self.function_table[scope].constants_table.keys():
             addr = self.function_table[scope].memory_manager.assign_new_constant()
             self.function_table[scope].constants_table[cte_value] = addr
+            return addr
         else:
             return self.function_table[scope].constants_table[cte_value]
             #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)

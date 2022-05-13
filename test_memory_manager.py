@@ -28,10 +28,10 @@ def test_assign_new_temp():
 
 
 def test_get_variable_from_address():
-    assert memory_manager.get_variable_from_address(10000) == "int"
-    assert memory_manager.get_variable_from_address(20000) == "float"
-    assert memory_manager.get_variable_from_address(30000) == "char"
-    assert memory_manager.get_variable_from_address(40000) == "temp"
+    assert memory_manager.get_variable_type_from_address(10000) == "int"
+    assert memory_manager.get_variable_type_from_address(20000) == "float"
+    assert memory_manager.get_variable_type_from_address(30000) == "char"
+    assert memory_manager.get_variable_type_from_address(40000) == "temp"
 
 
 def test_get_variable_size_from_scope():

@@ -86,7 +86,7 @@ class MemoryManager:
             return assigned
         error("Too much Constants, please optimize your operations!")
 
-    def get_variable_from_address(self, address):
+    def get_variable_type_from_address(self, address):
         if STARTING_ADDRESS <= address <= self.MAX_INTS:
             return "int"
         elif self.MAX_INTS + 1 <= address <= self.MAX_FLOATS:

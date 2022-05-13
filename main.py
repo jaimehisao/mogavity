@@ -31,6 +31,8 @@ stackO = Stack()
 stack_type = Stack()
 stackJumps = Stack()
 
+memory = Stack()
+
 quads = []
 
 global current_scope
@@ -300,7 +302,7 @@ def p_asignacion(p):
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     new_quad = quad.generate_quad('=', exp, None, p[1])
-    new_quad.print_quad()
+    #new_quad.print_quad()
     quads.append(new_quad)
 
 
@@ -467,9 +469,9 @@ def p_expMD(p):
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
-                |   CTE_INT save_id
-                |   CTE_FLOAT save_id
-                |   CTE_CHAR save_id
+                |   CTE_INT save_constant
+                |   CTE_FLOAT save_constant
+                |   CTE_CHAR save_constant
                 |   variable save_id
                 |   llamada'''
     pass
@@ -508,7 +510,7 @@ def p_save_program(p):
 def p_new_variable(p):
     """new_variable : """
     func_table.add_variable(p[-1], current_scope, tmp_type)
-    func_table.print_all_variable_tables()
+    #func_table.print_all_variable_tables()
 
 
 def p_new_variable_set_type(p):
@@ -527,13 +529,21 @@ def p_new_function(p):
 
 def p_save_id(p):
     """save_id :"""
-    stackO.push(p[-1])
+    #func_table.function_table[current_scope].
+    address = func_table.get_variable_address(current_scope, p[-1])
+    stackO.push(address)
+    var_type = func_table.get_var_type(p[-1], current_scope)
+    stack_type.push(var_type)
+    # TODO: check for float
+
+
+def p_save_constant(p):
+    """save_constant : """
+    addr = func_table.get_constant(p[-1], current_scope)
+    stackO.push(addr)
     if p[-1].isdigit():
         stack_type.push("int")
-    else:
-        var_type = func_table.get_var_type(p[-1], current_scope)
-        stack_type.push(var_type)
-    # TODO: check for float
+    #  TODO CHECK THIS LOGIC, need to add options for other types
 
 
 def p_save_op(p):
@@ -553,13 +563,12 @@ def p_add_operator_plusminus(p):
         left_type = stack_type.pop()
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
-        print("result type" + result_type)
         if result_type != -1:
-            print("si baila mija con en senor")
-           # tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            # tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(result_type)
-            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
-            new_quad.print_quad()
+            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, temporal)
+            #new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(res[0])
             stack_type.push(res[1])
@@ -581,10 +590,10 @@ def p_add_operator_multiplydivide(p):
         #  print(right_op, right_type, left_op, left_type, op)
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
-            print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(tmp_type)
-            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(res[0])
@@ -605,10 +614,10 @@ def p_add_operator_loop(p):
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
-            print("si baila mija con en senor")
             #tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(result_type)
-            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(res[0])
@@ -629,10 +638,10 @@ def p_add_operator_and(p):
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
-            print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(tmp_type)
-            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
+            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(res[0])
@@ -653,11 +662,11 @@ def p_add_operator_or(p):
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
-            print("si baila mija con en senor")
             tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(tmp_type)
-            new_quad = quad.generate_quad(op, left_op, right_op, res[0])
-            new_quad.print_quad()
+            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            new_quad = quad.generate_quad(op, left_op, right_op, temporal)
+            #new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(res[0])
             stack_type.push(res[1])
@@ -676,23 +685,19 @@ def p_function_detection(p):
 
 def p_generate_write_quad(p):
     """generate_write_quad :"""
-    print("WRTIE ESCRIBIRRRR FASFDSAD")
-    print(p[-1])
     # When it is a string we can directly generate the quad
     if isinstance(p[-1], str):
-        print("ENTER STRING")
         new_quad = quad.generate_quad("OUTPUT", None, None, p[-1])
-        new_quad.print_quad()
+        #new_quad.print_quad()
         quads.append(new_quad)
     # If it is not a string, then it is an exp and we should already have it in stackO, remebering that it is a temporal
     else:
-        print("ENTER EXPPPP")
         res = stackO.pop()
         # We don't really need the type, do we?
         stack_type.pop()
         # We generate the quad
         new_quad = quad.generate_quad("OUTPUT", None, None, res)
-        new_quad.print_quad()
+        #new_quad.print_quad()
         quads.append(new_quad)
 
 
@@ -723,11 +728,9 @@ def p_change_scope(p):
 ####################################
 def p_np_if_1(p):
     """np_if_1 : """
-    print("IFIIFIFIFIF")
     cond = stackO.pop()
     type_cond = stack_type.pop()
     # if type_cond then it is a malformed if
-    print("here?" + type_cond)
     if type_cond != "bool":
         error("Expected type bool")
     else:
@@ -742,7 +745,8 @@ def p_np_if_2(p):
     # fill_quad
     tmp_quad = quads[num_quad]
     tmp_quad.fill_quad(len(quads) + 1)
-    tmp_quad.print_quad()
+    #tmp_quad.print_quad()
+
 
 def p_np_else(p):
     """np_else : """
@@ -752,7 +756,7 @@ def p_np_else(p):
     quads.append(new_quad)
     tmp_quad = quads[false]
     tmp_quad.fill_quad(len(quads) + 1)
-    tmp_quad.print_quad()
+    #tmp_quad.print_quad()
 
 
 ####################################
@@ -768,6 +772,7 @@ def p_np_for_1(p):
     else:
         error("Expected type int")
 
+
 def p_np_for_2(p):
     """np_for_2 : """
     exp_type = stack_type.pop()
@@ -777,7 +782,7 @@ def p_np_for_2(p):
         exp = stackO.pop()
         vControl = stackO.top()
         control_type = stack_type.top()
-        result_type = oracle.use_oracle(control_type, exp_type, "=")
+        _ = oracle.use_oracle(control_type, exp_type, "=")
         #  Cubo semantico se encarga de errores aqui
         quad.generate_quad("=", exp, None, vControl) ## Ahi va en none?
 
@@ -791,7 +796,7 @@ def p_np_for_3(p):
         exp = stackO.pop()
         new_quad = quad.generate_quad("=", exp, None, vFinal)
         quads.append(new_quad)
-        tmp_x = temp.get_temp(exp_type)
+        tmp_x = temp.get_temp(exp_type) ## TODO en este casoi tienen que ser los mismos temps?
         new_quad = quad.generate_quad("<", vControl, vFinal, tmp_x)
         quads.append(new_quad)
         stackJumps.push(len(quads) - 1)
@@ -816,7 +821,6 @@ def p_np_for_4(p):
     tmp_quad = quads[final]
     tmp_quad.fill_quad(len(quads) + 1)
     stack_type.pop()
->>>>>>> 25e22bbc852a160dba76a3d92db145df8b75c16e
 
 
 ####################################
@@ -834,7 +838,7 @@ def p_np_while_1(p):
         # GENERAR GOTO EN FALSO
         stackJumps.push(new_quad.id - 1)
     """
-    print("WHHHHHIIILLLEEEE")
+    #print("WHHHHHIIILLLEEEE")
     stackJumps.push(len(quads) + 1)  # cont
 
 
@@ -854,13 +858,13 @@ def p_np_while_3(p):
     """np_while_3 : """
     false = stackJumps.pop()
     ret = stackJumps.pop()
-    print(false)
+    #print(false)
     new_quad = quad.generate_quad("GOTO", None, None, ret)
-    new_quad.print_quad()
+    #new_quad.print_quad()
     quads.append(new_quad)
     tmp_quad = quads[false]
     tmp_quad.fill_quad(len(quads) + 1)
-    tmp_quad.print_quad()
+    #tmp_quad.print_quad()
 
 
 # Compute column.
@@ -883,7 +887,8 @@ except FileNotFoundError:
 parser.parse(r)
 # parser.parse(r, debug=1)
 print("Código Aceptado")
-#print(func_table.function_table)
+for quad in quads:
+    quad.print_quad()
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
