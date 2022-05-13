@@ -35,4 +35,4 @@ def test_get_variable_from_address():
 
 
 def test_get_variable_size_from_scope():
-    assert memory_manager.get_variable_size_for_scope() == (1, 1, 1)
+    assert memory_manager.get_variable_size_for_scope() == (1, 1, 1, 1, 0)
