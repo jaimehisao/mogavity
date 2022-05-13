@@ -1,12 +1,15 @@
 """
-WE ARE GOING TO SET UP AN ARBITRARY LIMIT OF 10K VARIABLES PER TYPE
+memory_manager.py - Mogavity's Memory Manager
+Hisao Yesaki and Clarissa Velasquez
 
+WE ARE GOING TO SET UP AN ARBITRARY LIMIT OF 10K VARIABLES PER TYPE
 -----------------------------
 -- INTS -- FLOATS -- CHARS --
 -----------------------------
 
 """
-import sys, logging
+import sys
+import logging
 from error_handling import error, info, warning
 logging.basicConfig(level=logging.DEBUG)
 
@@ -85,4 +88,14 @@ class MemoryManager:
             return "temp"
         else:
             error("Given address does not match any address type interval.")
+
+    def get_variable_size_for_scope(self):
+        """
+        Our intermediate code generator needs the number of variables to calculate storage requirements.
+        :return: Number of Integer, Float and Char Variables for the current scope.
+        """
+        number_of_int_variables = self.assigned_ints - STARTING_ADDRESS
+        number_of_float_variables = self.assigned_floats - (self.MAX_INTS + 1)
+        number_of_char_variables = self.assigned_chars - (self.MAX_FLOATS + 1)
+        return number_of_int_variables, number_of_float_variables, number_of_char_variables
 
