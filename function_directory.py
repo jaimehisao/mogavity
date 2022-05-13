@@ -9,10 +9,12 @@ class Function:
     id: str
     return_type: str
     variable_table = {}
+    constants_table = {}
     memory_manager = memory_manager.MemoryManager
 
     def __init__(self, _id, return_type):
         self.variable_table = {}
+        self.constants_table = {}
         self.id = _id
         self.return_type = return_type
         self.memory_manager = memory_manager.MemoryManager()
@@ -132,3 +134,10 @@ class FunctionDirectory:
         if identifier not in self.function_table.keys():
             error("Function " + identifier + " on line " + line_no + " does not exist!")
 
+    def get_constant(self, cte_value, scope):
+        if cte_value not in self.function_table[scope].constants_table.keys():
+            addr = self.function_table[scope].memory_manager.assign_new_constant()
+            self.function_table[scope].constants_table[cte_value] = addr
+        else:
+            return self.function_table[scope].constants_table[cte_value]
+            #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)
