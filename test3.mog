@@ -8,6 +8,12 @@ main {
     if (a < b) {
         output -> "b es mayor que a";
     }
+    elif (b < a) {
+        output -> "error";
+    }
+    otherwise {
+        output -> "galo";
+    }
     output -> "hola mundo";
     return 0;
 }

@@ -316,8 +316,8 @@ def p_condicion(p):
 
 
 def p_condicion2(p):
-    """condicion2   :   OTHERWISE bloque
-                    |   ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque condicion2"""
+    """condicion2   :   OTHERWISE np_else bloque np_if_2
+                    |   np_if_2 ELIF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque condicion2"""
     # print('here again')
 
 
@@ -353,8 +353,7 @@ def p_llamada2(p):
 
 # <CicloW>
 def p_cicloW(p):
-    """cicloW   :   WHILE np_while_1 LEFTPARENTHESIS exp RIGHTPARENTHESIS bloque"""
-    # print('w')
+    """cicloW   :   WHILE np_while_1 LEFTPARENTHESIS exp RIGHTPARENTHESIS np_while_2 bloque np_while_3"""
 
 
 # <CicloFor>
@@ -542,8 +541,8 @@ def p_add_operator_plusminus(p):
         print("result type" + result_type)
         if result_type != -1:
             print("si baila mija con en senor")
-            tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            res = temp.get_temp(tmp_type)
+           # tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(result_type)
             new_quad = quad.generate_quad(op, left_op, right_op, res[0])
             new_quad.print_quad()
             quads.append(new_quad)
@@ -592,8 +591,8 @@ def p_add_operator_loop(p):
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             print("si baila mija con en senor")
-            tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            res = temp.get_temp(tmp_type)
+            #tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(result_type)
             new_quad = quad.generate_quad(op, left_op, right_op, res[0])
             new_quad.print_quad()
             quads.append(new_quad)
@@ -730,6 +729,16 @@ def p_np_if_2(p):
     tmp_quad.fill_quad(len(quads) + 1)
     tmp_quad.print_quad()
 
+def p_np_else(p):
+    """np_else : """
+    false = stackJumps.pop()
+    new_quad = quad.generate_quad("GOTO", None, None, None)
+    stackJumps.push(new_quad.id - 1)
+    quads.append(new_quad)
+    tmp_quad = quads[false]
+    tmp_quad.fill_quad(len(quads) + 1)
+    tmp_quad.print_quad()
+
 
 ####################################
 ######### PUNTOS DEL FOR ###########
@@ -742,10 +751,11 @@ def p_np_for_1(p):
         error("For loop requires an Integer type variable on line " + str(p.lexer.lineno))
     stack_type.push(func_table.get_var_type(_id, current_scope)) #####
     # vailidate that tit is numeric, if not break (var we mean)
-
-
-    print("FORRRRRRRRR")
-
+# def p_np_for_1(p):
+#     """np_for_1 : """
+#     stackO.push(id) ####
+#     stack_type.push(type) #####
+#     # vailidate that tit is numeric, if not break (var we mean)
 
 def p_np_for_2(p):
     """np_for_2 : """
@@ -763,13 +773,13 @@ def p_np_for_2(p):
         quad.generate_quad("=", exp, vControl, None)  # TODO Ahi va en none?
 
 
-def p_np_for_3(p):
-    """np_for_3 : """
-    print("FORRRRRRRRR")
+# def p_np_for_3(p):
+#     """np_for_3 : """
+#     print("FORRRRRRRRR")
 
-def p_np_for_4(p):
-    """np_for_4 : """
-    print("FORRRRRRRRR")
+# def p_np_for_4(p):
+#     """np_for_4 : """
+#     print("FORRRRRRRRR")
 
 
 ####################################
@@ -777,8 +787,6 @@ def p_np_for_4(p):
 ####################################
 def p_np_while_1(p):
     """np_while_1 : """
-    print("WHILE")
-    stackJumps.push(cont)  # cont
     """
     exp_type = stack_type.pop()
     if (exp_type != bool):
@@ -789,30 +797,33 @@ def p_np_while_1(p):
         # GENERAR GOTO EN FALSO
         stackJumps.push(new_quad.id - 1)
     """
-
+    print("WHHHHHIIILLLEEEE")
+    stackJumps.push(len(quads) + 1)  # cont
 
 
 def p_np_while_2(p):
     """np_while_2 : """
-    print("FORRRRRRRRR")
-    stackJumps.push()  # cont
-    exp_type = stack_type.pop()
-    if exp_type != bool:
-        error("Type Mismatch")
+    cond = stackO.pop()
+    type_cond = stack_type.pop()
+    if type_cond != "bool":
+        error("Expected type bool")
     else:
-        result = stackO.pop()
-        new_quad = quad.generate_quad("GOTOF", None, None, result)
+        new_quad = quad.generate_quad("GOTOF", cond, None, None)
         stackJumps.push(new_quad.id - 1)
+        quads.append(new_quad)
 
 
 def p_np_while_3(p):
     """np_while_3 : """
-    save_stack_object_reference = None
-    end = stackJumps.pop()
-    print(end)
+    false = stackJumps.pop()
     ret = stackJumps.pop()
+    print(false)
     new_quad = quad.generate_quad("GOTO", None, None, ret)
-    fill(end, cont)
+    new_quad.print_quad()
+    quads.append(new_quad)
+    tmp_quad = quads[false]
+    tmp_quad.fill_quad(len(quads) + 1)
+    tmp_quad.print_quad()
 
 
 # Compute column.
@@ -826,7 +837,7 @@ def find_column(input, token):
 parser = yacc.yacc()
 r = None
 try:
-    f = open("test4.txt", 'r')
+    f = open("test4.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
