@@ -509,7 +509,7 @@ def p_save_program(p):
 # Agregar Variable en Tabla
 def p_new_variable(p):
     """new_variable : """
-    func_table.add_variable(p[-1], current_scope, tmp_type)
+    func_table.function_table[current_scope].add_variable(p[-1], tmp_type)
     #func_table.print_all_variable_tables()
 
 

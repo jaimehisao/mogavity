@@ -18,6 +18,37 @@ class Function:
         self.return_type = return_type
         self.memory_manager = memory_manager.MemoryManager()
 
+    def add_variable(self, identifier, _type):
+        logging.info(
+            "Added variable with ID "
+            + identifier
+            + " in Scope "
+            + self.id
+            + " and type "
+            + _type
+        )
+        if _type == "int":
+            self.variable_table[identifier] = Variable(
+                identifier, _type, self.memory_manager.assign_new_int_address()
+            )
+        elif _type == "float":
+            self.variable_table[identifier] = Variable(
+                identifier, _type, self.memory_manager.assign_new_float()
+            )
+        elif _type == "char":
+            self.variable_table[identifier] = Variable(
+                identifier, _type, self.memory_manager.assign_new_char()
+            )
+
+    def get_constant(self, cte_value):
+        if cte_value not in self.constants_table.keys():
+            addr = self.memory_manager.assign_new_constant()
+            self.constants_table[cte_value] = addr
+            return addr
+        else:
+            return self.constants_table[cte_value]
+            #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)
+
 
 class Variable:
     id: str
@@ -43,41 +74,30 @@ class FunctionDirectory:
         Add new function scope to the Function Table
         """
         if identifier in self.function_table.keys():
-            logging.error('Function ' + identifier + ' already exists!')  # Might be redundant but important in case
+            logging.error(
+                "Function " + identifier + " already exists!"
+            )  # Might be redundant but important in case
             # we export the logs to a file
-            error('Function ' + identifier + ' already exists!')
+            error("Function " + identifier + " already exists!")
         else:
             self.function_table[identifier] = Function(identifier, return_type)
             logging.info("Scope " + identifier + " created!")
 
     def add_global_variable(self, identifier, data_type):
-        self.function_table['global']['vars'][identifier] = {'data_type': data_type,
-                                                             'address': None}
-
-    def add_variable(self, identifier, scope, _type):
-        logging.info("Added variable with ID " + identifier + " in Scope " + scope + " and type " + _type)
-        if _type == "int":
-            self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
-                                                                             self.function_table[
-                                                                                 scope].memory_manager.assign_new_int_address())
-        elif _type == "float":
-            self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
-                                                                             self.function_table[
-                                                                                 scope].memory_manager.assign_new_float())
-        elif _type == "char":
-            self.function_table[scope].variable_table[identifier] = Variable(identifier, _type,
-                                                                             self.function_table[
-                                                                                 scope].memory_manager.assign_new_char())
-        #print("x-x-x-x", self.function_table[scope].variable_table[identifier].id,
-              #self.function_table[scope].variable_table[identifier].type,
-              #self.function_table[scope].variable_table[identifier].address)
+        self.function_table["global"]["vars"][identifier] = {
+            "data_type": data_type,
+            "address": None,
+        }
+        # print("x-x-x-x", self.function_table[scope].variable_table[identifier].id,
+        # self.function_table[scope].variable_table[identifier].type,
+        # self.function_table[scope].variable_table[identifier].address)
 
     def print_variable_table(self, current_scope):
         info(str(self.function_table[current_scope].variable_table))
 
     def print_all_variable_tables(self):
         for key, value in self.function_table.items():
-            print(key, ' : ', value.variable_table)
+            print(key, " : ", value.variable_table)
 
         # TODO cleanup pending on certain functions
 
@@ -109,16 +129,23 @@ class FunctionDirectory:
         # Check for variable in global scope
         if scope != "global":
             if identifier in self.function_table["global"].variable_table.keys():
-                var_in_global_scope_type = self.function_table["global"].variable_table[identifier].type
+                var_in_global_scope_type = (
+                    self.function_table["global"].variable_table[identifier].type
+                )
             else:
                 info("Var " + identifier + " is not in global scope!")
         # Check for variable in local scope
         if identifier in self.function_table[scope].variable_table.keys():
-            var_in_local_scope_type = self.function_table[scope].variable_table[identifier].type
+            var_in_local_scope_type = (
+                self.function_table[scope].variable_table[identifier].type
+            )
         if scope == "global":
             return var_in_local_scope_type
         else:
-            if var_in_global_scope_type is not None and var_in_local_scope_type is not None:
+            if (
+                var_in_global_scope_type is not None
+                and var_in_local_scope_type is not None
+            ):
                 warning("Variable " + identifier + " exists in global scope")
                 return var_in_local_scope_type  # Local Scope maintains preference over global scope
             elif var_in_local_scope_type is not None:
@@ -129,7 +156,7 @@ class FunctionDirectory:
                 error("Variable " + identifier + " has not been declared previously!")
 
     def add_elements(self, identifier, elem_type):
-        self.function_table = {'identifier': identifier, 'type': elem_type}
+        self.function_table = {"identifier": identifier, "type": elem_type}
 
     def get_function(self, identifier, line_no):
         if identifier not in self.function_table.keys():
@@ -137,6 +164,7 @@ class FunctionDirectory:
 
     def get_variable_address(self, scope, identifier):
         return self.function_table[scope].variable_table[identifier].address
+    #  TODO move to Function class
 
     def get_constant(self, cte_value, scope):
         if cte_value not in self.function_table[scope].constants_table.keys():
