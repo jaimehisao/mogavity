@@ -106,7 +106,8 @@ t_RIGHTBRACKET = r'\]'
 t_CTE_STRING = r'"([^\\"\n]+|\\.)*"'
 t_CTE_FLOAT = r'[+-]?[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
 t_CTE_INT = r'[0-9]+'
-t_CTE_CHAR = r'[a-zA-Z0-9]'
+# t_CTE_CHAR = r'[a-zA-Z0-9]'
+t_CTE_CHAR = r'[a-zA]'
 t_DOT = r'\.'
 t_SEMICOLON = r';'
 t_COLON = r':'
@@ -877,7 +878,7 @@ def find_column(input, token):
     return (token.lexpos - line_start) + 1
 
 
-parser = yacc.yacc()
+parser = yacc.yacc(debug=True)
 r = None
 try:
     f = open("test5.mog", 'r')
@@ -886,11 +887,12 @@ try:
 except FileNotFoundError:
     error("No hay archivo para probar")
 
-parser.parse(r)
+parser.parse(r, debug=True)
 # parser.parse(r, debug=1)
 print("Código Aceptado")
 for quad in quads:
     quad.print_quad()
+
 
 def dump(obj):
     if hasattr(obj, '__dict__'):
