@@ -4,7 +4,7 @@ Created by Clarissa V, and Hisao Y
 March 2022
 Usage for the Compiler´s Design Course
 """
-from xmlrpc.client import Boolean
+import json
 import ply.yacc as yacc
 import ply.lex as lex
 import logging
@@ -14,6 +14,8 @@ from quadruple import Quadruple
 from temporal import Temporal
 from Stack import Stack
 import oracle
+
+import pickle
 
 from error_handling import info, error, warning
 
@@ -137,7 +139,6 @@ reserved = {
 }
 
 tokens = tokens + list(reserved.values())
-
 
 def t_ID(t):
     r"[a-zA-Z]+(_?[a-zA-Z0-9]+)*"
@@ -889,6 +890,24 @@ parser.parse(r)
 print("Código Aceptado")
 for quad in quads:
     quad.print_quad()
+
+def dump(obj):
+    if hasattr(obj, '__dict__'):
+        return vars(obj)
+    else:
+        return {attr: getattr(obj, attr, None) for attr in obj.__slots__}
+
+#print(vars(func_table.function_table))
+
+
+#with open("test.avity", 'w') as file:
+   # objs = {
+        #'function_directory': vars(func_table),
+       # 'quadruples': vars(quads)
+   # }
+   # file.write(str(objs))
+    #pickle.dump(str(objs), file, protocol=None, *, fix_imports=True)
+
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
