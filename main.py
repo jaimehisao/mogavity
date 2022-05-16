@@ -377,10 +377,11 @@ def p_assign(p):
 
 # <Update>
 def p_update(p):
-    """update   :   ID PLUSEQUAL CTE_INT
+    """update   :   ID PLUSEQUAL CTE_INT 
                 |   ID MINUSEQUAL CTE_INT
                 |   ID TIMESEQUAL CTE_INT
                 |   ID DIVIDEEQUAL CTE_INT"""
+    print("HOLAASD")
     if p[2] == "+=":
         for_op = "+"
     elif p[2] == "-=":
@@ -879,7 +880,7 @@ def find_column(input, token):
 parser = yacc.yacc()
 r = None
 try:
-    f = open("test4.mog", 'r')
+    f = open("test5.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:

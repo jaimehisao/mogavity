@@ -1,0 +1,11 @@
+program test;
+
+var int a, b;
+
+main {
+    b = 6;
+    for (a = 0; a < b; a += 2) {
+        output -> "STEVIE";
+    }
+    return 0;
+}
