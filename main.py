@@ -21,7 +21,7 @@ from error_handling import info, error, warning
 
 from pprint import pprint
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 # class_table = class_directory.ClassTable()
 func_table = FunctionDirectory()
@@ -367,13 +367,13 @@ def p_cicloW(p):
 
 # <CicloFor>
 def p_cicloFor(p):
-    """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update RIGHTPARENTHESIS bloque"""
+    """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4"""
     # print('f')
 
 #TODO: update assign diagram
 # <Assign>
 def p_assign(p):
-    """assign   :   ID ASSIGNMENT exp"""
+    """assign   :   ID np_for_1 ASSIGNMENT exp np_for_2"""
 
 
 # <Update>
@@ -382,7 +382,8 @@ def p_update(p):
                 |   ID MINUSEQUAL CTE_INT
                 |   ID TIMESEQUAL CTE_INT
                 |   ID DIVIDEEQUAL CTE_INT"""
-    print("HOLAASD")
+    global for_op
+    global for_updater
     if p[2] == "+=":
         for_op = "+"
     elif p[2] == "-=":
@@ -778,8 +779,9 @@ def p_np_for_1(p):
 
 def p_np_for_2(p):
     """np_for_2 : """
+    global vControl
     exp_type = stack_type.pop()
-    if exp_type != "int" or exp_type != "float":
+    if exp_type != "int":
         error("Type mismatch")
     else:
         exp = stackO.pop()
@@ -787,39 +789,43 @@ def p_np_for_2(p):
         control_type = stack_type.top()
         _ = oracle.use_oracle(control_type, exp_type, "=")
         #  Cubo semantico se encarga de errores aqui
-        quad.generate_quad("=", exp, None, vControl) ## Ahi va en none?
+        new_quad = quad.generate_quad("=", exp, None, vControl) ## Ahi va en none?
+        quads.append(new_quad)
 
 
 def p_np_for_3(p):
     """np_for_3 : """
     exp_type = stack_type.pop()
-    if exp_type != "int" or exp_type != "float":
+    print(exp_type)
+    if exp_type != "int":
         error("Type mismatch")
     else:
         exp = stackO.pop()
-        new_quad = quad.generate_quad("=", exp, None, vFinal)
+        vFinal = temp.get_temp(exp_type)
+        new_quad = quad.generate_quad("=", exp, None, vFinal[0])
         quads.append(new_quad)
-        tmp_x = temp.get_temp(exp_type) ## TODO en este casoi tienen que ser los mismos temps?
-        new_quad = quad.generate_quad("<", vControl, vFinal, tmp_x)
+        tmp_x = temp.get_temp("bool") ## TODO en este casoi tienen que ser los mismos temps?
+        new_quad = quad.generate_quad("<", vControl, vFinal[0], tmp_x[0])
         quads.append(new_quad)
-        stackJumps.push(len(quads) - 1)
-        new_quad = quad.generate_quad("GOTOF", tmp_x, None, None)
+        stackJumps.push(len(quads))
+        new_quad = quad.generate_quad("GOTOF", tmp_x[0], None, None)
         quads.append(new_quad)
-        stackJumps.push(len(quads) - 1)
+        stackJumps.push(len(quads)- 1)
 
 
 def p_np_for_4(p):
     """np_for_4 : """
-    tmp_y = temp.get_temp("float") 
-    new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y)
+    tmp_y = temp.get_temp("int") 
+    new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y[0])
     quads.append(new_quad)
-    new_quad = quad.generate_quad("=", tmp_y, None, vControl)
+    # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
+    new_quad = quad.generate_quad("=", tmp_y[0], None, vControl)
     quads.append(new_quad)
-    new_quad = quad.generate_quad("=", tmp_y, None, stackO.pop()) #stackO.pop() has to be the original ID
+    new_quad = quad.generate_quad("=", tmp_y[0], None, stackO.pop()) #stackO.pop() has to be the original ID
     quads.append(new_quad)
     final = stackJumps.pop()
     ret = stackJumps.pop()
-    new_quad = quad.generate_quad("GOTO", ret, None, None) 
+    new_quad = quad.generate_quad("GOTO", None, None, ret) 
     quads.append(new_quad)
     tmp_quad = quads[final]
     tmp_quad.fill_quad(len(quads) + 1)
@@ -878,7 +884,7 @@ def find_column(input, token):
     return (token.lexpos - line_start) + 1
 
 
-parser = yacc.yacc(debug=True)
+parser = yacc.yacc()
 r = None
 try:
     f = open("test5.mog", 'r')
@@ -887,7 +893,7 @@ try:
 except FileNotFoundError:
     error("No hay archivo para probar")
 
-parser.parse(r, debug=True)
+parser.parse(r)
 # parser.parse(r, debug=1)
 print("Código Aceptado")
 for quad in quads:
