@@ -167,12 +167,12 @@ lexer = lex.lex()
 
 # <PROGRAMA>
 def p_programa(p):
-    """programa : PROGRAM new_program ID save_program SEMICOLON class vars instr MAIN np_main bloque
-    | PROGRAM new_program ID save_program SEMICOLON class instr MAIN np_main bloque
-    | PROGRAM new_program ID save_program SEMICOLON vars instr MAIN np_main bloque
-    | PROGRAM new_program ID save_program SEMICOLON vars MAIN np_main bloque
-    | PROGRAM new_program ID save_program SEMICOLON instr MAIN np_main bloque
-    | PROGRAM new_program ID save_program SEMICOLON MAIN np_main bloque
+    """programa : PROGRAM new_program ID save_program SEMICOLON class vars instr MAIN np_main bloque np_end_func
+    | PROGRAM new_program ID save_program SEMICOLON class instr MAIN np_main bloque np_end_func
+    | PROGRAM new_program ID save_program SEMICOLON vars instr MAIN np_main bloque np_end_func
+    | PROGRAM new_program ID save_program SEMICOLON vars MAIN np_main bloque np_end_func
+    | PROGRAM new_program ID save_program SEMICOLON instr MAIN np_main bloque np_end_func
+    | PROGRAM new_program ID save_program SEMICOLON MAIN np_main bloque np_end_func
     """
     # print('here xd')
 
@@ -241,8 +241,8 @@ def p_tipoSimple(p):
 # TODO: Volver a agregar instr2 cuando resolvamos el bug
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
-    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque np_end_func
+    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque np_end_func
     """
 
 
@@ -511,11 +511,15 @@ def p_save_program(p):
 
 # Generar el quad del main
 def p_np_main(p):
-    """np_main:"""
+    """np_main : """
     new_quad = quad.generate_quad("GOTO", None, None, None)
     quads.append(new_quad)
     stackJumps.push(new_quad.id)
 
+def p_np_end_func(p):
+    """np_end_func : """
+    new_quad = quad.generate_quad("ENDFUNC", None, None, None)
+    quads.append(new_quad)
 
 # Agregar Variable en Tabla
 def p_new_variable(p):
