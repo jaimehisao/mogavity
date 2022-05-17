@@ -167,12 +167,12 @@ lexer = lex.lex()
 
 # <PROGRAMA>
 def p_programa(p):
-    """programa : PROGRAM new_program ID save_program SEMICOLON class vars instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON class instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON vars instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON vars MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON MAIN bloque
+    """programa : PROGRAM new_program ID save_program SEMICOLON class vars instr MAIN np_main bloque
+    | PROGRAM new_program ID save_program SEMICOLON class instr MAIN np_main bloque
+    | PROGRAM new_program ID save_program SEMICOLON vars instr MAIN np_main bloque
+    | PROGRAM new_program ID save_program SEMICOLON vars MAIN np_main bloque
+    | PROGRAM new_program ID save_program SEMICOLON instr MAIN np_main bloque
+    | PROGRAM new_program ID save_program SEMICOLON MAIN np_main bloque
     """
     # print('here xd')
 
@@ -509,6 +509,13 @@ def p_save_program(p):
     print()
     # func_table.add_elements(p[-1], "program")
 
+# Generar el quad del main
+def p_np_main(p):
+    """np_main:"""
+    new_quad = quad.generate_quad("GOTO", None, None, None)
+    quads.append(new_quad)
+    stackJumps.push(new_quad.id)
+
 
 # Agregar Variable en Tabla
 def p_new_variable(p):
@@ -796,7 +803,6 @@ def p_np_for_2(p):
 def p_np_for_3(p):
     """np_for_3 : """
     exp_type = stack_type.pop()
-    print(exp_type)
     if exp_type != "int":
         error("Type mismatch")
     else:
