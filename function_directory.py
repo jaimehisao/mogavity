@@ -9,6 +9,9 @@ class Function:
     return_type: str
     variable_table = {}
     constants_table = {}
+    params = []   # We only need the amount of params, their type and their order
+    resources_size = {} # Dict to store the resources needed to calculate the workspace required
+    initial_address: str
     memory_manager = memory_manager.MemoryManager
 
     def __init__(self, _id, return_type):
@@ -174,3 +177,30 @@ class FunctionDirectory:
         else:
             return self.function_table[scope].constants_table[cte_value]
             #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)
+
+    # We add the type of parameter into our Params list
+    def add_param(self, scope, type):
+        self.function_table[scope].params.append(type)
+
+    # Set the amount of params defined
+    def set_params(self, scope, params):
+        if params == len(self.function_table[scope].params):
+            self.function_table[scope].resources_size["params"] = len(self.function_table[scope].params)
+        else:
+            error("Incorrect number of params")
+
+    # Set the amount of local variables defined
+    def set_vars(self, scope):
+        self.function_table[scope].resources_size["vars"] = len(self.function_table[scope].variable_table)
+
+    # Set the amount of temporals used
+    def set_temporals(self, scope, temporals):
+        self.function_table[scope].resources_size["temporals"] = temporals
+
+    # Set the initial address (current quad)
+    def set_initial_address(self, scope, quad_id):
+        self.function_table[scope].initial_address = quad_id
+
+    # Deletes the local var table
+    def release_var_table(self, scope):
+        self.function_table[scope].variable_table.clear()

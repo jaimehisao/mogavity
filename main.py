@@ -37,8 +37,10 @@ memory = Stack()
 
 quads = []
 
-global current_scope
+global current_scope, num_params, cont_temporals
 current_scope = 'global'
+num_params = 0
+cont_temporals = 0
 
 vControl = ""
 vFinal = ""
@@ -238,36 +240,19 @@ def p_tipoSimple(p):
 
 
 # TODO: Actualizar el diagrama instr
-# TODO: Volver a agregar instr2 cuando resolvamos el bug
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque np_end_func
-    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params RIGHTPARENTHESIS instr2 bloque np_end_func
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func
+    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func
     """
-
-
-def p_instr2(p):
-    """instr2 : vars
-              | empty"""
-    pass
-
 
 # <Params>
 def p_params(p):
-    """params : tipoSimple ID
-    | tipoSimple ID COMMA params1
+    """params : tipoSimple new_variable_set_type set_params ID new_variable params
+    | COMMA tiploSimple new_variable_set_type set_params ID new_variable params
     | empty
     """
     pass
-
-
-# <Params1>
-def p_params1(p):
-    """params1 : tipoSimple ID ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
-    | instr tipoSimple ID LEFTPARENTHESIS params RIGHTPARENTHESIS bloque
-    | empty
-    """
-    # print('here222')
 
 
 # <Bloque>
@@ -516,10 +501,14 @@ def p_np_main(p):
     quads.append(new_quad)
     stackJumps.push(new_quad.id)
 
+# Actions needed when a function ends 
 def p_np_end_func(p):
     """np_end_func : """
     new_quad = quad.generate_quad("ENDFUNC", None, None, None)
     quads.append(new_quad)
+    func_table.set_temporals(current_scope, cont_temporals)
+    func_table.release_var_table(current_scope)
+    cont_temporals = 0
 
 # Agregar Variable en Tabla
 def p_new_variable(p):
@@ -537,7 +526,9 @@ def p_new_variable_set_type(p):
 
 def p_new_function(p):
     """new_function :"""
-    global current_scope
+    global current_scope, num_params, cont_temporals
+    num_params = 0
+    cont_temporals = 0  
     current_scope = p[-1]
     func_table.add_function(p[-1], tmp_type)
 
@@ -566,6 +557,26 @@ def p_save_op(p):
     if p[-1] is not None:
         poper.push(p[-1])
 
+# Save type of param into our ParamList
+def p_set_params(p):
+    """set_params : """
+    func_table.add_param(current_scope, tmp_type)
+    num_params += 1
+
+# Save the amount of params in DirFunc
+def p_set_number_params(p):
+    """set_number_params : """
+    func_table.set_params(current_scope, num_params)
+
+# Save the initial address of the function with its quad
+def p_save_curr_quad(p):
+    """save_curr_quad : """
+    func_table.set_initial_address(current_scope,quads[-1].id + 1)
+
+# Save the amount of local variables in DirFunc
+def p_set_local_vars(p):
+    """set_local_vars : """
+    func_table.set_vars(current_scope, cont_temporals)
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
@@ -581,6 +592,8 @@ def p_add_operator_plusminus(p):
         if result_type != -1:
             # tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(result_type)
+            if current_scope != "global":
+                cont_temporals += 1
             temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             #new_quad.print_quad()
@@ -605,8 +618,10 @@ def p_add_operator_multiplydivide(p):
         #  print(right_op, right_type, left_op, left_type, op)
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
-            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+           #tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(tmp_type)
+            if current_scope != "global":
+                cont_temporals += 1
             temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
@@ -631,6 +646,8 @@ def p_add_operator_loop(p):
         if result_type != -1:
             #tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(result_type)
+            if current_scope != "global":
+                cont_temporals += 1
             temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
@@ -653,8 +670,10 @@ def p_add_operator_and(p):
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
-            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            #tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(tmp_type)
+            if current_scope != "global":
+                cont_temporals += 1
             temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
@@ -677,8 +696,10 @@ def p_add_operator_or(p):
         op = poper.pop()
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
-            tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            #tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(tmp_type)
+            if current_scope != "global":
+                cont_temporals += 1
             temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             #new_quad.print_quad()
@@ -812,9 +833,13 @@ def p_np_for_3(p):
     else:
         exp = stackO.pop()
         vFinal = temp.get_temp(exp_type)
+        if current_scope != "global":
+                cont_temporals += 1
         new_quad = quad.generate_quad("=", exp, None, vFinal[0])
         quads.append(new_quad)
         tmp_x = temp.get_temp("bool") ## TODO en este casoi tienen que ser los mismos temps?
+        if current_scope != "global":
+                cont_temporals += 1
         new_quad = quad.generate_quad("<", vControl, vFinal[0], tmp_x[0])
         quads.append(new_quad)
         stackJumps.push(len(quads))
@@ -826,6 +851,8 @@ def p_np_for_3(p):
 def p_np_for_4(p):
     """np_for_4 : """
     tmp_y = temp.get_temp("int") 
+    if current_scope != "global":
+                cont_temporals += 1
     new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y[0])
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
