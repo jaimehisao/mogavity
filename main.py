@@ -14,6 +14,7 @@ from quadruple import Quadruple
 from temporal import Temporal
 from Stack import Stack
 import oracle
+import virtual_machine as vm
 
 import pickle
 
@@ -167,12 +168,12 @@ lexer = lex.lex()
 
 # <PROGRAMA>
 def p_programa(p):
-    """programa : PROGRAM new_program ID save_program SEMICOLON class vars instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON class instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON vars instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON vars MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque
-    | PROGRAM new_program ID save_program SEMICOLON MAIN bloque
+    """programa : PROGRAM new_program ID save_program SEMICOLON class vars instr MAIN bloque end_of_file
+    | PROGRAM new_program ID save_program SEMICOLON class instr MAIN bloque end_of_file
+    | PROGRAM new_program ID save_program SEMICOLON vars instr MAIN bloque end_of_file
+    | PROGRAM new_program ID save_program SEMICOLON vars MAIN bloque end_of_file
+    | PROGRAM new_program ID save_program SEMICOLON instr MAIN bloque end_of_file
+    | PROGRAM new_program ID save_program SEMICOLON MAIN bloque end_of_file
     """
     # print('here xd')
 
@@ -827,6 +828,16 @@ def p_np_for_4(p):
 
 
 ####################################
+######## ARRAYS ##########
+####################################
+def p_new_array(p):
+    """new_array : """
+    #  WE need to reserve the memory space for all the size of the array.
+    size = p[-1] # suponiendo, prob es diferente
+    for i in range(0, size):
+        func_table.function_table[current_scope].memory_manager.assign_new_int_address()
+
+####################################
 ######## PUNTOS DEL WHILE ##########
 ####################################
 def p_np_while_1(p):
@@ -870,6 +881,11 @@ def p_np_while_3(p):
     #tmp_quad.print_quad()
 
 
+def p_end_of_file(p):
+    """end_of_file :"""
+    quads.append(quad.generate_quad("END", None, None, None))
+
+
 # Compute column.
 #     input is the input text string
 #     token is a token instance
@@ -878,27 +894,33 @@ def find_column(input, token):
     return (token.lexpos - line_start) + 1
 
 
-parser = yacc.yacc(debug=True)
+parser = yacc.yacc()
+#parser = yacc.yacc(debug=True)
+
+
+
+
+
+
 r = None
 try:
-    f = open("test5.mog", 'r')
+    f = open("test3.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
     error("No hay archivo para probar")
 
-parser.parse(r, debug=True)
-# parser.parse(r, debug=1)
+# parser.parse(r, debug=True)
+parser.parse(r)
 print("Código Aceptado")
+
 for quad in quads:
     quad.print_quad()
 
+#  Prepare to pass code to virtual machine
 
-def dump(obj):
-    if hasattr(obj, '__dict__'):
-        return vars(obj)
-    else:
-        return {attr: getattr(obj, attr, None) for attr in obj.__slots__}
+vm.start_virtual_machine(func_table, quads)
+
 
 #print(vars(func_table.function_table))
 

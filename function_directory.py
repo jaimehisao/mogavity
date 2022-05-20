@@ -11,6 +11,9 @@ class Function:
     constants_table = {}
     memory_manager = memory_manager.MemoryManager
 
+    number_of_ints: int
+    number_of_floats: int
+
     def __init__(self, _id, return_type):
         self.variable_table = {}
         self.constants_table = {}
@@ -50,6 +53,8 @@ class Function:
             #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)
 
 
+
+
 class Variable:
     id: str
     type: str
@@ -59,9 +64,6 @@ class Variable:
         self.id = _id
         self.type = _type
         self.address = address
-
-
-constants_table = {}  # We have this dictionary to hold our constants
 
 
 class FunctionDirectory:
@@ -167,10 +169,10 @@ class FunctionDirectory:
     #  TODO move to Function class
 
     def get_constant(self, cte_value, scope):
-        if cte_value not in self.function_table[scope].constants_table.keys():
-            addr = self.function_table[scope].memory_manager.assign_new_constant()
-            self.function_table[scope].constants_table[cte_value] = addr
+        if cte_value not in self.function_table["global"].constants_table.keys():
+            addr = self.function_table["global"].memory_manager.assign_new_constant()
+            self.function_table["global"].constants_table[cte_value] = addr
             return addr
         else:
-            return self.function_table[scope].constants_table[cte_value]
+            return self.function_table["global"].constants_table[cte_value]
             #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)
