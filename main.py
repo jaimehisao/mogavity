@@ -4,20 +4,14 @@ Created by Clarissa V, and Hisao Y
 March 2022
 Usage for the Compiler´s Design Course
 """
-import json
 import ply.yacc as yacc
 import ply.lex as lex
-import logging
 from function_directory import FunctionDirectory
-import quadruples_generator
 from quadruple import Quadruple
 from temporal import Temporal
 from Stack import Stack
 import oracle
 import virtual_machine as vm
-
-import pickle
-
 from error_handling import info, error, warning
 
 from pprint import pprint
@@ -38,7 +32,9 @@ memory = Stack()
 
 quads = []
 
-global current_scope, num_params, cont_temporals
+global current_scope
+global num_params
+global cont_temporals
 current_scope = 'global'
 num_params = 0
 cont_temporals = 0
@@ -252,7 +248,7 @@ def p_instr(p):
 # <Params>
 def p_params(p):
     """params : tipoSimple new_variable_set_type set_params ID new_variable params
-    | COMMA tiploSimple new_variable_set_type set_params ID new_variable params
+    | COMMA tipoSimple new_variable_set_type set_params ID new_variable params
     | empty
     """
     pass
@@ -291,7 +287,13 @@ def p_asignacion(p):
     exp = stackO.pop()
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
-    new_quad = quad.generate_quad('=', exp, None, p[1])
+    address = 0
+    if func_table.get_var_type(p[1], current_scope):
+        address = func_table.get_variable_address(current_scope, p[1])
+    else:
+        print("no addr?")
+
+    new_quad = quad.generate_quad('=', exp, None, address)
     # new_quad.print_quad()
     quads.append(new_quad)
 
@@ -512,6 +514,7 @@ def p_np_end_func(p):
     """np_end_func : """
     new_quad = quad.generate_quad("ENDFUNC", None, None, None)
     quads.append(new_quad)
+    cont_temporals = 0 ## TODO parchado @clarissa
     func_table.set_temporals(current_scope, cont_temporals)
     func_table.release_var_table(current_scope)
     cont_temporals = 0
@@ -610,6 +613,7 @@ def p_add_operator_plusminus(p):
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             # new_quad.print_quad()
             quads.append(new_quad)
+            print("res", res[0])
             stackO.push(res[0])
             stack_type.push(res[1])
         else:
@@ -664,7 +668,7 @@ def p_add_operator_loop(p):
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res[0])
+            stackO.push(temporal)
             stack_type.push(res[1])
         else:
             error("Type Mismatched")
@@ -777,6 +781,7 @@ def p_change_scope(p):
 def p_np_if_1(p):
     """np_if_1 : """
     cond = stackO.pop()
+    print("cond", cond)
     type_cond = stack_type.pop()
     # if type_cond then it is a malformed if
     if type_cond != "bool":
@@ -812,7 +817,8 @@ def p_np_else(p):
 ####################################
 def p_np_for_1(p):
     """np_for_1 : """
-    stackO.push(p[-1])  ####
+    print("ppppp", str(p[-1]))
+    stackO.push(p[-1])  #### TODO
     id_type = func_table.get_var_type(p[-1], current_scope)
     # vailidate that tit is numeric, if not break (var we mean)
     if id_type == "int":
@@ -938,7 +944,7 @@ def p_np_while_3(p):
 
 def p_end_of_file(p):
     """end_of_file :"""
-    quads.append(quad.generate_quad("END", None, None, None))
+    quads.append(quad.generate_quad("EOF", None, None, None))
 
 
 # Compute column.

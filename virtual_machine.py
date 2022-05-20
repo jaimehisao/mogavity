@@ -21,7 +21,7 @@ class ExecutionMemory:
 
 
 def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Quadruple]):
-
+    print("START VM")
     ## Initial VM Declarations
     global_memory = ExecutionMemory()
 
@@ -31,29 +31,57 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     global_scope = function_directory.function_table["global"]
 
     #  Constants are stored in a table only inside the global scope, so we load them from here
-    print(global_scope.constants_table)
+    #print(global_scope.constants_table)
     for constant, addr in global_scope.constants_table.items():
         ## TODO make sure compatibility is validated.
         global_memory.insert(addr, constant)
 
-    print(global_memory.scope_memory)
+    #print(global_memory.scope_memory)
 
     while quadruples[instruction_pointer][1] != "EOF":
+        print("Quad", quadruples[instruction_pointer][0])
+        #print(global_memory.scope_memory)
+        #quadruples[instruction_pointer].print_quad()
 
         if quadruples[instruction_pointer][1] == "=":
-            pass
+            value = quadruples[instruction_pointer][2]
+            addr = quadruples[instruction_pointer][4]
+            global_memory.insert(addr, value)
+            instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "+":
-            pass
+            instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "-":
-            pass
+            instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "/":
-            pass
+            instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "*":
-            pass
-        elif quadruples[instruction_pointer][1] == "output":
-            pass
+            instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "<":
+            left = quadruples[instruction_pointer][2]
+            right = quadruples[instruction_pointer][3]
+            res = quadruples[instruction_pointer][4]
+            value = bool(left < right)
+            print(res,"Value", value, type(value))
+            global_memory.insert(res, value)
+            instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "GOTO":
+            instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "GOTOF":
+            print("GOTOF",quadruples[instruction_pointer][2])
+            if not quadruples[instruction_pointer][2]:
+                print("Changing IP to ", quadruples[instruction_pointer][4], quadruples[instruction_pointer][2])
+                instruction_pointer = quadruples[instruction_pointer][4]
+            else:
+                instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "ENDFUNC":
+            instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "OUTPUT":
+            print(str(quadruples[instruction_pointer][4]))
+            instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "input":
-            pass
+            ## res = input()
+            ## assign to memory
+            instruction_pointer += 1
 
 
 
