@@ -10,7 +10,7 @@ class Function:
     variable_table = {}
     constants_table = {}
     params = []   # We only need the amount of params, their type and their order
-    resources_size = {} # Dict to store the resources needed to calculate the workspace required
+    resources_size = {}  # Dict to store the resources needed to calculate the workspace required
     initial_address: str
     memory_manager = memory_manager.MemoryManager
 
@@ -55,7 +55,21 @@ class Function:
             return self.constants_table[cte_value]
             #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)
 
+    # Set the amount of temporals used
+    def set_temporals(self, temporals):
+        self.resources_size["temporals"] = temporals
 
+    # Set the initial address (current quad)
+    def set_initial_address(self, quad_id):
+        self.initial_address = quad_id
+
+    # Deletes the local var table
+    def release_var_table(self):
+        self.variable_table.clear()
+
+    # Set the amount of local variables defined
+    def set_vars(self):
+        self.resources_size["vars"] = len(self.variable_table)
 
 
 class Variable:
@@ -109,10 +123,6 @@ class FunctionDirectory:
     def add_function_variables(self):
         """This is called after vars is detected inside a function, we will need a way to manage the scope"""
         pass
-
-    def remove(self, identifier):
-        """Removes Scope from the table"""
-        self.function_table.pop(identifier)
 
     def check_if_exists(self, identifier):
         """Will verify if the given scope exists in the function table"""
@@ -171,7 +181,7 @@ class FunctionDirectory:
         return self.function_table[scope].variable_table[identifier].address
     #  TODO move to Function class
 
-    def get_constant(self, cte_value, scope):
+    def get_constant(self, cte_value):
         if cte_value not in self.function_table["global"].constants_table.keys():
             addr = self.function_table["global"].memory_manager.assign_new_constant()
             self.function_table["global"].constants_table[cte_value] = addr
@@ -189,20 +199,6 @@ class FunctionDirectory:
         if params == len(self.function_table[scope].params):
             self.function_table[scope].resources_size["params"] = len(self.function_table[scope].params)
         else:
-            error("Incorrect number of params")
+            error("Incorrect number of Parameters")
 
-    # Set the amount of local variables defined
-    def set_vars(self, scope):
-        self.function_table[scope].resources_size["vars"] = len(self.function_table[scope].variable_table)
 
-    # Set the amount of temporals used
-    def set_temporals(self, scope, temporals):
-        self.function_table[scope].resources_size["temporals"] = temporals
-
-    # Set the initial address (current quad)
-    def set_initial_address(self, scope, quad_id):
-        self.function_table[scope].initial_address = quad_id
-
-    # Deletes the local var table
-    def release_var_table(self, scope):
-        self.function_table[scope].variable_table.clear()

@@ -6,7 +6,7 @@ Usage for the Compiler´s Design Course
 """
 import ply.yacc as yacc
 import ply.lex as lex
-from function_directory import FunctionDirectory
+from function_directory import FunctionDirectory as fD
 from quadruple import Quadruple
 from temporal import Temporal
 from Stack import Stack
@@ -19,7 +19,7 @@ from pprint import pprint
 # logging.basicConfig(level=logging.DEBUG)
 
 # class_table = class_directory.ClassTable()
-func_table = FunctionDirectory()
+fD = fD()
 quad = Quadruple(0, "", "", "", "")
 temp = Temporal()
 
@@ -288,8 +288,8 @@ def p_asignacion(p):
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     address = 0
-    if func_table.get_var_type(p[1], current_scope):
-        address = func_table.get_variable_address(current_scope, p[1])
+    if fD.get_var_type(p[1], current_scope):
+        address = fD.get_variable_address(current_scope, p[1])
     else:
         print("no addr?")
 
@@ -335,7 +335,9 @@ def p_escritura2(p):
 # <Lectura>
 def p_lectura(p):
     """lectura  :   INPUT LEFTARROW variable SEMICOLON"""
-    new_quad = quad.generate_quad('INPUT', None, None, p[3])
+    address = fD.get_variable_address(current_scope, p[3])
+    ## TODO VALIDATE VARIABLE EXISTANCE
+    new_quad = quad.generate_quad('INPUT', None, None, address)
     quads.append(new_quad)
 
 
@@ -492,7 +494,7 @@ def p_error(p):
 
 def p_new_program(p):
     """new_program : """
-    global func_table
+    global fD
 
 
 def p_save_program(p):
@@ -515,8 +517,8 @@ def p_np_end_func(p):
     new_quad = quad.generate_quad("ENDFUNC", None, None, None)
     quads.append(new_quad)
     cont_temporals = 0 ## TODO parchado @clarissa
-    func_table.set_temporals(current_scope, cont_temporals)
-    func_table.release_var_table(current_scope)
+    fD.function_table[current_scope].set_temporals(cont_temporals)
+    fD.function_table[current_scope].release_var_table()
     cont_temporals = 0
 
 
@@ -524,7 +526,7 @@ def p_np_end_func(p):
 def p_new_variable(p):
     """new_variable : """
     print("TMP TYPE", tmp_type, "VAR", p[-1])
-    func_table.function_table[current_scope].add_variable(p[-1], tmp_type)
+    fD.function_table[current_scope].add_variable(p[-1], tmp_type)
     # func_table.print_all_variable_tables()
 
 
@@ -541,15 +543,15 @@ def p_new_function(p):
     num_params = 0
     cont_temporals = 0
     current_scope = p[-1]
-    func_table.add_function(p[-1], tmp_type)
+    fD.add_function(p[-1], tmp_type)
 
 
 def p_save_id(p):
     """save_id :"""
     # func_table.function_table[current_scope].
-    address = func_table.get_variable_address(current_scope, p[-1])
+    address = fD.get_variable_address(current_scope, p[-1])
     stackO.push(address)
-    var_type = func_table.get_var_type(p[-1], current_scope)
+    var_type = fD.get_var_type(p[-1], current_scope)
     stack_type.push(var_type)
     # TODO: check for float
 
@@ -557,7 +559,7 @@ def p_save_id(p):
 def p_save_constant_int(p):
     """save_constant_int : """
     tmp_int = int(p[-1])
-    address = func_table.get_constant(tmp_int, current_scope)
+    address = fD.get_constant(tmp_int)
     stackO.push(address)
     #if p[-1].isdigit():
     stack_type.push("int")
@@ -567,10 +569,12 @@ def p_save_constant_int(p):
 def p_save_constant_float(p):
     """save_constant_float : """
     tmp_float = float(p[-1])
-    address = func_table.get_constant(tmp_float, current_scope)
+    address = fD.get_constant(tmp_float)
     stackO.push(address)
     #if p[-1].isdigit():
     stack_type.push("float")
+
+
 
 
 def p_save_op(p):
@@ -582,26 +586,26 @@ def p_save_op(p):
 # Save type of param into our ParamList
 def p_set_params(p):
     """set_params : """
-    func_table.add_param(current_scope, tmp_type)
+    fD.add_param(current_scope, tmp_type)
     num_params += 1
 
 
 # Save the amount of params in DirFunc
 def p_set_number_params(p):
     """set_number_params : """
-    func_table.set_params(current_scope, num_params)
+    fD.set_params(current_scope, num_params)
 
 
 # Save the initial address of the function with its quad
 def p_save_curr_quad(p):
     """save_curr_quad : """
-    func_table.set_initial_address(current_scope, quads[-1].id + 1)
+    fD.function_table[current_scope].set_initial_address(quads[-1].id + 1)
 
 
 # Save the amount of local variables in DirFunc
 def p_set_local_vars(p):
     """set_local_vars : """
-    func_table.set_vars(current_scope, cont_temporals)
+    fD.function_table[current_scope].set_vars(cont_temporals)
 
 
 def p_add_operator_plusminus(p):
@@ -620,7 +624,7 @@ def p_add_operator_plusminus(p):
             res = temp.get_temp(result_type)
             if current_scope != "global":
                 cont_temporals += 1
-            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             # new_quad.print_quad()
             quads.append(new_quad)
@@ -649,7 +653,7 @@ def p_add_operator_multiplydivide(p):
             res = temp.get_temp(tmp_type)
             if current_scope != "global":
                 cont_temporals += 1
-            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
@@ -675,7 +679,7 @@ def p_add_operator_loop(p):
             res = temp.get_temp(result_type)
             if current_scope != "global":
                 cont_temporals += 1
-            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
@@ -701,7 +705,7 @@ def p_add_operator_and(p):
             res = temp.get_temp(tmp_type)
             if current_scope != "global":
                 cont_temporals += 1
-            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
@@ -727,7 +731,7 @@ def p_add_operator_or(p):
             res = temp.get_temp(tmp_type)
             if current_scope != "global":
                 cont_temporals += 1
-            temporal = func_table.function_table[current_scope].memory_manager.assign_new_temp()
+            temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             # new_quad.print_quad()
             quads.append(new_quad)
@@ -740,7 +744,7 @@ def p_add_operator_or(p):
 #  Neuralgic Point for function detection
 def p_function_detection(p):
     """function_detection :"""
-    func_table.get_function(p[-1], str(p.lexer.lineno))
+    fD.get_function(p[-1], str(p.lexer.lineno))
     # Verify function exists
     # Start handling execution
     pass
@@ -750,7 +754,8 @@ def p_generate_write_quad(p):
     """generate_write_quad :"""
     # When it is a string we can directly generate the quad
     if isinstance(p[-1], str):
-        new_quad = quad.generate_quad("OUTPUT", None, None, p[-1])
+        address = fD.get_constant(p[-1])
+        new_quad = quad.generate_quad("OUTPUT", None, None, address)
         # new_quad.print_quad()
         quads.append(new_quad)
     # If it is not a string, then it is an exp and we should already have it in stackO, remebering that it is a temporal
@@ -830,7 +835,7 @@ def p_np_for_1(p):
     """np_for_1 : """
     print("ppppp", str(p[-1]))
     stackO.push(p[-1])  #### TODO
-    id_type = func_table.get_var_type(p[-1], current_scope)
+    id_type = fD.get_var_type(p[-1], current_scope)
     # vailidate that tit is numeric, if not break (var we mean)
     if id_type == "int":
         stack_type.push(id_type)
@@ -906,7 +911,7 @@ def p_new_array(p):
     #  WE need to reserve the memory space for all the size of the array.
     size = p[-1]  # suponiendo, prob es diferente
     for i in range(0, size):
-        func_table.function_table[current_scope].memory_manager.assign_new_int_address()
+        fD.function_table[current_scope].memory_manager.assign_new_int_address()
 
 
 ####################################
@@ -971,7 +976,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test7.mog", 'r')
+    f = open("test6.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -986,7 +991,7 @@ for quad in quads:
 
 #  Prepare to pass code to virtual machine
 
-vm.start_virtual_machine(func_table, quads)
+vm.start_virtual_machine(fD, quads)
 
 # print(vars(func_table.function_table))
 
