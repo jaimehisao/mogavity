@@ -464,9 +464,9 @@ def p_expMD(p):
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
-                |   CTE_INT save_constant
-                |   CTE_FLOAT save_constant
-                |   CTE_CHAR save_constant
+                |   CTE_INT save_constant_int
+                |   CTE_FLOAT save_constant_float
+                |   CTE_CHAR save_constant_int
                 |   variable save_id
                 |   llamada'''
     pass
@@ -523,6 +523,7 @@ def p_np_end_func(p):
 # Agregar Variable en Tabla
 def p_new_variable(p):
     """new_variable : """
+    print("TMP TYPE", tmp_type, "VAR", p[-1])
     func_table.function_table[current_scope].add_variable(p[-1], tmp_type)
     # func_table.print_all_variable_tables()
 
@@ -553,13 +554,23 @@ def p_save_id(p):
     # TODO: check for float
 
 
-def p_save_constant(p):
-    """save_constant : """
-    addr = func_table.get_constant(p[-1], current_scope)
-    stackO.push(addr)
-    if p[-1].isdigit():
-        stack_type.push("int")
+def p_save_constant_int(p):
+    """save_constant_int : """
+    tmp_int = int(p[-1])
+    address = func_table.get_constant(tmp_int, current_scope)
+    stackO.push(address)
+    #if p[-1].isdigit():
+    stack_type.push("int")
     #  TODO CHECK THIS LOGIC, need to add options for other types
+
+
+def p_save_constant_float(p):
+    """save_constant_float : """
+    tmp_float = float(p[-1])
+    address = func_table.get_constant(tmp_float, current_scope)
+    stackO.push(address)
+    #if p[-1].isdigit():
+    stack_type.push("float")
 
 
 def p_save_op(p):
@@ -613,8 +624,8 @@ def p_add_operator_plusminus(p):
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             # new_quad.print_quad()
             quads.append(new_quad)
-            print("res", res[0])
-            stackO.push(res[0])
+            print("res1", temporal)
+            stackO.push(temporal)
             stack_type.push(res[1])
         else:
             error("Type mismatch at " + str(p.lexer.lineno))
@@ -960,7 +971,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test3.mog", 'r')
+    f = open("test7.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -978,16 +989,6 @@ for quad in quads:
 vm.start_virtual_machine(func_table, quads)
 
 # print(vars(func_table.function_table))
-
-
-# with open("test.avity", 'w') as file:
-# objs = {
-# 'function_directory': vars(func_table),
-# 'quadruples': vars(quads)
-# }
-# file.write(str(objs))
-# pickle.dump(str(objs), file, protocol=None, *, fix_imports=True)
-
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
