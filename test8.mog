@@ -1,0 +1,12 @@
+program test;
+
+var int a, b, c, d;
+
+main {
+    input <- a;
+    input <- b;
+    input <- d;
+    c = a + b;
+    output -> d;
+    return 0;
+}
