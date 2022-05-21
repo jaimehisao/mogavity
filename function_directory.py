@@ -1,5 +1,5 @@
 import logging
-import memory_manager
+from memory_manager import MemoryManager
 
 from error_handling import error, warning, info
 
@@ -12,7 +12,7 @@ class Function:
     params = []   # We only need the amount of params, their type and their order
     resources_size = {}  # Dict to store the resources needed to calculate the workspace required
     initial_address: str
-    memory_manager = memory_manager.MemoryManager
+    memory_manager: MemoryManager
 
     number_of_ints: int
     number_of_floats: int
@@ -22,7 +22,7 @@ class Function:
         self.constants_table = {}
         self.id = _id
         self.return_type = return_type
-        self.memory_manager = memory_manager.MemoryManager()
+        self.memory_manager = MemoryManager()
 
     def add_variable(self, identifier, _type):
         logging.info(
@@ -70,6 +70,17 @@ class Function:
     # Set the amount of local variables defined
     def set_vars(self):
         self.resources_size["vars"] = len(self.variable_table)
+
+    # We add the type of parameter into our Params list
+    def add_param(self, _type):
+        self.params.append(_type)
+
+    # Set the amount of params defined
+    def set_params(self, params):
+        if params == len(self.params):
+            self.resources_size["params"] = len(params)
+        else:
+            error("Incorrect number of Parameters")
 
 
 class Variable:
@@ -189,16 +200,3 @@ class FunctionDirectory:
         else:
             return self.function_table["global"].constants_table[cte_value]
             #  TODO might be problematic when storing different types as keys will differ (eg, ints and chars)
-
-    # We add the type of parameter into our Params list
-    def add_param(self, scope, type):
-        self.function_table[scope].params.append(type)
-
-    # Set the amount of params defined
-    def set_params(self, scope, params):
-        if params == len(self.function_table[scope].params):
-            self.function_table[scope].resources_size["params"] = len(self.function_table[scope].params)
-        else:
-            error("Incorrect number of Parameters")
-
-

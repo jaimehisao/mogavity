@@ -514,9 +514,9 @@ def p_np_main(p):
 # Actions needed when a function ends
 def p_np_end_func(p):
     """np_end_func : """
+    global cont_temporals
     new_quad = quad.generate_quad("ENDFUNC", None, None, None)
     quads.append(new_quad)
-    cont_temporals = 0 ## TODO parchado @clarissa
     fD.function_table[current_scope].set_temporals(cont_temporals)
     fD.function_table[current_scope].release_var_table()
     cont_temporals = 0
@@ -586,14 +586,15 @@ def p_save_op(p):
 # Save type of param into our ParamList
 def p_set_params(p):
     """set_params : """
-    fD.add_param(current_scope, tmp_type)
+    global num_params
+    fD.function_table[current_scope].add_param(tmp_type)
     num_params += 1
 
 
 # Save the amount of params in DirFunc
 def p_set_number_params(p):
     """set_number_params : """
-    fD.set_params(current_scope, num_params)
+    fD.function_table[current_scope].set_params(current_scope, num_params)
 
 
 # Save the initial address of the function with its quad
@@ -610,6 +611,7 @@ def p_set_local_vars(p):
 
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
+    global cont_temporals
     """if poper.top() is not None:
         print("ADD")"""
     if poper.top() == '+' or poper.top() == '-':
@@ -976,7 +978,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test6.mog", 'r')
+    f = open("test3.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
