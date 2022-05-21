@@ -2,11 +2,17 @@ program test;
 
 var int a, b, c, d;
 
-main {
-    input <- a;
-    input <- b;
-    input <- d;
+instr void local()
+{
+    var int a, b, c;
+    a = a + 2;
+    b = 1 + 6;
     c = a + b;
+    return c;
+}
+
+main {
+    d = local()
     output -> d;
     return 0;
 }
