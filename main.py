@@ -13,12 +13,10 @@ from Stack import Stack
 import oracle
 import virtual_machine as vm
 from error_handling import info, error, warning
-
 from pprint import pprint
 
 # logging.basicConfig(level=logging.DEBUG)
 
-# class_table = class_directory.ClassTable()
 fD = fD()
 quad = Quadruple(0, "", "", "", "")
 temp = Temporal()
@@ -548,12 +546,10 @@ def p_new_function(p):
 
 def p_save_id(p):
     """save_id :"""
-    # func_table.function_table[current_scope].
     address = fD.get_variable_address(current_scope, p[-1])
     stackO.push(address)
     var_type = fD.get_var_type(p[-1], current_scope)
     stack_type.push(var_type)
-    # TODO: check for float
 
 
 def p_save_constant_int(p):
@@ -561,9 +557,7 @@ def p_save_constant_int(p):
     tmp_int = int(p[-1])
     address = fD.get_constant(tmp_int)
     stackO.push(address)
-    #if p[-1].isdigit():
     stack_type.push("int")
-    #  TODO CHECK THIS LOGIC, need to add options for other types
 
 
 def p_save_constant_float(p):
@@ -571,10 +565,7 @@ def p_save_constant_float(p):
     tmp_float = float(p[-1])
     address = fD.get_constant(tmp_float)
     stackO.push(address)
-    #if p[-1].isdigit():
-    stack_type.push("float")
-
-
+    stack_type.push("float") ## Maybe we can change this to our int operator codes.
 
 
 def p_save_op(p):
@@ -612,8 +603,6 @@ def p_set_local_vars(p):
 def p_add_operator_plusminus(p):
     """add_operator_plusminus : """
     global cont_temporals
-    """if poper.top() is not None:
-        print("ADD")"""
     if poper.top() == '+' or poper.top() == '-':
         right_op = stackO.pop()
         right_type = stack_type.pop()
@@ -630,7 +619,6 @@ def p_add_operator_plusminus(p):
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             # new_quad.print_quad()
             quads.append(new_quad)
-            print("res1", temporal)
             stackO.push(temporal)
             stack_type.push(res[1])
         else:
@@ -641,7 +629,7 @@ def p_add_operator_multiplydivide(p):
     """add_operator_multiplydivide : """
     # print('poper md', p[-1])
     # poper.size()
-
+    global cont_temporals
     if poper.top() == '*' or poper.top() == '/':
         right_op = stackO.pop()
         right_type = stack_type.pop()
@@ -667,9 +655,9 @@ def p_add_operator_multiplydivide(p):
 
 def p_add_operator_loop(p):
     """add_operator_loop :"""
-    # print('poper ' + poper)
-
-    if poper.top() == '<=' or poper.top() == '<' or poper.top() == '>' or poper.top() == '>=' or poper.top() == '==' or poper.top() == '!=':
+    global cont_temporals
+    if poper.top() == '<=' or poper.top() == '<' or poper.top() == '>' or poper.top() == '>=' \
+            or poper.top() == '==' or poper.top() == '!=':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -693,8 +681,7 @@ def p_add_operator_loop(p):
 
 def p_add_operator_and(p):
     """add_operator_and :"""
-    # print('poper ' + poper)
-
+    global cont_temporals
     if poper.top() == 'AND':
         right_op = stackO.pop()
         right_type = stack_type.pop()
@@ -719,8 +706,7 @@ def p_add_operator_and(p):
 
 def p_add_operator_or(p):
     """add_operator_or :"""
-    # print('poper ' + poper)
-
+    global cont_temporals
     if poper.top() == 'OR':
         right_op = stackO.pop()
         right_type = stack_type.pop()
@@ -749,34 +735,20 @@ def p_function_detection(p):
     fD.get_function(p[-1], str(p.lexer.lineno))
     # Verify function exists
     # Start handling execution
-    pass
 
 
 def p_generate_write_quad(p):
     """generate_write_quad :"""
-    # When it is a string we can directly generate the quad
+    # When it is a string we can directly generate the quadm still we need to assign an address to the constant
     if isinstance(p[-1], str):
-        address = fD.get_constant(p[-1])
-        new_quad = quad.generate_quad("OUTPUT", None, None, address)
-        # new_quad.print_quad()
+        address = fD.get_constant(p[-1])  # CTE address generated for value.
+        new_quad = quad.generate_quad("OUTPUT", None, None, address)  # Quad is generated using CTE address.
         quads.append(new_quad)
-    # If it is not a string, then it is an exp and we should already have it in stackO, remebering that it is a temporal
     else:
         res = stackO.pop()
-        # We don't really need the type, do we?
         stack_type.pop()
-        # We generate the quad
-        new_quad = quad.generate_quad("OUTPUT", None, None, res)
-        # new_quad.print_quad()
+        new_quad = quad.generate_quad("OUTPUT", None, None, res)  # Quad is generated based on operand stack.
         quads.append(new_quad)
-
-
-"""
-One to start and one to end the program? Maybe this simplifies our execution flow when converting
-instructions in the virtual machine?
-
-Should we maybe add one when we call a function inside a function? 
-"""
 
 
 def p_np_print(p):

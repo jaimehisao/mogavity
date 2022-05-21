@@ -16,10 +16,6 @@ logging.basicConfig(level=logging.DEBUG)
 STARTING_ADDRESS = 10000
 MAX_PER_VAR = 10000
 
-#  Stack that holds all the states that went to sleep, this way we make sure we escape the contexts in order.
-# TODO: adapt to our own Stack implementation.
-sleeping_memory = []
-
 
 class MemoryManager:
     assigned_ints: int
@@ -81,6 +77,11 @@ class MemoryManager:
         error("Too much Constants, please optimize your operations!")
 
     def get_variable_type_from_address(self, address):
+        """
+        Returns the type of a variable, in string, depending on the address given.
+        :param address: virtual address of the variable needed.
+        :return: type of the requested variable.
+        """
         if STARTING_ADDRESS <= address <= self.MAX_INTS:
             return "int"
         elif self.MAX_INTS + 1 <= address <= self.MAX_FLOATS:
