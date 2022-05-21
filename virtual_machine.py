@@ -44,94 +44,95 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     # print(global_scope.constants_table)
     for constant, addr in global_scope.constants_table.items():
         ## TODO make sure compatibility is validated.
-        global_memory.insert(addr, constant)
+        save_to_memory(addr, constant)
 
     # print(global_memory.scope_memory)
 
     while quadruples[instruction_pointer][1] != "EOF":
-        # print("Quad", quadruples[instruction_pointer][0])
-        # print(global_memory.scope_memory)
+        print("Quad", quadruples[instruction_pointer][0])
+        #print(global_memory.scope_memory)
         # quadruples[instruction_pointer].print_quad()
 
         ##############
         # ASSIGNMENT #
         ##############
         if quadruples[instruction_pointer][1] == "=":
-            value = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
+            value = get_var_from_address(quadruples[instruction_pointer][2])
             addr = quadruples[instruction_pointer][4]
-            global_memory.insert(addr, value)
+            save_to_memory(addr, value)
             instruction_pointer += 1
 
         ##############
         # ARITHMETIC #
         ##############
         elif quadruples[instruction_pointer][1] == "+":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = left + right
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "-":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = left - right
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "/":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = left / right
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "*":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = left * right
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
 
         ##############
         # COMPARISON #
         ##############
         elif quadruples[instruction_pointer][1] == "<":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
+            print("Hey im hewre")
             value = bool(left < right)
-            print(left, right, res, value)
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == ">":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = bool(left > right)
-            global_memory.insert(res, value)
+            print("resval",res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "!=":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = bool(left != right)
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "AND":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = bool(left and right)
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "OR":
-            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
-            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = bool(left or right)
-            global_memory.insert(res, value)
+            save_to_memory(res, value)
             instruction_pointer += 1
 
         ########
@@ -142,17 +143,17 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             instruction_pointer = quadruples[instruction_pointer][4]
         elif quadruples[instruction_pointer][1] == "GOTOF":
             # print("GOTOF",quadruples[instruction_pointer][2])
-            if not quadruples[instruction_pointer][2]:
-                info("Changing IP to "
-                     + str(quadruples[instruction_pointer][4])
-                     + str(quadruples[instruction_pointer][2]))
-                instruction_pointer = quadruples[instruction_pointer][4]
+            #print("GOTOF VAL", get_var_from_address(quadruples[instruction_pointer][2]))
+            if not get_var_from_address(quadruples[instruction_pointer][2]):
+                info("Changing IP to " + str(quadruples[instruction_pointer][4]))
+                instruction_pointer = quadruples[instruction_pointer][4] -1
+                continue
             else:
                 instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "OUTPUT":
-            print(str(global_memory.get_value_by_address(quadruples[instruction_pointer][4])))
+            print(str(get_var_from_address(quadruples[instruction_pointer][4])))
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":
             res = input()
@@ -160,7 +161,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
                 res = int(res)
             elif is_float(res):
                 res = float(res)
-            global_memory.insert(quadruples[instruction_pointer][4], res)
+            save_to_memory(quadruples[instruction_pointer][4], res)
             instruction_pointer += 1
 
 
@@ -183,7 +184,7 @@ def save_to_memory(address, val):
 
 
 def is_global_variable(address):
-    if address > (STARTING_ADDRESS + GLOBAL_OFFSET):
+    if address >= (STARTING_ADDRESS + GLOBAL_OFFSET):
         return True
     return False
 
