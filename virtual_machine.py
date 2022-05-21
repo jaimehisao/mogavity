@@ -5,12 +5,12 @@ generated during compilation.
 """
 from function_directory import FunctionDirectory
 from quadruple import Quadruple
+from constants import STARTING_ADDRESS, GLOBAL_OFFSET
 from error_handling import info
 
 
 class ExecutionMemory:
     """This way we can handle memory in scopes rather than having a ton of variables."""
-
     ## TODO check if overflow validation should be done here or is it fine with the one we already do
     def __init__(self):
         self.scope_memory = {}
@@ -22,15 +22,18 @@ class ExecutionMemory:
         return self.scope_memory[address]
 
 
+global_memory = ExecutionMemory()
+local_memory = ExecutionMemory()
+
+
 def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Quadruple]):
     print("")
     print("")
     print("")
     print("")
     print("")
-    print("START VM")
+    print("Starting the Mogavity Virtual Machine")
     ## Initial VM Declarations
-    global_memory = ExecutionMemory()
 
     instruction_pointer = 1
 
@@ -50,7 +53,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         # print(global_memory.scope_memory)
         # quadruples[instruction_pointer].print_quad()
 
-        #  Assignment
+        ##############
+        # ASSIGNMENT #
+        ##############
         if quadruples[instruction_pointer][1] == "=":
             value = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
             addr = quadruples[instruction_pointer][4]
@@ -114,12 +119,26 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             value = bool(left != right)
             global_memory.insert(res, value)
             instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "AND":
+            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
+            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            res = quadruples[instruction_pointer][4]
+            value = bool(left and right)
+            global_memory.insert(res, value)
+            instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "OR":
+            left = global_memory.get_value_by_address(quadruples[instruction_pointer][2])
+            right = global_memory.get_value_by_address(quadruples[instruction_pointer][3])
+            res = quadruples[instruction_pointer][4]
+            value = bool(left or right)
+            global_memory.insert(res, value)
+            instruction_pointer += 1
 
         ########
         # GOTO #
         ########
         elif quadruples[instruction_pointer][1] == "GOTO":
-            print("Changing IP based on GOTO to Q", quadruples[instruction_pointer][4])
+            info("Changing IP based on GOTO to Q " + str(quadruples[instruction_pointer][4]))
             instruction_pointer = quadruples[instruction_pointer][4]
         elif quadruples[instruction_pointer][1] == "GOTOF":
             # print("GOTOF",quadruples[instruction_pointer][2])
@@ -145,7 +164,30 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             instruction_pointer += 1
 
 
-## Helpers for input
+###########
+# HELPERS #
+###########
+
+def get_var_from_address(address):
+    if is_global_variable(address):
+        return global_memory.get_value_by_address(address)
+    else:
+        return local_memory.get_value_by_address(address)
+
+
+def save_to_memory(address, val):
+    if is_global_variable(address):
+        global_memory.insert(address, val)
+    else:
+        local_memory.insert(address, val)
+
+
+def is_global_variable(address):
+    if address > (STARTING_ADDRESS + GLOBAL_OFFSET):
+        return True
+    return False
+
+
 def is_float(check_input):
     if '.' in check_input:
         split_number = check_input.split('.')
