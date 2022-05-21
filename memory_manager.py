@@ -10,14 +10,13 @@ WE ARE GOING TO SET UP AN ARBITRARY LIMIT OF 10K VARIABLES PER TYPE
 """
 import sys
 import logging
+from constants import STARTING_ADDRESS, MAX_PER_VAR, GLOBAL_OFFSET
 from error_handling import error, info, warning
 logging.basicConfig(level=logging.DEBUG)
 
-STARTING_ADDRESS = 10000
-MAX_PER_VAR = 10000
-
 
 class MemoryManager:
+    is_global: bool
     assigned_ints: int
     assigned_floats: int
     assigned_chars: int
@@ -29,8 +28,12 @@ class MemoryManager:
     MAX_TEMPS: int
     MAX_CONSTANTS: int
 
-    def __init__(self):
-        self.assigned_ints = STARTING_ADDRESS
+    def __init__(self, is_global: bool):
+        self.is_global = is_global
+        if self.is_global:
+            self.assigned_ints = STARTING_ADDRESS + GLOBAL_OFFSET
+        else:
+            self.assigned_ints = STARTING_ADDRESS
         self.MAX_INTS = self.assigned_ints + MAX_PER_VAR - 1
         self.assigned_floats = self.MAX_INTS + 1
         self.MAX_FLOATS = self.assigned_floats + MAX_PER_VAR - 1
