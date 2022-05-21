@@ -22,7 +22,10 @@ class Function:
         self.constants_table = {}
         self.id = _id
         self.return_type = return_type
-        self.memory_manager = MemoryManager()
+        if _id == "global":
+            self.memory_manager = MemoryManager(True)
+        else:
+            self.memory_manager = MemoryManager(False)
 
     def add_variable(self, identifier, _type):
         logging.info(
@@ -78,7 +81,7 @@ class Function:
     # Set the amount of params defined
     def set_params(self, params):
         if params == len(self.params):
-            self.resources_size["params"] = len(params)
+            self.resources_size["params"] = len([params]) # TODO parche
         else:
             error("Incorrect number of Parameters")
 

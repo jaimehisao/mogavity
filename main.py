@@ -33,6 +33,8 @@ quads = []
 global current_scope
 global num_params
 global cont_temporals
+global elif_num
+elif_num = 0
 current_scope = 'global'
 num_params = 0
 cont_temporals = 0
@@ -292,6 +294,7 @@ def p_asignacion(p):
         print("no addr?")
 
     new_quad = quad.generate_quad('=', exp, None, address)
+    print(address)
     # new_quad.print_quad()
     quads.append(new_quad)
 
@@ -383,7 +386,6 @@ def p_update(p):
         for_op = "*"
     else:
         for_op = "/"
-
     for_updater = p[3]
 
 
@@ -565,7 +567,7 @@ def p_save_constant_float(p):
     tmp_float = float(p[-1])
     address = fD.get_constant(tmp_float)
     stackO.push(address)
-    stack_type.push("float") ## Maybe we can change this to our int operator codes.
+    stack_type.push("float")  ## Maybe we can change this to our int operator codes.
 
 
 def p_save_op(p):
@@ -585,7 +587,7 @@ def p_set_params(p):
 # Save the amount of params in DirFunc
 def p_set_number_params(p):
     """set_number_params : """
-    fD.function_table[current_scope].set_params(current_scope, num_params)
+    fD.function_table[current_scope].set_params(num_params)
 
 
 # Save the initial address of the function with its quad
@@ -770,6 +772,7 @@ def p_change_scope(p):
 ####################################
 def p_np_if_1(p):
     """np_if_1 : """
+    stackJumps.show_all()
     cond = stackO.pop()
     print("cond", cond)
     type_cond = stack_type.pop()
@@ -782,17 +785,54 @@ def p_np_if_1(p):
         quads.append(new_quad)
 
 
+def p_np_if_elif(p):
+    """np_if_elif : """
+    stackJumps.show_all()
+
+    global elif_num
+    cond = stackO.pop()
+    print("cond", cond)
+    type_cond = stack_type.pop()
+    # if type_cond then it is a malformed if
+    if type_cond != "bool":
+        error("Expected type bool")
+    else:
+        new_quad = quad.generate_quad("GOTOF", cond, None, None)
+        stackJumps.push(new_quad.id - 1)
+        quads.append(new_quad)
+        new_quad = quad.generate_quad("GOTO", None, None, None)
+        stackJumps.push(new_quad.id - 1)
+        quads.append(new_quad)
+    elif_num += 1
+
+
 def p_np_if_2(p):
     """np_if_2 : """
-    num_quad = stackJumps.pop()
+    stackJumps.show_all()
+
+    # num_quad = stackJumps.pop()
     # fill_quad
+    """
+    global elif_num
+    if elif_num != 0:
+        for x in range(0, elif_num):
+            num_quad = stackJumps.pop()
+            tmp_quad = quads[num_quad]
+            tmp_quad.fill_quad(len(quads) + 1)
+    """
+
+    num_quad = stackJumps.pop()
     tmp_quad = quads[num_quad]
     tmp_quad.fill_quad(len(quads) + 1)
     # tmp_quad.print_quad()
+    elif_num = 0
+    # TODO solo jala para un elif
 
 
 def p_np_else(p):
     """np_else : """
+    stackJumps.show_all()
+
     false = stackJumps.pop()
     new_quad = quad.generate_quad("GOTO", None, None, None)
     stackJumps.push(new_quad.id - 1)
@@ -835,6 +875,7 @@ def p_np_for_2(p):
 
 def p_np_for_3(p):
     """np_for_3 : """
+    global cont_temporals
     exp_type = stack_type.pop()
     if exp_type != "int":
         error("Type mismatch")
@@ -858,6 +899,7 @@ def p_np_for_3(p):
 
 def p_np_for_4(p):
     """np_for_4 : """
+    global cont_temporals
     tmp_y = temp.get_temp("int")
     if current_scope != "global":
         cont_temporals += 1
@@ -950,14 +992,14 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test3.mog", 'r')
+    f = open("test8.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
     error("No hay archivo para probar")
 
-# parser.parse(r, debug=True)
-parser.parse(r)
+parser.parse(r, debug=True)
+#parser.parse(r)
 print("Código Aceptado")
 
 for quad in quads:
