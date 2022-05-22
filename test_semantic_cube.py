@@ -1,3 +1,7 @@
+"""
+Functions to test the Semantic Cube
+Tests semantic operations "cheat sheet"
+"""
 import oracle
 import unittest
 

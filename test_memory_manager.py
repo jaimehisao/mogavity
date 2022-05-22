@@ -1,3 +1,7 @@
+"""
+Functions to test the Memory Manager Class
+Tests assigning new memory addresses to variables and constants, getting addresses from var names and types.
+"""
 import memory_manager
 
 memory_manager = memory_manager.MemoryManager()
