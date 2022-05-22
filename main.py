@@ -919,6 +919,19 @@ def p_np_for_4(p):
     stack_type.pop()
 
 
+###############################
+######## FAKE BOTTOM ##########
+###############################
+def p_create_fake_bottom(p):
+    """create_fake_bottom :"""
+    poper.push(p[-1])
+
+
+def p_add_fake_bottom(p):
+    """erase_fake_bottom :"""
+    poper.pop()
+
+
 ####################################
 ######## ARRAYS ##########
 ####################################
@@ -992,14 +1005,14 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test8.mog", 'r')
+    f = open("test3.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
     error("No hay archivo para probar")
 
-parser.parse(r, debug=True)
-#parser.parse(r)
+#parser.parse(r, debug=True)
+parser.parse(r)
 print("Código Aceptado")
 
 for quad in quads:
