@@ -34,10 +34,13 @@ global current_scope
 global num_params
 global cont_temporals
 global elif_num
+global param_counter
+global function_id
 elif_num = 0
 current_scope = 'global'
 num_params = 0
 cont_temporals = 0
+param_counter = 0
 
 vControl = ""
 vFinal = ""
@@ -217,8 +220,8 @@ def p_vars3(p):
 
 
 def p_vars4(p):
-    '''vars4 :  tipoCompuesto ID new_variable vars2 SEMICOLON
-             |  tipoSimple ID new_variable vars3 SEMICOLON
+    '''vars4 :  VAR tipoCompuesto ID new_variable vars2 SEMICOLON vars4
+             |  VAR tipoSimple ID new_variable vars3 SEMICOLON vars4
              |  empty'''
 
 
@@ -344,12 +347,12 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   ID function_detection LEFTPARENTHESIS llamada2 RIGHTPARENTHESIS SEMICOLON"""
+    """llamada  :   ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON"""
 
 
 def p_llamada2(p):
-    """llamada2 :   exp llamada2
-                |   COMMA exp llamada2
+    """llamada2 :   exp verify_param llamada2
+                |   COMMA add_to_param_counter exp verify_param llamada2
                 |   empty"""
 
 
@@ -494,7 +497,11 @@ def p_error(p):
 
 def p_new_program(p):
     """new_program : """
+    # Generar el quad del main
     global fD
+    new_quad = quad.generate_quad("GOTO", None, None, None)
+    quads.append(new_quad)
+    stackJumps.push(new_quad.id)
 
 
 def p_save_program(p):
@@ -506,10 +513,9 @@ def p_save_program(p):
 # Generar el quad del main
 def p_np_main(p):
     """np_main : """
-    new_quad = quad.generate_quad("GOTO", None, None, None)
-    quads.append(new_quad)
-    stackJumps.push(new_quad.id)
-    ## TODO Okay pero aqui hay que darle direccion al main...o como lo vamos a manejar?
+    num_quad = stackJumps.pop() #it should always be 1
+    tmp_quad = quads[num_quad-1]
+    tmp_quad.fill_quad(len(quads) + 1)
 
 
 # Agregar Variable en Tabla
@@ -711,16 +717,7 @@ def p_add_operator_or(p):
             stackO.push(res[0])
             stack_type.push(res[1])
         else:
-            error("Operator type mismatched at line: " + str(p.lineno()))
-
-
-#  Neuralgic Point for function detection
-def p_function_detection(p):
-    """function_detection :"""
-    fD.get_function(p[-1], str(p.lexer.lineno))
-    # Verify function exists
-    # Start handling execution
-
+            error("Operator type mismatched at line: " + str(p.lineno()))    
 
 def p_generate_write_quad(p):
     """generate_write_quad :"""
@@ -981,6 +978,46 @@ def p_new_function(p):
     current_scope = p[-1]
     fD.add_function(p[-1], tmp_type)
 
+#  Neuralgic Point for function detection
+def p_function_detection(p):
+    """function_detection :"""
+    global param_counter, function_id
+    function_id = p[-1]
+    fD.get_function(function_id, str(p.lexer.lineno))
+    # Verify function exists
+    # Start handling execution
+    new_quad = quad.generate_quad("ERA", None, None, function_id)
+    quads.append(new_quad)
+    param_counter = 0
+
+def p_verify_param(p):
+    """verify_param : """
+    global param_counter, function_id
+    arg = stackO.pop()
+    arg_type = stack_type.pop()
+    if fD.function_table[function_id].parameter_table[param_counter] == arg_type:
+        new_quad = quad.generate_quad("PARAMETER",arg, None, "p+"[param_counter+1])
+        quads.append(new_quad)
+    else:
+        error("Type mismatched in parameters in scope " +  current_scope)
+
+def p_add_to_param_counter(p):
+    """add_to_param_counter : """
+    global param_counter
+    param_counter += 1
+
+def p_verify_coherence_of_params(p):
+    """verify_coherence_of_params : """
+    global param_counter
+    if param_counter == len(fD.function_table[function_id].parameter_table) :
+        pass
+    else:
+        error("Amount of parameters is incorrect for scope " + current_scope)
+
+def p_function_gosub(p):
+    """function_gosub : """
+    new_quad = quad.generate_quad("GOSUB", function_id, None, str(fD.function_table[function_id].starting_quadruple))
+    quads.append(new_quad)
 
 def p_np_end_func(p):
     """np_end_func : """
@@ -1012,7 +1049,7 @@ def find_column(input, token):
 
 
 parser = yacc.yacc()
-# parser = yacc.yacc(debug=True)
+#parser = yacc.yacc(debug=True)
 
 r = None
 try:
