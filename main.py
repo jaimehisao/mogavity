@@ -468,10 +468,10 @@ def p_expMD(p):
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
-                |   CTE_INT save_constant_int
-                |   CTE_FLOAT save_constant_float
-                |   CTE_CHAR save_constant_int
-                |   variable save_id
+                |   CTE_INT save_pvar save_constant_int
+                |   CTE_FLOAT save_pvar save_constant_float
+                |   CTE_CHAR save_pvar save_constant_int
+                |   variable save_pvar save_id
                 |   llamada'''
     pass
 
@@ -534,16 +534,17 @@ def p_new_variable_set_type(p):
 
 def p_save_id(p):
     """save_id :"""
-    address = fD.get_variable_address(current_scope, p[-1])
+    global pvar
+    address = fD.get_variable_address(current_scope, pvar)
     stackO.push(address)
-    var_type = fD.get_var_type(p[-1], current_scope)
+    var_type = fD.get_var_type(pvar, current_scope)
     stack_type.push(var_type)
 
 
 def p_save_constant_int(p):
     """save_constant_int : """
-    global tmp_int
-    tmp_int = int(p[-1])
+    global pvar
+    tmp_int = int(pvar)
     address = fD.get_constant(tmp_int)
     stackO.push(address)
     stack_type.push("int")
@@ -551,8 +552,8 @@ def p_save_constant_int(p):
 
 def p_save_constant_float(p):
     """save_constant_float : """
-    global tmp_float
-    tmp_float = float(p[-1])
+    global pvar
+    tmp_float = float(pvar)
     address = fD.get_constant(tmp_float)
     stackO.push(address)
     stack_type.push("float")  ## Maybe we can change this to our int operator codes.
@@ -1039,13 +1040,20 @@ def p_np_end_func(p):
 
 def p_end_func_return(p):
     """end_func_return : """
+    global pvar
     return_type = fD.function_table[current_scope].return_type   # Ver el tipo de retorno de la funcion
     address = fD.function_table["global"].add_variable(current_scope, return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
-    print(p[-1], p.lexer.lineno)
+    print(pvar, p.lexer.lineno)
     print(current_scope)
-    item_to_return = fD.get_variable_address(current_scope, p[-1])
+    item_to_return = fD.get_variable_address(current_scope, pvar)
     new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
     quads.append(new_quad)
+
+
+def p_save_pvar(p):
+    """save_pvar : """
+    global pvar
+    pvar = p[-1]
 
 
 #######################
