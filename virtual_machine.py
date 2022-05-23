@@ -25,6 +25,9 @@ class ExecutionMemory:
 global_memory = ExecutionMemory()
 local_memory = ExecutionMemory()
 
+memory_stack = []  # To store different memory segments
+pending_jumps = []  # Addresses to return to previous point of executions
+
 
 def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Quadruple]):
     print("")
@@ -42,6 +45,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
 
     #  Constants are stored in a table only inside the global scope, so we load them from here
     # print(global_scope.constants_table)
+    #####################
+    # LOADING CONSTANTS #
+    #####################
     for constant, addr in global_scope.constants_table.items():
         ## TODO make sure compatibility is validated.
         save_to_memory(addr, constant)
@@ -49,7 +55,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     # print(global_memory.scope_memory)
 
     while quadruples[instruction_pointer][1] != "EOF":
-        print("Quad", quadruples[instruction_pointer][0])
+        #print("Quad", quadruples[instruction_pointer][0])
         #print(global_memory.scope_memory)
         # quadruples[instruction_pointer].print_quad()
 
@@ -101,7 +107,6 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
-            print("Hey im hewre")
             value = bool(left < right)
             save_to_memory(res, value)
             instruction_pointer += 1
@@ -120,6 +125,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             value = bool(left != right)
             save_to_memory(res, value)
             instruction_pointer += 1
+        ############
+        # BOOLEANS #
+        ############
         elif quadruples[instruction_pointer][1] == "AND":
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
@@ -150,8 +158,28 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
                 continue
             else:
                 instruction_pointer += 1
-        elif quadruples[instruction_pointer][1] == "ENDFUNC":
+
+        #############
+        # FUNCTIONS #
+        #############
+        elif quadruples[instruction_pointer][1] == "PARAMETER":
+            # Obtain paramater index
+            paramIndex = quadruples[instruction_pointer][3] - 1 ## ???
+            value = get_var_from_address(quadruples[instruction_pointer][4])
+            # argument_value = extra_memory.get_value_by_address(curr_quad[1])
+            # Insert argument to formal param
+            save_to_memory(None, value) ## ADDRESS???
             instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "GOSUB":  # Need to asign ARGUMENTS  to PARAMETERS
+            # Save the current IP
+            pending_jumps.append(instruction_pointer)
+            # saltos.append(ip+1)
+            ip = quadruples[instruction_pointer][4] - 1  ## TODO REVISAR ESTE -1
+        elif quadruples[instruction_pointer][1] == "ENDFUNC":
+
+
+            instruction_pointer += 1
+
 
         #######
         # I/O #
