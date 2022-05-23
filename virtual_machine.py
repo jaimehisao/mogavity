@@ -44,7 +44,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     print("")
     print("")
     print("Starting the Mogavity Virtual Machine")
-    pending_jumps.append(len(quadruples)-1) #TODO parche
+    pending_jumps.append(len(quadruples)+1) #TODO parche
     ## Initial VM Declarations
 
     instruction_pointer = 0
@@ -209,8 +209,10 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             info("Function Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
             instruction_pointer = quadruples[instruction_pointer][4] - 1 # Send IP to Function Start
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
-            return_pointer = pending_jumps.pop()
-            info("End of function - returning Execution to quadruple" + str(return_pointer))
+            memory_stack.pop()  # Offload memory
+            print(memory_stack)
+            return_pointer = pending_jumps.pop() + 1
+            info("End of function - returning execution to quadruple " + str(return_pointer))
             instruction_pointer = return_pointer
         elif quadruples[instruction_pointer][1] == "RETURN":
             #  Guardar Valor de Retorno en Memoria global (hay que obtener direccion antes)
