@@ -995,7 +995,6 @@ def p_verify_param(p):
     global param_counter, function_id
     arg = stackO.pop()
     arg_type = stack_type.pop()
-
     if fD.function_table[function_id].parameter_table[param_counter-1] == arg_type:
         new_quad = quad.generate_quad("PARAMETER", arg, None, [param_counter+1])
         quads.append(new_quad)
