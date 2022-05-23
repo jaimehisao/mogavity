@@ -1,0 +1,14 @@
+program test;
+
+var int a, b, c, d;
+
+instr void local()
+{
+    var int a, b, c;
+    return 0;
+}
+
+main {
+    var a, b, c;
+    return 0;
+}
