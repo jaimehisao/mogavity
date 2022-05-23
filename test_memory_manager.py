@@ -4,8 +4,8 @@ Tests assigning new memory addresses to variables and constants, getting address
 """
 import memory_manager
 
-memory_manager = memory_manager.MemoryManager()
-
+memory_manager = memory_manager.MemoryManager(False)
+#TODO add test for globals
 
 def test_assign_new_int_address_in_interval():
     assigned_address = memory_manager.assign_new_int_address()
