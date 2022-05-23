@@ -10,7 +10,7 @@ class Function:
 
     #  Tables
     variable_table = {}  # id: Variable(id, type, address)
-    constants_table = {}  # key(constant): address
+    constants_table = {}  # key(constant): address (only in global)
     parameter_table = []  # [type1 ... typeN]
     resources_size = {}  # Dict to store the resources needed to calculate the workspace required
     starting_quadruple: int
@@ -40,17 +40,20 @@ class Function:
             + _type
         )
         if _type == "int":
+            address = self.memory_manager.assign_new_int_address()
             self.variable_table[identifier] = Variable(
-                identifier, _type, self.memory_manager.assign_new_int_address()
-            )
+                identifier, _type, address)
+            return address
         elif _type == "float":
+            address = self.memory_manager.assign_new_float()
             self.variable_table[identifier] = Variable(
-                identifier, _type, self.memory_manager.assign_new_float()
-            )
+                identifier, _type, address)
+            return address
         elif _type == "char":
+            address = self.memory_manager.assign_new_char()
             self.variable_table[identifier] = Variable(
-                identifier, _type, self.memory_manager.assign_new_char()
-            )
+                identifier, _type, address)
+            return address
 
     def get_constant(self, cte_value):
         if cte_value not in self.constants_table.keys():
@@ -195,12 +198,15 @@ class FunctionDirectory:
     def add_elements(self, identifier, elem_type):
         self.function_table = {"identifier": identifier, "type": elem_type}
 
-    def get_function(self, identifier, line_no):
+    def check_if_function_exists(self, identifier, line_no):
         if identifier not in self.function_table.keys():
             error("Function " + identifier + " on line " + line_no + " does not exist!")
 
+    def get_function(self, identifier) -> Function:
+        return self.function_table[identifier]
+
     def get_variable_address(self, scope, identifier):
-        print(scope, identifier, self.function_table[scope].variable_table.keys())
+        #print(scope, identifier, self.function_table[scope].variable_table.keys())
         return self.function_table[scope].variable_table[identifier].address
 
     #  TODO move to Function class
