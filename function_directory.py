@@ -88,6 +88,10 @@ class Function:
         else:
             error("Incorrect number of Parameters")
 
+    # Get the size of resources
+    def get_resources_size(self):
+        return self.resources_size["temporals"] + self.resources_size["vars"] + self.resources_size["params"]
+
 
 class Variable:
     id: str
