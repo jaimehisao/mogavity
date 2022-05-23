@@ -511,17 +511,6 @@ def p_np_main(p):
     stackJumps.push(new_quad.id)
 
 
-# Actions needed when a function ends
-def p_np_end_func(p):
-    """np_end_func : """
-    global cont_temporals
-    new_quad = quad.generate_quad("ENDFUNC", None, None, None)
-    quads.append(new_quad)
-    fD.function_table[current_scope].set_temporals(cont_temporals)
-    fD.function_table[current_scope].release_var_table()
-    cont_temporals = 0
-
-
 # Agregar Variable en Tabla
 def p_new_variable(p):
     """new_variable : """
@@ -535,15 +524,6 @@ def p_new_variable_set_type(p):
     global tmp_type
     if p[-1] is not None:
         tmp_type = p[-1]
-
-
-def p_new_function(p):
-    """new_function :"""
-    global current_scope, num_params, cont_temporals
-    num_params = 0
-    cont_temporals = 0
-    current_scope = p[-1]
-    fD.add_function(p[-1], tmp_type)
 
 
 def p_save_id(p):
@@ -588,6 +568,7 @@ def p_set_params(p):
 def p_set_number_params(p):
     """set_number_params : """
     fD.function_table[current_scope].set_params(num_params)
+    ## TODO a mi se me hace que esto es extra y podemos calcular el numero de params con len()
 
 
 # Save the initial address of the function with its quad
@@ -986,6 +967,33 @@ def p_np_while_3(p):
     tmp_quad.fill_quad(len(quads) + 1)
     # tmp_quad.print_quad()
 
+
+#############################
+######## FUNCTIONS ##########
+#############################
+def p_new_function(p):
+    """new_function :"""
+    global current_scope, num_params, cont_temporals
+    num_params = 0
+    cont_temporals = 0
+    current_scope = p[-1]
+    fD.add_function(p[-1], tmp_type)
+
+
+def p_np_end_func(p):
+    """np_end_func : """
+    global cont_temporals
+    new_quad = quad.generate_quad("ENDFUNC", None, None, None)
+    quads.append(new_quad)
+    fD.function_table[current_scope].set_temporals(cont_temporals)
+    fD.function_table[current_scope].release_var_table()
+    cont_temporals = 0
+
+
+
+#######################
+######## EOF ##########
+#######################
 
 def p_end_of_file(p):
     """end_of_file :"""

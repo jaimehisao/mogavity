@@ -7,11 +7,13 @@ from error_handling import error, warning, info
 class Function:
     id: str
     return_type: str
-    variable_table = {}
-    constants_table = {}
-    params = []   # We only need the amount of params, their type and their order
+
+    #  Tables
+    variable_table = {}  # id: Variable(id, type, address)
+    constants_table = {}  # key(constant): address
+    parameter_table = []  # [type1 ... typeN]
     resources_size = {}  # Dict to store the resources needed to calculate the workspace required
-    initial_address: str
+    starting_quadruple: int
     memory_manager: MemoryManager
 
     number_of_ints: int
@@ -20,6 +22,7 @@ class Function:
     def __init__(self, _id, return_type):
         self.variable_table = {}
         self.constants_table = {}
+        self.parameter_table = []
         self.id = _id
         self.return_type = return_type
         if _id == "global":
@@ -64,7 +67,7 @@ class Function:
 
     # Set the initial address (current quad)
     def set_initial_address(self, quad_id):
-        self.initial_address = quad_id
+        self.starting_quadruple = quad_id
 
     # Deletes the local var table
     def release_var_table(self):
@@ -76,12 +79,12 @@ class Function:
 
     # We add the type of parameter into our Params list
     def add_param(self, _type):
-        self.params.append(_type)
+        self.parameter_table.append(_type)
 
     # Set the amount of params defined
     def set_params(self, params):
-        if params == len(self.params):
-            self.resources_size["params"] = len([params]) # TODO parche
+        if params == len(self.parameter_table):
+            self.resources_size["params"] = len([params])  # TODO parche
         else:
             error("Incorrect number of Parameters")
 
@@ -172,8 +175,8 @@ class FunctionDirectory:
             return var_in_local_scope_type
         else:
             if (
-                var_in_global_scope_type is not None
-                and var_in_local_scope_type is not None
+                    var_in_global_scope_type is not None
+                    and var_in_local_scope_type is not None
             ):
                 warning("Variable " + identifier + " exists in global scope")
                 return var_in_local_scope_type  # Local Scope maintains preference over global scope
@@ -193,6 +196,7 @@ class FunctionDirectory:
 
     def get_variable_address(self, scope, identifier):
         return self.function_table[scope].variable_table[identifier].address
+
     #  TODO move to Function class
 
     def get_constant(self, cte_value):

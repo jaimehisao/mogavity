@@ -139,23 +139,30 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         # GOTO #
         ########
         elif quadruples[instruction_pointer][1] == "GOTO":
-            info("Changing IP based on GOTO to Q " + str(quadruples[instruction_pointer][4]))
+            info("GOTO detected, changing IP to quadruple " + str(quadruples[instruction_pointer][4]))
             instruction_pointer = quadruples[instruction_pointer][4]
         elif quadruples[instruction_pointer][1] == "GOTOF":
             # print("GOTOF",quadruples[instruction_pointer][2])
             #print("GOTOF VAL", get_var_from_address(quadruples[instruction_pointer][2]))
             if not get_var_from_address(quadruples[instruction_pointer][2]):
-                info("Changing IP to " + str(quadruples[instruction_pointer][4]))
-                instruction_pointer = quadruples[instruction_pointer][4] -1
+                info("GOTOF detected, changing IP to quadruple " + str(quadruples[instruction_pointer][4]))
+                instruction_pointer = quadruples[instruction_pointer][4] - 1
                 continue
             else:
                 instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
             instruction_pointer += 1
+
+        #######
+        # I/O #
+        #######
         elif quadruples[instruction_pointer][1] == "OUTPUT":
             print(str(get_var_from_address(quadruples[instruction_pointer][4])))
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":
+            #  here theres an issue, because if it is a constant, the address is generic and doesnt specify a type,
+            #  so we cant do a cast based on object type execpt if it comes with a specific address (we can do that later)
+            #  TODO force type compatibility on non constants based on recieved address.
             res = input()
             if is_digit(res):
                 res = int(res)
