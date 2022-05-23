@@ -1032,8 +1032,11 @@ def p_np_end_func(p):
     fD.function_table[current_scope].set_temporals(cont_temporals)
     #fD.function_table[current_scope].release_var_table() lo hacemos en maq virtual
     cont_temporals = 0
-    #TODO @clarissa aqui hay un caso de excepcion en el caso de que no haya operaciones y solo salga el enfcunc
 
+
+def p_end_func_return(p):
+    """end_func_return : """
+    pass
 
 
 #######################
