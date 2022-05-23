@@ -204,8 +204,8 @@ def p_constructor(p):
 
 # <VARS>
 def p_vars(p):
-    """vars :   VAR tipoCompuesto new_variable_set_type ID new_variable vars2 SEMICOLON vars4
-            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON vars4"""
+    """vars :   VAR tipoCompuesto new_variable_set_type ID new_variable vars2 SEMICOLON
+            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON """
 
 
 def p_vars2(p):
@@ -581,7 +581,8 @@ def p_set_number_params(p):
 # Save the initial address of the function with its quad
 def p_save_curr_quad(p):
     """save_curr_quad : """
-    fD.function_table[current_scope].set_initial_address(quads[-1].id + 1)
+    pass
+    #fD.function_table[current_scope].set_initial_address(quads[-1].id + 1)
 
 
 # Save the amount of local variables in DirFunc
@@ -865,7 +866,7 @@ def p_np_for_3(p):
             cont_temporals += 1
         new_quad = quad.generate_quad("=", exp, None, vFinal[0])
         quads.append(new_quad)
-        tmp_x = temp.get_temp("bool")  ## TODO en este casoi tienen que ser los mismos temps?
+        tmp_x = temp.get_temp("bool")
         if current_scope != "global":
             cont_temporals += 1
         new_quad = quad.generate_quad("<", vControl, vFinal[0], tmp_x[0])
@@ -1026,6 +1027,7 @@ def p_np_end_func(p):
     fD.function_table[current_scope].set_temporals(cont_temporals)
     fD.function_table[current_scope].release_var_table()
     cont_temporals = 0
+    #TODO @clarissa aqui hay un caso de excepcion en el caso de que no haya operaciones y solo salga el enfcunc
 
 
 
@@ -1051,7 +1053,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test3.mog", 'r')
+    f = open("test10.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
