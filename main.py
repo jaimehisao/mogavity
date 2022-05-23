@@ -996,7 +996,7 @@ def p_verify_param(p):
     arg = stackO.pop()
     arg_type = stack_type.pop()
     if fD.function_table[function_id].parameter_table[param_counter] == arg_type:
-        new_quad = quad.generate_quad("PARAMETER",arg, None, "p+"[param_counter+1])
+        new_quad = quad.generate_quad("PARAMETER",arg, None, "p"+str(param_counter+1))
         quads.append(new_quad)
     else:
         error("Type mismatched in parameters in scope " +  current_scope)
@@ -1053,7 +1053,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test9.mog", 'r')
+    f = open("test10.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
