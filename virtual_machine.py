@@ -184,11 +184,12 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         #############
         elif quadruples[instruction_pointer][1] == "PARAMETER":
             # Obtain paramater index
-            paramIndex = quadruples[instruction_pointer][3] - 1  ## ???
-            value = get_var_from_address(quadruples[instruction_pointer][4])
-            # argument_value = extra_memory.get_value_by_address(curr_quad[1])
-            # Insert argument to formal param
-            save_to_memory(None, value)  ## ADDRESS???
+            paramIndex = quadruples[instruction_pointer][2] - 1  ## ???
+            #print(current_local_memory.return_val())
+
+            origin_value = get_var_from_address(quadruples[instruction_pointer][2])
+            destination_address_in_new_scope = quadruples[instruction_pointer][4]
+            memory_stack[-1].insert(destination_address_in_new_scope, origin_value)
             instruction_pointer += 1
 
         elif quadruples[instruction_pointer][1] == "ERA":
@@ -224,7 +225,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         # I/O #
         #######
         elif quadruples[instruction_pointer][1] == "OUTPUT":
-            print(str(get_var_from_address(quadruples[instruction_pointer][4])))
+            #print(str(get_var_from_address(quadruples[instruction_pointer][4])))
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":
             #  here theres an issue, because if it is a constant, the address is generic and doesnt specify a type,
