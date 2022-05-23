@@ -66,7 +66,7 @@ class Function:
         self.resources_size["temporals"] = temporals
 
     # Set the initial address (current quad)
-    def set_initial_address(self, quad_id):
+    def set_quadruple(self, quad_id):
         self.starting_quadruple = quad_id
 
     # Deletes the local var table

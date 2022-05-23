@@ -67,9 +67,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     # print(global_memory.scope_memory)
 
     while quadruples[instruction_pointer][1] != "EOF":
-        print("Quad", quadruples[instruction_pointer][0])
+        #print("Quad", quadruples[instruction_pointer][0])
         #print(global_memory.scope_memory)
-        quadruples[instruction_pointer].print_quad()
+        #quadruples[instruction_pointer].print_quad()
 
         ##############
         # ASSIGNMENT #
@@ -187,6 +187,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             save_to_memory(None, value) ## ADDRESS???
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "GOSUB":  # Need to asign ARGUMENTS  to PARAMETERS
+            instruction_pointer += 1
+            continue
+
 
             #  Change memory to new function scope
             local_memory = memory_stack[-1]  # Load Function Memory
@@ -199,7 +202,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             # Save the current IP
             pending_jumps.append(instruction_pointer)
             # saltos.append(ip+1)
-            ip = quadruples[instruction_pointer][4] - 1  ## TODO REVISAR ESTE -1
+            instruction_pointer = quadruples[instruction_pointer][4] - 1  ## TODO REVISAR ESTE -1
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
 
             instruction_pointer += 1
