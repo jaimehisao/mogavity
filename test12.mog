@@ -1,0 +1,17 @@
+program test;
+
+var int a, b;
+
+main {
+    a = 1;
+    b = 2;
+
+    for(a=1;
+    a < 10;
+    a += 1){
+        b = b + 1;
+    }
+    output -> b;
+
+    return 0;
+}
