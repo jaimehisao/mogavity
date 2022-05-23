@@ -71,7 +71,8 @@ class Function:
 
     # Deletes the local var table
     def release_var_table(self):
-        self.variable_table.clear()
+        pass
+        #self.variable_table.clear()
 
     # Set the amount of local variables defined
     def set_vars(self):
@@ -195,6 +196,7 @@ class FunctionDirectory:
             error("Function " + identifier + " on line " + line_no + " does not exist!")
 
     def get_variable_address(self, scope, identifier):
+        print(scope, identifier, self.function_table[scope].variable_table.keys())
         return self.function_table[scope].variable_table[identifier].address
 
     #  TODO move to Function class
