@@ -393,7 +393,7 @@ def p_update(p):
 
 # <Return>
 def p_return(p):
-    """return   :   RETURN exp SEMICOLON"""
+    """return   :   RETURN exp end_func_return SEMICOLON"""
 
 
 # <Exp>
@@ -1036,7 +1036,12 @@ def p_np_end_func(p):
 
 def p_end_func_return(p):
     """end_func_return : """
-    pass
+    return_type = fD.function_table[current_scope].return_type
+    address = fD.function_table["global"].add_variable(current_scope, return_type) ## caso void?
+    print(p[-1], p.lexer.lineno)
+    item_to_return = fD.get_variable_address(current_scope, p[-1])
+    new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
+    quads.append(new_quad)
 
 
 #######################
