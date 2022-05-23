@@ -393,7 +393,7 @@ def p_update(p):
 
 # <Return>
 def p_return(p):
-    """return   :   RETURN exp SEMICOLON"""
+    """return   :   RETURN exp end_func_return SEMICOLON"""
 
 
 # <Exp>
@@ -542,6 +542,7 @@ def p_save_id(p):
 
 def p_save_constant_int(p):
     """save_constant_int : """
+    global tmp_int
     tmp_int = int(p[-1])
     address = fD.get_constant(tmp_int)
     stackO.push(address)
@@ -550,6 +551,7 @@ def p_save_constant_int(p):
 
 def p_save_constant_float(p):
     """save_constant_float : """
+    global tmp_float
     tmp_float = float(p[-1])
     address = fD.get_constant(tmp_float)
     stackO.push(address)
@@ -982,7 +984,7 @@ def p_function_detection(p):
     """function_detection :"""
     global param_counter, function_id
     function_id = p[-1]
-    fD.check_if_function_exists(function_id, str(p.lexer.lineno))
+    fD.check_if_exists(function_id)
     # Verify function exists
     # Start handling execution
     new_quad = quad.generate_quad("ERA", None, None, function_id)
