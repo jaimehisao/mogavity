@@ -44,6 +44,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     print("")
     print("")
     print("Starting the Mogavity Virtual Machine")
+    pending_jumps.append(len(quadruples)-1) #TODO parche
     ## Initial VM Declarations
 
     instruction_pointer = 0
@@ -186,7 +187,6 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             # Obtain paramater index
             paramIndex = quadruples[instruction_pointer][2] - 1  ## ???
             #print(current_local_memory.return_val())
-
             origin_value = get_var_from_address(quadruples[instruction_pointer][2])
             destination_address_in_new_scope = quadruples[instruction_pointer][4]
             memory_stack[-1].insert(destination_address_in_new_scope, origin_value)
@@ -206,17 +206,12 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         elif quadruples[instruction_pointer][1] == "GOSUB":  # Need to asign ARGUMENTS  to PARAMETERS
             # local_memory = memory_stack[-1]  # Load Function Memory
             pending_jumps.append(instruction_pointer + 1)  # Add where we are to return after execution
-
-            instruction_pointer = quadruples[instruction_pointer][4]  # Send IP to Function Start
-
-
-
-            # Save the current IP
-            # saltos.append(ip+1)
-            instruction_pointer = quadruples[instruction_pointer][4] - 1  ## TODO REVISAR ESTE -1
+            info("Function Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
+            instruction_pointer = quadruples[instruction_pointer][4] - 1 # Send IP to Function Start
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
-
-            instruction_pointer += 1
+            return_pointer = pending_jumps.pop()
+            info("End of function - returning Execution to quadruple" + str(return_pointer))
+            instruction_pointer = return_pointer
         elif quadruples[instruction_pointer][1] == "RETURN":
             #  Guardar Valor de Retorno en Memoria global (hay que obtener direccion antes)
             instruction_pointer += 1
