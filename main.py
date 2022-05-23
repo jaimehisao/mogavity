@@ -1025,7 +1025,7 @@ def p_np_end_func(p):
     new_quad = quad.generate_quad("ENDFUNC", None, None, None)
     quads.append(new_quad)
     fD.function_table[current_scope].set_temporals(cont_temporals)
-    fD.function_table[current_scope].release_var_table()
+    #fD.function_table[current_scope].release_var_table() lo hacemos en maq virtual
     cont_temporals = 0
     #TODO @clarissa aqui hay un caso de excepcion en el caso de que no haya operaciones y solo salga el enfcunc
 
@@ -1053,7 +1053,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test10.mog", 'r')
+    f = open("test9.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:

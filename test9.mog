@@ -8,7 +8,6 @@ instr void local()
     return 0;
 }
 
-main {
-    var a, b, c;
+main{
     return 0;
 }

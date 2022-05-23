@@ -44,11 +44,11 @@ class MemoryManager:
         self.assigned_constants = self.MAX_TEMPS + 1
         self.MAX_CONSTANTS = self.assigned_constants + MAX_PER_VAR - 1
 
-        print("int", str(self.assigned_ints), str(self.MAX_INTS))
-        print("float", str(self.assigned_floats), str(self.MAX_FLOATS))
-        print("char", str(self.assigned_chars), str(self.MAX_CHARS))
-        print("tmp", str(self.assigned_temps), str(self.MAX_TEMPS))
-        print("CTE", str(self.assigned_constants), str(self.MAX_CONSTANTS))
+        #print("int", str(self.assigned_ints), str(self.MAX_INTS))
+        #print("float", str(self.assigned_floats), str(self.MAX_FLOATS))
+        #print("char", str(self.assigned_chars), str(self.MAX_CHARS))
+        #print("tmp", str(self.assigned_temps), str(self.MAX_TEMPS))
+        #print("CTE", str(self.assigned_constants), str(self.MAX_CONSTANTS))
 
     def assign_new_int_address(self):
         if self.assigned_ints < self.MAX_INTS:
