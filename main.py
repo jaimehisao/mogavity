@@ -297,7 +297,6 @@ def p_asignacion(p):
         print("no addr?")
 
     new_quad = quad.generate_quad('=', exp, None, address)
-    print(address)
     # new_quad.print_quad()
     quads.append(new_quad)
 
@@ -521,7 +520,7 @@ def p_np_main(p):
 # Agregar Variable en Tabla
 def p_new_variable(p):
     """new_variable : """
-    print("TMP TYPE", tmp_type, "VAR", p[-1])
+    #print("TMP TYPE", tmp_type, "VAR", p[-1])
     fD.function_table[current_scope].add_variable(p[-1], tmp_type)
     # func_table.print_all_variable_tables()
 
@@ -635,7 +634,7 @@ def p_add_operator_multiplydivide(p):
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
-            new_quad.print_quad()
+            #new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(res[0])
             stack_type.push(res[1])
@@ -661,7 +660,7 @@ def p_add_operator_loop(p):
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
-            new_quad.print_quad()
+            #new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(temporal)
             stack_type.push(res[1])
@@ -982,12 +981,13 @@ def p_function_detection(p):
     """function_detection :"""
     global param_counter, function_id
     function_id = p[-1]
-    fD.get_function(function_id, str(p.lexer.lineno))
+    fD.check_if_function_exists(function_id, str(p.lexer.lineno))
     # Verify function exists
     # Start handling execution
     new_quad = quad.generate_quad("ERA", None, None, function_id)
     quads.append(new_quad)
     param_counter = 0
+
 
 def p_verify_param(p):
     """verify_param : """
@@ -995,7 +995,9 @@ def p_verify_param(p):
     arg = stackO.pop()
     arg_type = stack_type.pop()
     if fD.function_table[function_id].parameter_table[param_counter-1] == arg_type:
-        new_quad = quad.generate_quad("PARAMETER", arg, None, [param_counter+1])
+        print(function_id)
+        address_in_new_scope = fD.function_table[function_id].memory_manager.assign_new_temp()
+        new_quad = quad.generate_quad("PARAMETER", arg, None, address_in_new_scope)
         quads.append(new_quad)
     else:
         error("Type mismatched in parameters in scope " +  current_scope)
@@ -1009,7 +1011,7 @@ def p_add_to_param_counter(p):
 def p_verify_coherence_of_params(p):
     """verify_coherence_of_params : """
     global param_counter
-    print("param count", param_counter, "len", len(fD.function_table[function_id].parameter_table))
+    #print("param count", param_counter, "len", len(fD.function_table[function_id].parameter_table))
     if param_counter == len(fD.function_table[function_id].parameter_table):
         pass
     else:
@@ -1018,7 +1020,7 @@ def p_verify_coherence_of_params(p):
 
 def p_function_gosub(p):
     """function_gosub : """
-    new_quad = quad.generate_quad("GOSUB", function_id, None, str(fD.function_table[function_id].starting_quadruple))
+    new_quad = quad.generate_quad("GOSUB", function_id, None, fD.function_table[function_id].starting_quadruple)
     quads.append(new_quad)
 
 
