@@ -582,7 +582,7 @@ def p_set_number_params(p):
 def p_save_curr_quad(p):
     """save_curr_quad : """
     pass
-    #fD.function_table[current_scope].set_initial_address(quads[-1].id + 1)
+    #fD.function_table[current_scope].set_quadruple(quads[-1].id + 1)
 
 
 # Save the amount of local variables in DirFunc
