@@ -393,7 +393,7 @@ def p_update(p):
 
 # <Return>
 def p_return(p):
-    """return   :   RETURN exp end_func_return SEMICOLON"""
+    """return   :   RETURN exp SEMICOLON"""
 
 
 # <Exp>
@@ -717,6 +717,7 @@ def p_add_operator_or(p):
         else:
             error("Operator type mismatched at line: " + str(p.lineno()))    
 
+
 def p_generate_write_quad(p):
     """generate_write_quad :"""
     # When it is a string we can directly generate the quadm still we need to assign an address to the constant
@@ -1036,9 +1037,10 @@ def p_np_end_func(p):
 
 def p_end_func_return(p):
     """end_func_return : """
-    return_type = fD.function_table[current_scope].return_type
-    address = fD.function_table["global"].add_variable(current_scope, return_type) ## caso void?
+    return_type = fD.function_table[current_scope].return_type   # Ver el tipo de retorno de la funcion
+    address = fD.function_table["global"].add_variable(current_scope, return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
     print(p[-1], p.lexer.lineno)
+    print(current_scope)
     item_to_return = fD.get_variable_address(current_scope, p[-1])
     new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
     quads.append(new_quad)
