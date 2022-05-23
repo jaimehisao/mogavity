@@ -351,7 +351,7 @@ def p_llamada(p):
 
 
 def p_llamada2(p):
-    """llamada2 :   exp verify_param llamada2
+    """llamada2 :   add_to_param_counter exp verify_param llamada2
                 |   COMMA add_to_param_counter exp verify_param llamada2
                 |   empty"""
 
@@ -995,8 +995,9 @@ def p_verify_param(p):
     global param_counter, function_id
     arg = stackO.pop()
     arg_type = stack_type.pop()
-    if fD.function_table[function_id].parameter_table[param_counter] == arg_type:
-        new_quad = quad.generate_quad("PARAMETER",arg, None, "p+"[param_counter+1])
+
+    if fD.function_table[function_id].parameter_table[param_counter-1] == arg_type:
+        new_quad = quad.generate_quad("PARAMETER", arg, None, [param_counter+1])
         quads.append(new_quad)
     else:
         error("Type mismatched in parameters in scope " +  current_scope)
@@ -1006,18 +1007,22 @@ def p_add_to_param_counter(p):
     global param_counter
     param_counter += 1
 
+
 def p_verify_coherence_of_params(p):
     """verify_coherence_of_params : """
     global param_counter
-    if param_counter == len(fD.function_table[function_id].parameter_table) :
+    print("param count", param_counter, "len", len(fD.function_table[function_id].parameter_table))
+    if param_counter == len(fD.function_table[function_id].parameter_table):
         pass
     else:
         error("Amount of parameters is incorrect for scope " + current_scope)
+
 
 def p_function_gosub(p):
     """function_gosub : """
     new_quad = quad.generate_quad("GOSUB", function_id, None, str(fD.function_table[function_id].starting_quadruple))
     quads.append(new_quad)
+
 
 def p_np_end_func(p):
     """np_end_func : """
@@ -1053,7 +1058,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test9.mog", 'r')
+    f = open("test10.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
