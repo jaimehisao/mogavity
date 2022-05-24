@@ -241,7 +241,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         # I/O #
         #######
         elif quadruples[instruction_pointer][1] == "OUTPUT":
-            #print(str(get_var_from_address(quadruples[instruction_pointer][4])))
+            print(str(get_var_from_address(quadruples[instruction_pointer][4])))
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":
             #  here theres an issue, because if it is a constant, the address is generic and doesnt specify a type,
