@@ -11,8 +11,7 @@ instr int test(int alpha){
 }
 
 main {
-    test(1);
-    a = test(1);
+    a = _test();
     output -> a;
     return 0;
 }
