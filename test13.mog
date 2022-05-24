@@ -2,7 +2,7 @@ program test;
 
 var int a;
 
-instr int test(){
+instr int test(int alpha){
     var int a, b, c;
     a = 1 + 2;
     b = a + 1;
