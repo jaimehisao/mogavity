@@ -259,7 +259,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
 ###########
 # HELPERS #
 ###########
-
+## TODO validate no trash in var
 def get_var_from_address(address):
     # print("global", global_memory.return_val())
     # print("local", local_memory.return_val())
