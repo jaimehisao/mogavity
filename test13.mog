@@ -2,7 +2,7 @@ program test;
 
 var int a;
 
-instr int test(int alpha){
+instr int test(){
     var int a, b, c;
     a = 1 + 2;
     b = a + 1;
@@ -11,7 +11,8 @@ instr int test(int alpha){
 }
 
 main {
-    a = _test();
+    a = _test();;
+    a = 1 + 1;
     output -> a;
     return 0;
 }
