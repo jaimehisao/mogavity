@@ -80,6 +80,7 @@ tokens = [
     "SEMICOLON",
     "COLON",
     "COMMA",
+    "UNDERSCORE",
 ]
 # Tokens
 t_PLUS = r'\+'
@@ -114,6 +115,7 @@ t_DOT = r'\.'
 t_SEMICOLON = r';'
 t_COLON = r':'
 t_COMMA = r','
+t_UNDERSCORE = r'\_'
 
 # Reserved Keywords
 reserved = {
@@ -346,7 +348,7 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON"""
+    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON"""
 
 
 def p_llamada2(p):
