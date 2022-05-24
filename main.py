@@ -1109,7 +1109,7 @@ except FileNotFoundError:
     error("No hay archivo para probar")
 
 parser.parse(r, debug=True)
-parser.parse(r)
+#parser.parse(r)
 print("Código Aceptado")
 
 for quad in quads:

@@ -12,7 +12,6 @@ instr int test(){
 
 main {
     a = _test();;
-    a = 1 + 1;
     output -> a;
     return 0;
 }
