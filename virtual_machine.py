@@ -32,6 +32,7 @@ current_local_memory = ExecutionMemory(None)
 global_memory = ExecutionMemory("global")
 
 memory_stack = []  # To store different memory segments
+memory_stack.append(global_memory)
 pending_jumps = []  # Addresses to return to previous point of executions
 
 
@@ -44,7 +45,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     print("")
     print("")
     print("Starting the Mogavity Virtual Machine")
-    pending_jumps.append(len(quadruples)+1) #TODO parche
+    pending_jumps.append(len(quadruples)-1) #TODO parche
     ## Initial VM Declarations
 
     instruction_pointer = 0
@@ -208,14 +209,32 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             pending_jumps.append(instruction_pointer + 1)  # Add where we are to return after execution
             info("Function Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
             instruction_pointer = quadruples[instruction_pointer][4] - 1 # Send IP to Function Start
-        elif quadruples[instruction_pointer][1] == "ENDFUNC":
-            memory_stack.pop()  # Offload memory
-            print(memory_stack)
-            return_pointer = pending_jumps.pop() + 1
-            info("End of function - returning execution to quadruple " + str(return_pointer))
-            instruction_pointer = return_pointer
+
         elif quadruples[instruction_pointer][1] == "RETURN":
             #  Guardar Valor de Retorno en Memoria global (hay que obtener direccion antes)
+
+            destination = quadruples[instruction_pointer][4]
+            origin_address = quadruples[instruction_pointer][2]
+            origin_value = get_var_from_address(origin_address)
+            save_to_memory(destination, origin_value)
+            info("Saving return value in global memory")
+            instruction_pointer += 1
+
+        elif quadruples[instruction_pointer][1] == "ENDFUNC":
+            memory_stack.pop()  # Offload memory
+            return_pointer = pending_jumps.pop()
+            info("End of function - returning execution to quadruple " + str(return_pointer))
+            instruction_pointer = return_pointer
+
+
+        #######
+        # I/O #
+        #######
+        elif quadruples[instruction_pointer][1] == "VERIFY":
+
+            # Verificar out of bounds
+
+
             instruction_pointer += 1
 
         #######

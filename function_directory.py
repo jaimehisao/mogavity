@@ -101,11 +101,13 @@ class Variable:
     id: str
     type: str
     address: int
+    has_dimensions: bool
 
     def __init__(self, _id, _type, address):
         self.id = _id
         self.type = _type
         self.address = address
+
 
 
 class FunctionDirectory:

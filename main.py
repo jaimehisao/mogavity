@@ -468,10 +468,10 @@ def p_expMD(p):
 # <Factor>
 def p_factor(p):
     '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
-                |   CTE_INT save_pvar save_constant_int
-                |   CTE_FLOAT save_pvar save_constant_float
-                |   CTE_CHAR save_pvar save_constant_int
-                |   variable save_pvar save_id
+                |   CTE_INT save_pvar_int save_constant_int
+                |   CTE_FLOAT save_pvar_float save_constant_float
+                |   CTE_CHAR save_pvar_int save_constant_int
+                |   variable save_pvar_var save_id
                 |   llamada'''
     pass
 
@@ -831,6 +831,7 @@ def p_np_for_1(p):
     """np_for_1 : """
     print("ppppp", str(p[-1]))
     stackO.push(p[-1])  #### TODO
+    stackO.show_all()
     id_type = fD.get_var_type(p[-1], current_scope)
     # vailidate that tit is numeric, if not break (var we mean)
     if id_type == "int":
@@ -844,13 +845,12 @@ def p_np_for_2(p):
     global vControl
     exp_type = stack_type.pop()
     if exp_type != "int":
-        error("Type mismatch")
+        error("Type mismatch in linex " + str(p.lexer.lineno))
     else:
         exp = stackO.pop()
         vControl = stackO.top()
         control_type = stack_type.top()
-        _ = oracle.use_oracle(control_type, exp_type, "=")
-        #  Cubo semantico se encarga de errores aqui
+        _ = oracle.use_oracle(control_type, exp_type, "=")  # Cubo semantico se encarga de errores aqui
         new_quad = quad.generate_quad("=", exp, None, vControl)  ## Ahi va en none?
         quads.append(new_quad)
 
@@ -859,8 +859,9 @@ def p_np_for_3(p):
     """np_for_3 : """
     global cont_temporals
     exp_type = stack_type.pop()
+    print(exp_type)
     if exp_type != "int":
-        error("Type mismatch")
+        error("Type mismatch in linez " + str(p.lexer.lineno))
     else:
         exp = stackO.pop()
         vFinal = temp.get_temp(exp_type)
@@ -1042,18 +1043,36 @@ def p_end_func_return(p):
     """end_func_return : """
     global pvar
     return_type = fD.function_table[current_scope].return_type   # Ver el tipo de retorno de la funcion
+    if return_type == "void":
+        new_quad = quad.generate_quad("RETURN", None, None, None)
+    if type(pvar) == int:
+        item_to_return = fD.get_constant(pvar)
+    elif type(pvar) == float:
+        item_to_return = fD.get_constant(pvar)
+    else:
+        item_to_return = fD.get_variable_address(current_scope, pvar)
+
     address = fD.function_table["global"].add_variable(current_scope, return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
-    print(pvar, p.lexer.lineno)
-    print(current_scope)
-    item_to_return = fD.get_variable_address(current_scope, pvar)
     new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
     quads.append(new_quad)
 
 
-def p_save_pvar(p):
-    """save_pvar : """
+def p_save_pvar_int(p):
+    """save_pvar_int : """
+    global pvar
+    pvar = int(p[-1])
+
+
+def p_save_pvar_float(p):
+    """save_pvar_float : """
+    global pvar
+    pvar = float(p[-1])
+
+def p_save_pvar_var(p):
+    """save_pvar_var : """
     global pvar
     pvar = p[-1]
+
 
 
 #######################
@@ -1078,7 +1097,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test10.mog", 'r')
+    f = open("test13.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
