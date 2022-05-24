@@ -471,8 +471,9 @@ def p_factor(p):
                 |   CTE_INT save_pvar_int save_constant_int
                 |   CTE_FLOAT save_pvar_float save_constant_float
                 |   CTE_CHAR save_pvar_int save_constant_int
+                |   llamada
                 |   variable save_pvar_var save_id
-                |   llamada'''
+                '''
     pass
 
 
@@ -1068,10 +1069,12 @@ def p_save_pvar_float(p):
     global pvar
     pvar = float(p[-1])
 
+
 def p_save_pvar_var(p):
     """save_pvar_var : """
     global pvar
     pvar = p[-1]
+    #print("AAAAA",p[-3])
 
 
 
@@ -1103,7 +1106,7 @@ try:
 except FileNotFoundError:
     error("No hay archivo para probar")
 
-#parser.parse(r, debug=True)
+parser.parse(r, debug=True)
 parser.parse(r)
 print("Código Aceptado")
 
