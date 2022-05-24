@@ -5,13 +5,13 @@ var int a;
 instr int test(){
     var int a, b, c;
     a = 1 + 2;
-    b = 2;
+    b = a + 1;
     c = 3;
     return a;
 }
 
 main {
-    test();
+    a = test();
     output -> a;
     return 0;
 }
