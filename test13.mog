@@ -11,7 +11,7 @@ instr int test(){
 }
 
 main {
-    a = test();
+    a = _test();
     output -> a;
     return 0;
 }
