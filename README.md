@@ -13,3 +13,6 @@ Corregimos errores que nos generaban tanto la tabla de funciones como el cubo se
 
 ## Avance #5 Generación de Código para funciones 16/05/2022
 Para este avance terminamos la generación de código del FOR. Empezamos a implementar la generación de código para las funciones, todavía no lo completamos. Se creó la clase para el manejo de memoria. Ajustamos generacion de cuadruplos para asignar espacios de memoria. El directorio de funciones ya acepta constantes y los separa en su propia tabla. 
+
+## Avance #6 Ejecución de Expresiones y Estatutos Secuenciales. Mapa de Memoria en Ejecución 24/05/2022
+Para este avance terminamos la generación de código para las funciones. Dentro de la máquina virtual ya implementamos la ejecución de expresiones y estatutos secuenciales. También ya empezamos a implementar la ejecución para las funciones, sin embargo todavía no lo terminamos. El mapa de memoria en ejecución está casi completado, solo nos falta afinar unos detalles en cuanto a los parametros para ls funciones.
