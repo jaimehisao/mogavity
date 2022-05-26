@@ -11,7 +11,8 @@ class Function:
     #  Tables
     variable_table = {}  # id: Variable(id, type, address)
     constants_table = {}  # key(constant): address (only in global)
-    parameter_table = []  # [type1 ... typeN]
+    parameter_table_types = []  # [type1 ... typeN]
+    parameter_table = []  # (id, addr)
     resources_size = {}  # Dict to store the resources needed to calculate the workspace required
     starting_quadruple: int
     memory_manager: MemoryManager
@@ -22,6 +23,7 @@ class Function:
     def __init__(self, _id, return_type):
         self.variable_table = {}
         self.constants_table = {}
+        self.parameter_table_types = []
         self.parameter_table = []
         self.id = _id
         self.return_type = return_type
@@ -31,29 +33,30 @@ class Function:
             self.memory_manager = MemoryManager(False)
 
     def add_variable(self, identifier, _type):
-        logging.info(
-            "Added variable with ID "
-            + identifier
-            + " in Scope "
-            + self.id
-            + " and type "
-            + _type
-        )
+        address: str
         if _type == "int":
             address = self.memory_manager.assign_new_int_address()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
-            return address
         elif _type == "float":
             address = self.memory_manager.assign_new_float()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
-            return address
         elif _type == "char":
             address = self.memory_manager.assign_new_char()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
-            return address
+        logging.info(
+            "Added variable with ID "
+            + identifier
+            + " in scope "
+            + self.id
+            + " with type "
+            + _type
+            + " and address "
+            + str(address)
+        )
+        return address
 
     def get_constant(self, cte_value):
         if cte_value not in self.constants_table.keys():
@@ -83,11 +86,11 @@ class Function:
 
     # We add the type of parameter into our Params list
     def add_param(self, _type):
-        self.parameter_table.append(_type)
+        self.parameter_table_types.append(_type)
 
     # Set the amount of params defined
     def set_params(self, params):
-        if params == len(self.parameter_table):
+        if params == len(self.parameter_table_types):
             self.resources_size["params"] = len([params])  # TODO parche
         else:
             error("Incorrect number of Parameters")
@@ -208,9 +211,14 @@ class FunctionDirectory:
         return self.function_table[identifier]
 
     def get_variable_address(self, scope, identifier):
-        #print(scope, identifier, self.function_table[scope].variable_table.keys())
+        print(scope, identifier, self.function_table[scope].variable_table.keys())
         return self.function_table[scope].variable_table[identifier].address
 
+    def get_var_from_address(self, scope, address):
+        for key, item in self.function_table[scope].variable_table.items():
+            print("KEY AND ITEM", key, item.address)
+            if str(item.address) == str(address):
+                return item
     #  TODO move to Function class
 
     def get_constant(self, cte_value):

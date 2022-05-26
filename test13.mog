@@ -12,6 +12,7 @@ instr int test(){
 
 main {
     a = _test();;
+    output -> "abcd";
     output -> a;
     return 0;
 }

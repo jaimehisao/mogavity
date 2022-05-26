@@ -1,0 +1,21 @@
+program test;
+
+var int a, b;
+
+instr int test(int alpha){
+    var int a;
+    a = alpha + 1;
+    return a;
+}
+
+main {
+    b = 1;
+    a = b + _test(1);;
+    b = a + _test(1);;
+
+
+
+    output -> b;
+
+    return 0;
+}

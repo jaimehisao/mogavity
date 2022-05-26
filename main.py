@@ -251,9 +251,9 @@ def p_instr(p):
 
 
 # <Params>
-def p_params(p):
-    """params : tipoSimple new_variable_set_type set_params ID new_variable params
-    | COMMA tipoSimple new_variable_set_type set_params ID new_variable params
+def p_params(p): ## TODO AQUI ESTA EL ERROR
+    """params : tipoSimple new_variable_set_type set_params ID new_variable_param params
+    | COMMA tipoSimple new_variable_set_type set_params ID new_variable_param params
     | empty
     """
     pass
@@ -524,8 +524,16 @@ def p_np_main(p):
 def p_new_variable(p):
     """new_variable : """
     #print("TMP TYPE", tmp_type, "VAR", p[-1])
+    print("CURRENT SCOPE", current_scope, "VAR", p[-1])
     fD.function_table[current_scope].add_variable(p[-1], tmp_type)
-    # func_table.print_all_variable_tables()
+    #fD.function_table.print_all_variable_tables()
+
+
+def p_new_param_variable(p):
+    """new_variable_param : """
+    name = p[-1]
+    address = fD.function_table[current_scope].add_variable(name, tmp_type)
+    fD.function_table[current_scope].parameter_table.append(address)
 
 
 def p_new_variable_set_type(p):
@@ -572,6 +580,7 @@ def p_save_op(p):
 def p_set_params(p):
     """set_params : """
     global num_params
+    #global tmp_id
     fD.function_table[current_scope].add_param(tmp_type)
     num_params += 1
 
@@ -832,7 +841,6 @@ def p_np_else(p):
 ####################################
 def p_np_for_1(p):
     """np_for_1 : """
-    print("ppppp", str(p[-1]))
     stackO.push(p[-1])  #### TODO
     stackO.show_all()
     id_type = fD.get_var_type(p[-1], current_scope)
@@ -862,7 +870,6 @@ def p_np_for_3(p):
     """np_for_3 : """
     global cont_temporals
     exp_type = stack_type.pop()
-    print(exp_type)
     if exp_type != "int":
         error("Type mismatch in linez " + str(p.lexer.lineno))
     else:
@@ -984,6 +991,7 @@ def p_new_function(p):
     current_scope = p[-1]
     fD.add_function(p[-1], tmp_type)
 
+
 #  Neuralgic Point for function detection
 def p_function_detection(p):
     """function_detection :"""
@@ -1000,15 +1008,14 @@ def p_function_detection(p):
 def p_verify_param(p):
     """verify_param : """
     global param_counter, function_id
-    arg = stackO.pop()
+    original_address = stackO.pop()
     arg_type = stack_type.pop()
-    if fD.function_table[function_id].parameter_table[param_counter-1] == arg_type:
-        print(function_id)
-        address_in_new_scope = fD.function_table[function_id].memory_manager.assign_new_temp()
-        new_quad = quad.generate_quad("PARAMETER", arg, None, address_in_new_scope)
+    if fD.function_table[function_id].parameter_table_types[param_counter-1] == arg_type:
+        param_addr = fD.function_table[function_id].parameter_table[param_counter-1]
+        new_quad = quad.generate_quad("PARAMETER", original_address, None, param_addr)
         quads.append(new_quad)
     else:
-        error("Type mismatched in parameters in scope " +  current_scope)
+        error("Type mismatched in parameters in scope " + current_scope)
 
 def p_add_to_param_counter(p):
     """add_to_param_counter : """
@@ -1102,13 +1109,13 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test13.mog", 'r')
+    f = open("test14.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
     error("No hay archivo para probar")
 
-parser.parse(r, debug=True)
+parser.parse(r, debug=False)
 #parser.parse(r)
 print("Código Aceptado")
 

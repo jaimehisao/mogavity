@@ -6,6 +6,7 @@ Usage for the Compiler´s Design Course
 """
 import logging
 import sys
+logging.basicConfig(level=logging.WARNING)
 
 
 def error(message: str) -> None:
