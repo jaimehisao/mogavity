@@ -382,8 +382,10 @@ def p_update(p):
                 |   ID DIVIDEEQUAL CTE_INT"""
     global for_op
     global for_updater
+    print("p[-1]", p[3])
     if p[2] == "+=":
         for_op = "+"
+        print("+ assigned")
     elif p[2] == "-=":
         for_op = "-"
     elif p[2] == "*=":
@@ -500,7 +502,6 @@ def p_error(p):
 def p_new_program(p):
     """new_program : """
     # Generar el quad del main
-    global fD
     new_quad = quad.generate_quad("GOTO", None, None, None)
     quads.append(new_quad)
     stackJumps.push(new_quad.id)
@@ -841,10 +842,12 @@ def p_np_else(p):
 ####################################
 def p_np_for_1(p):
     """np_for_1 : """
-    stackO.push(p[-1])  #### TODO
-    stackO.show_all()
+    address = fD.get_variable_address(current_scope, p[-1])
+    stackO.push(address)
     id_type = fD.get_var_type(p[-1], current_scope)
     # vailidate that tit is numeric, if not break (var we mean)
+    print(id_type)
+    stack_type.show_all()
     if id_type == "int":
         stack_type.push(id_type)
     else:
@@ -863,12 +866,17 @@ def p_np_for_2(p):
         control_type = stack_type.top()
         _ = oracle.use_oracle(control_type, exp_type, "=")  # Cubo semantico se encarga de errores aqui
         new_quad = quad.generate_quad("=", exp, None, vControl)  ## Ahi va en none?
+        print("NP FOR 2 - Generated Quad")
+        new_quad.print_quad()
         quads.append(new_quad)
 
 
 def p_np_for_3(p):
     """np_for_3 : """
     global cont_temporals
+    stack_type.show_all()
+    stackO.show_all()
+    stack_type.pop() ## TODO PARCHE
     exp_type = stack_type.pop()
     if exp_type != "int":
         error("Type mismatch in linez " + str(p.lexer.lineno))
@@ -894,6 +902,7 @@ def p_np_for_4(p):
     """np_for_4 : """
     global cont_temporals
     tmp_y = temp.get_temp("int")
+    tmp_y = "F"
     if current_scope != "global":
         cont_temporals += 1
     new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y[0])
@@ -1063,7 +1072,11 @@ def p_end_func_return(p):
         item_to_return = fD.get_variable_address(current_scope, pvar)
 
     address = fD.function_table["global"].add_variable(current_scope, return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
-    new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
+    if address != "":
+        # Case of no return (mostly for main)
+        new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
+    else:
+        new_quad = quad.generate_quad("RETURN", item_to_return, None, None)
     quads.append(new_quad)
 
 
@@ -1109,7 +1122,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test14.mog", 'r')
+    f = open("test12.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -1130,3 +1143,10 @@ vm.start_virtual_machine(fD, quads)
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
+
+
+"""
+NOTAS
+
+A) 
+"""

@@ -33,7 +33,7 @@ class Function:
             self.memory_manager = MemoryManager(False)
 
     def add_variable(self, identifier, _type):
-        address: str
+        address = ""
         if _type == "int":
             address = self.memory_manager.assign_new_int_address()
             self.variable_table[identifier] = Variable(
