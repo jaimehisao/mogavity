@@ -214,7 +214,8 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
 
         elif quadruples[instruction_pointer][1] == "RETURN":
             #  Guardar Valor de Retorno en Memoria global (hay que obtener direccion antes)
-
+            instruction_pointer += 1
+            """
             destination = quadruples[instruction_pointer][4]
             if destination is None:
                 instruction_pointer += 1
@@ -228,6 +229,8 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             save_to_memory(destination, origin_value)
             info("Saving return value in global memory")
             instruction_pointer += 1
+            """
+
 
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
             return_pointer = 0

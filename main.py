@@ -1077,6 +1077,26 @@ def p_end_func_return(p):
             item_to_return = fD.get_constant(pvar)
         else:
             item_to_return = fD.get_variable_address(current_scope, pvar)
+        global_address = fD.function_table["global"].add_variable("global", return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
+        new_quad = quad.generate_quad("=", item_to_return, None, global_address)
+        quads.append(new_quad)
+        stackO.push(global_address)
+        stack_type.push("int")  ## TODO forzado a int
+        new_quad = quad.generate_quad("RETURN", None, None, global_address)
+        quads.append(new_quad)
+
+    """
+    return_type = fD.function_table[current_scope].return_type   # Ver el tipo de retorno de la funcion
+    if return_type == "void":
+        new_quad = quad.generate_quad("RETURN", None, None, None)
+        quads.append(new_quad)
+    else:
+        if type(pvar) == int:
+            item_to_return = fD.get_constant(pvar)
+        elif type(pvar) == float:
+            item_to_return = fD.get_constant(pvar)
+        else:
+            item_to_return = fD.get_variable_address(current_scope, pvar)
         print("CURRENT SCOPE ", return_type)
         address = fD.function_table[current_scope].add_variable(current_scope, return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
         print("Will return from scopee " + current_scope + " to scope " + last_scope + " with addr " + str(address))
@@ -1089,6 +1109,8 @@ def p_end_func_return(p):
         else:
             new_quad = quad.generate_quad("RETURN", item_to_return, None, None)
         quads.append(new_quad)
+    """
+
 
 
 def p_save_pvar_int(p):
