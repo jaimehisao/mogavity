@@ -8,6 +8,9 @@ class Stack:
         #print('added ' + value)
         self.stack.append(value)
 
+    def size(self):
+        return len(self.stack)
+
     # pop es la función para eliminar el último elemento que se agregó a la pila
     # la función pop() de List tiene la misma función que buscamos
     # tenemos que checar primero si la pila tiene elementos para poder hacer el pop

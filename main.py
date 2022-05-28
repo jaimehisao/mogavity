@@ -36,8 +36,10 @@ global cont_temporals
 global elif_num
 global param_counter
 global function_id
+global last_scope
 elif_num = 0
 current_scope = 'global'
+last_scope = ""
 num_params = 0
 cont_temporals = 0
 param_counter = 0
@@ -274,11 +276,11 @@ def p_bloque2(p):
 
 # <Estatuto>
 def p_estatuto(p):
-    """estatuto :   asignacion
+    """estatuto :   llamada
+                |   asignacion
                 |   condicion
                 |   escritura
                 |   lectura
-                |   llamada
                 |   cicloW
                 |   cicloFor
                 |   return
@@ -383,10 +385,8 @@ def p_update(p):
                 |   ID DIVIDEEQUAL CTE_INT"""
     global for_op
     global for_updater
-    print("p[-1]", p[3])
     if p[2] == "+=":
         for_op = "+"
-        print("+ assigned")
     elif p[2] == "-=":
         for_op = "-"
     elif p[2] == "*=":
@@ -517,7 +517,8 @@ def p_save_program(p):
 # Generar el quad del main
 def p_np_main(p):
     """np_main : """
-    global current_scope
+    global current_scope, last_scope
+    last_scope = current_scope
     current_scope = "global"
     num_quad = stackJumps.pop() #it should always be 1
     tmp_quad = quads[num_quad-1]
@@ -758,7 +759,8 @@ def p_np_print(p):
 
 def p_change_scope(p):
     """change_scope : """
-    global current_scope
+    global current_scope, last_scope
+    last_scope = current_scope
     current_scope = p[-1]
 
 
@@ -996,9 +998,10 @@ def p_np_while_3(p):
 #############################
 def p_new_function(p):
     """new_function :"""
-    global current_scope, num_params, cont_temporals
+    global current_scope, num_params, cont_temporals, last_scope
     num_params = 0
     cont_temporals = 0
+    last_scope = current_scope
     current_scope = p[-1]
     fD.add_function(p[-1], tmp_type)
 
@@ -1059,27 +1062,33 @@ def p_np_end_func(p):
     #fD.function_table[current_scope].release_var_table() lo hacemos en maq virtual
     cont_temporals = 0
 
-
+## TODO VALIDAR RETORNO Y TIPO DE RETORNO
 def p_end_func_return(p):
     """end_func_return : """
-    global pvar
+    global pvar, function_calls
     return_type = fD.function_table[current_scope].return_type   # Ver el tipo de retorno de la funcion
     if return_type == "void":
         new_quad = quad.generate_quad("RETURN", None, None, None)
-    if type(pvar) == int:
-        item_to_return = fD.get_constant(pvar)
-    elif type(pvar) == float:
-        item_to_return = fD.get_constant(pvar)
+        quads.append(new_quad)
     else:
-        item_to_return = fD.get_variable_address(current_scope, pvar)
-
-    address = fD.function_table["global"].add_variable(current_scope, return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
-    if address != "":
-        # Case of no return (mostly for main)
-        new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
-    else:
-        new_quad = quad.generate_quad("RETURN", item_to_return, None, None)
-    quads.append(new_quad)
+        if type(pvar) == int:
+            item_to_return = fD.get_constant(pvar)
+        elif type(pvar) == float:
+            item_to_return = fD.get_constant(pvar)
+        else:
+            item_to_return = fD.get_variable_address(current_scope, pvar)
+        print("CURRENT SCOPE ", return_type)
+        address = fD.function_table[current_scope].add_variable(current_scope, return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
+        print("Will return from scopee " + current_scope + " to scope " + last_scope + " with addr " + str(address))
+        if address != "":
+            # Case of no return (mostly for main)
+            new_quad = quad.generate_quad("RETURN", item_to_return, None, address)
+            stackO.push(address)
+            print(str(address) + str(" aaaaaa"))
+            stack_type.push(address)
+        else:
+            new_quad = quad.generate_quad("RETURN", item_to_return, None, None)
+        quads.append(new_quad)
 
 
 def p_save_pvar_int(p):
@@ -1124,7 +1133,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test9.mog", 'r')
+    f = open("tests/returnValueTest.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -1150,5 +1159,15 @@ vm.start_virtual_machine(fD, quads)
 """
 NOTAS
 
-A) 
+A) El problewma pasa al retornar y asignar variable a llamada el de ;;
+B) No podemos hacer operaciones como a = _local() + 1;;
+
+instr void local2()
+{
+    var int a, b, c;
+    a = 3;
+    output -> "Should output 3";
+    output -> a;
+    return 0;
+}
 """
