@@ -226,13 +226,21 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             instruction_pointer += 1
 
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
-            memory_stack.pop()  # Offload memory
-            new_memory = memory_stack.top()
-            current_local_memory = new_memory
-            return_pointer = pending_jumps.pop()
-            info("End of function - returning execution to quadruple " + str(return_pointer))
-            instruction_pointer = return_pointer
-
+            return_pointer = 0
+            if not (memory_stack.size() <= 1):
+                memory_stack.pop()  # Offload memory
+                #print("TRASHED MEM")
+                #print(trashed_mem.return_val())
+                new_memory = memory_stack.top()
+                #print("NEW MEM")
+                #print(new_memory.return_val())
+                current_local_memory = new_memory
+                return_pointer = pending_jumps.pop()
+                info("End of function - returning execution to quadruple " + str(return_pointer))
+                instruction_pointer = return_pointer
+                continue
+            info("End of Program")
+            instruction_pointer += 1
 
         #######
         # I/O #
@@ -248,6 +256,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         # I/O #
         #######
         elif quadruples[instruction_pointer][1] == "OUTPUT":
+            #print(current_local_memory.return_val())
             print(str(get_var_from_address(quadruples[instruction_pointer][4])))
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":

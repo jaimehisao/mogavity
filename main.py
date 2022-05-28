@@ -245,8 +245,9 @@ def p_tipoSimple(p):
 # TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func
-    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func
+    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
+    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
+    | empty
     """
 
 
@@ -516,6 +517,8 @@ def p_save_program(p):
 # Generar el quad del main
 def p_np_main(p):
     """np_main : """
+    global current_scope
+    current_scope = "global"
     num_quad = stackJumps.pop() #it should always be 1
     tmp_quad = quads[num_quad-1]
     tmp_quad.fill_quad(len(quads) + 1)
@@ -882,18 +885,18 @@ def p_np_for_3(p):
         error("Type mismatch in linez " + str(p.lexer.lineno))
     else:
         exp = stackO.pop()
-        vFinal = temp.get_temp(exp_type)
+        vFinal = fD.function_table[current_scope].memory_manager.assign_new_temp()
         if current_scope != "global":
             cont_temporals += 1
-        new_quad = quad.generate_quad("=", exp, None, vFinal[0])
+        new_quad = quad.generate_quad("=", exp, "vFinal", vFinal)
         quads.append(new_quad)
-        tmp_x = temp.get_temp("bool")
+        tmp_x = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("bool")
         if current_scope != "global":
             cont_temporals += 1
-        new_quad = quad.generate_quad("<", vControl, vFinal[0], tmp_x[0])
+        new_quad = quad.generate_quad("<", vControl, vFinal, tmp_x)
         quads.append(new_quad)
         stackJumps.push(len(quads))
-        new_quad = quad.generate_quad("GOTOF", tmp_x[0], None, None)
+        new_quad = quad.generate_quad("GOTOF", tmp_x, None, None)
         quads.append(new_quad)
         stackJumps.push(len(quads) - 1)
 
@@ -901,16 +904,15 @@ def p_np_for_3(p):
 def p_np_for_4(p):
     """np_for_4 : """
     global cont_temporals
-    tmp_y = temp.get_temp("int")
-    tmp_y = "F"
+    tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("int")
     if current_scope != "global":
         cont_temporals += 1
-    new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y[0])
+    new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y)
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
-    new_quad = quad.generate_quad("=", tmp_y[0], None, vControl)
+    new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl) ## TODO REMOVE 3 rd val
     quads.append(new_quad)
-    new_quad = quad.generate_quad("=", tmp_y[0], None, stackO.pop())  # stackO.pop() has to be the original ID
+    new_quad = quad.generate_quad("=", tmp_y, "STACK 0. pop", stackO.pop())  # stackO.pop() has to be the original ID
     quads.append(new_quad)
     final = stackJumps.pop()
     ret = stackJumps.pop()
@@ -1122,7 +1124,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test12.mog", 'r')
+    f = open("test9.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
