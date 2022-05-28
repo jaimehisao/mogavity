@@ -249,10 +249,10 @@ def p_instr(p):
     | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
     | empty
     """
-
+##  TODO INSTR modificado para soportar la declaracion de multiples funciones
 
 # <Params>
-def p_params(p): ## TODO AQUI ESTA EL ERROR
+def p_params(p):
     """params : tipoSimple new_variable_set_type set_params ID new_variable_param params
     | COMMA tipoSimple new_variable_set_type set_params ID new_variable_param params
     | empty
