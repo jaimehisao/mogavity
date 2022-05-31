@@ -4,9 +4,10 @@ Created by Clarissa V, and Hisao Y
 March 2022
 Usage for the Compiler´s Design Course
 """
+from re import M
 import ply.yacc as yacc
 import ply.lex as lex
-from function_directory import FunctionDirectory as fD
+from function_directory import FunctionDirectory as fD, NodeArray
 from quadruple import Quadruple
 from temporal import Temporal
 from Stack import Stack
@@ -222,7 +223,7 @@ def p_vars2(p):
 
 
 def p_vars3(p):
-    '''vars3 :  LEFTBRACKET CTE_INT RIGHTBRACKET vars3
+    '''vars3 :  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address add_dim vars3
              |  COMMA ID new_variable vars3
              |  empty'''
 
@@ -1192,6 +1193,65 @@ def p_save_pvar_var(p):
     #print("AAAAA",p[-3])
 
 
+#############################
+########## ARRAYS ###########
+#############################
+def p_set_array(p):
+    """set_array : """
+    global id_array
+    if p[-3] is None:
+        return
+    id_array = p[-3]
+    fD.function_table[current_scope].set_array(id_array)
+
+def p_set_dim_and_r(p):
+    """set_dim_and_r : """
+    global dim, r
+    dim = 1
+    r = 1
+
+def p_set_limits(p):
+    """set_limits : """
+    global r, id_array
+    node = NodeArray()
+    node.lim_inf = 0
+    node.lim_sup = int(p[-1])
+    r = (node.lim_sup - node.lim_inf + 1) * r
+    fD.function_table[current_scope].add_node(id_array, node)
+
+def p_add_dim(p):
+    """add_dim : """
+    global dim, id_array
+    dim += 1
+    next_node = NodeArray()
+    last_node = fD.function_table[current_scope].get_last_node(id_array)
+    last_node.next_node = next_node
+    
+def p_set_each_node(p):
+    """set_each_node : """
+    global dim, id_array, r, offset, size, k
+    last_node = fD.function_table[current_scope].get_last_node(id_array)
+    last_node.next_node = None
+    node = fD.function_table[current_scope].get_first_node(id_array)
+    dim = 1
+    offset = 0
+    size = r
+    while(node.next_node is not None) :
+        node.m = r / (node.lim_sup - node.lim_inf + 1)
+        r = node.m
+        offset = offset + node.lim_inf * node.m
+        dim += 1
+        node = node.next_node
+    k = offset
+    node.k = k
+
+def p_set_virtual_address(p):
+    """set_virtual_address : """
+    global next_virtual_address, id_array, size
+    next_virtual_address = fD.get_variable_address(current_scope, id_array) + size
+    var_type = fD.get_var_type(id_array, current_scope)
+    fD.function_table[current_scope].memory_manager.set_new_virtual_address(var_type, next_virtual_address)
+
 
 #######################
 ######## EOF ##########
@@ -1232,7 +1292,7 @@ for quad in quads:
 
 vm.start_virtual_machine(fD, quads)
 
-# print(vars(func_table.function_table))
+#print(vars(fD.function_table["global"].variable_table["A"]))
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.

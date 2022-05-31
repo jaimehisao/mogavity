@@ -85,6 +85,17 @@ class MemoryManager:
             return assigned
         error("Too much Constants, please optimize your operations!")
 
+    def set_new_virtual_address(self, type, new_address):
+        if type == "int":
+            if self.assigned_ints < self.MAX_INTS:
+                self.assigned_ints = new_address
+        elif type == "float":
+            if self.assigned_floats < self.MAX_FLOATS:
+                self.assigned_floats = new_address
+        else:
+            if self.assigned_chars < self.MAX_CHARS:
+                self.assigned_chars = new_address
+
     def get_variable_type_from_address(self, address):
         """
         Returns the type of a variable, in string, depending on the address given.

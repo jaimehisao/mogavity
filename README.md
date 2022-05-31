@@ -16,3 +16,6 @@ Para este avance terminamos la generación de código del FOR. Empezamos a imple
 
 ## Avance #6 Ejecución de Expresiones y Estatutos Secuenciales. Mapa de Memoria en Ejecución 24/05/2022
 Para este avance terminamos la generación de código para las funciones. Dentro de la máquina virtual ya implementamos la ejecución de expresiones y estatutos secuenciales. También ya empezamos a implementar la ejecución para las funciones, sin embargo todavía no lo terminamos. El mapa de memoria en ejecución está casi completado, solo nos falta afinar unos detalles en cuanto a los parametros para ls funciones.
+
+## Avance #7 Generación de Código de Arreglos y Ejecución de Condicionales 30/05/2022
+Para este avance implementamos la generación de código para arreglos. Se realizó la implementación de recursividad. La máquina virtual ya maneja diferentes alcances, es decir que ya puede despertar y dormir memoria para las diferentes funciones. Añadiendo a eso, ya guardamos los valores de retorno para cada llamda de función. También ya terminamos de implementar la generación de código de las funciones. 
