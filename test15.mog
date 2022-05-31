@@ -1,0 +1,7 @@
+program test;
+
+var int A[5];
+
+main {
+    return 0;
+}

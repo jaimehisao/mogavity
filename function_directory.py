@@ -1,8 +1,23 @@
 import logging
+from tkinter.ttk import Sizegrip
 from memory_manager import MemoryManager
 
 from error_handling import error, warning, info
 
+class NodeArray:
+    m: int
+    k: int
+    lim_inf: int
+    lim_sup: int
+    next_node = None
+    
+    def __init__(self, r = 0, m = 0, k = 0, lim_inf = 0, lim_sup = 0, next_node = None) -> None:
+        self.r = r
+        self.m = m
+        self.k = k
+        self.lim_inf = lim_inf
+        self.lim_sup = lim_sup
+        self.next_node = next_node
 
 class Function:
     id: str
@@ -99,18 +114,36 @@ class Function:
     def get_resources_size(self):
         return self.resources_size["temporals"] + self.resources_size["vars"] + self.resources_size["params"]
 
+    # Mark the variable as an array
+    def set_array(self, identifier):
+        self.variable_table[identifier].has_dimensions = True
+
+    # Store the node within the array variable
+    def add_node(self, identifier, node : NodeArray):
+        self.variable_table[identifier].nodes.append(node)
+
+    # Get the first node of the array varible
+    def get_first_node(self, identifier):
+        return self.variable_table[identifier].nodes[0]
+
+    # Get the last node of the array varible
+    def get_last_node(self, identifier):
+        return self.variable_table[identifier].nodes[-1]
+
 
 class Variable:
     id: str
     type: str
     address: int
     has_dimensions: bool
+    nodes = []  # NodeArray
 
-    def __init__(self, _id, _type, address):
+    def __init__(self, _id, _type, address, has_dimensions = False):
         self.id = _id
         self.type = _type
         self.address = address
-
+        self.has_dimensions = has_dimensions
+        self.nodes = []
 
 
 class FunctionDirectory:
