@@ -1196,6 +1196,8 @@ def p_save_pvar_var(p):
 def p_set_array(p):
     """set_array : """
     global id_array
+    if p[-3] is None:
+        return
     id_array = p[-3]
     fD.function_table[current_scope].set_array(id_array)
 
@@ -1287,7 +1289,7 @@ for quad in quads:
 
 vm.start_virtual_machine(fD, quads)
 
-# print(vars(func_table.function_table))
+#print(vars(fD.function_table["global"].variable_table["A"]))
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
