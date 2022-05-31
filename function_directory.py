@@ -175,9 +175,11 @@ class FunctionDirectory:
         # self.function_table[scope].variable_table[identifier].address)
 
     def print_variable_table(self, current_scope):
-        info(str(self.function_table[current_scope].variable_table))
+        pass
+        #info(str(self.function_table[current_scope].variable_table))
 
     def print_all_variable_tables(self):
+        pass
         for key, value in self.function_table.items():
             print(key, " : ", value.variable_table)
 
@@ -244,7 +246,7 @@ class FunctionDirectory:
         return self.function_table[identifier]
 
     def get_variable_address(self, scope, identifier):
-        print(scope, identifier, self.function_table[scope].variable_table.keys())
+        #print(scope, identifier, self.function_table[scope].variable_table.keys())
         return self.function_table[scope].variable_table[identifier].address
 
     def get_var_from_address(self, scope, address):
