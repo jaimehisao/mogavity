@@ -75,7 +75,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     while quadruples[instruction_pointer][1] != "EOF":
         #print("Quad", quadruples[instruction_pointer][0])
         # rint(global_memory.scope_memory)
-        quadruples[instruction_pointer].print_quad()
+        #quadruples[instruction_pointer].print_quad()
         global current_local_memory
 
         ##############
@@ -236,13 +236,13 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             return_pointer = 0
             if not (memory_stack.size() <= 1):
                 trashed_mem = memory_stack.pop()  # Offload memory
-                print("TRASHED MEM " + trashed_mem.id)
-                print(trashed_mem.return_val())
+                #print("TRASHED MEM " + trashed_mem.id)
+                #print(trashed_mem.return_val())
                 new_memory = memory_stack.top()
-                print("NEW MEM " + new_memory.id)
-                print(new_memory.return_val())
-                print("GLOBAL MEM")
-                print(global_memory.return_val())
+                #print("NEW MEM " + new_memory.id)
+                #print(new_memory.return_val())
+               # print("GLOBAL MEM")
+                #print(global_memory.return_val())
                 current_local_memory = new_memory
                 return_pointer = pending_jumps.pop()
                 info("End of function - returning execution to quadruple " + str(return_pointer))
