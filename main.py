@@ -21,12 +21,15 @@ fD = fD()
 quad = Quadruple(0, "", "", "", "")
 temp = Temporal()
 
-poper = Stack()
-stackO = Stack()
-stack_type = Stack()
-stackJumps = Stack()
 
-memory = Stack()
+###################
+##### STACKS ######
+###################
+poper = Stack()  # Operator Stack
+stackO = Stack()  # Operand Stack
+stack_type = Stack()  # Type Stack
+stackJumps = Stack()  # Jump Stack
+memory = Stack()  # Memory Stack ()?
 
 quads = []
 
@@ -276,8 +279,8 @@ def p_bloque2(p):
 
 # <Estatuto>
 def p_estatuto(p):
-    """estatuto :   llamada
-                |   asignacion
+    """estatuto :   asignacion
+                |   llamada
                 |   condicion
                 |   escritura
                 |   lectura
@@ -298,10 +301,13 @@ def p_asignacion(p):
     address = 0
     if fD.get_var_type(p[1], current_scope):
         address = fD.get_variable_address(current_scope, p[1])
+        print("ADDRESS FOR ", p[1], "in scope", current_scope, "is", address)
     else:
         print("no addr?")
 
     new_quad = quad.generate_quad('=', exp, None, address)
+    print("ASIGN QUAD")
+    new_quad.print_quad()
     # new_quad.print_quad()
     quads.append(new_quad)
 
@@ -529,7 +535,7 @@ def p_np_main(p):
 def p_new_variable(p):
     """new_variable : """
     #print("TMP TYPE", tmp_type, "VAR", p[-1])
-    print("CURRENT SCOPE", current_scope, "VAR", p[-1])
+    #print("CURRENT SCOPE", current_scope, "VAR", p[-1])
     fD.function_table[current_scope].add_variable(p[-1], tmp_type)
     #fD.function_table.print_all_variable_tables()
 
@@ -1004,6 +1010,8 @@ def p_new_function(p):
     last_scope = current_scope
     current_scope = p[-1]
     fD.add_function(p[-1], tmp_type)
+    if tmp_type != "void":
+        fD.function_table["global"].add_variable(p[-1], tmp_type)
 
 
 #  Neuralgic Point for function detection
@@ -1049,8 +1057,14 @@ def p_verify_coherence_of_params(p):
 
 def p_function_gosub(p):
     """function_gosub : """
-    new_quad = quad.generate_quad("GOSUB", function_id, None, fD.function_table[function_id].starting_quadruple)
-    quads.append(new_quad)
+    gosub_quad = quad.generate_quad("GOSUB", function_id, None, fD.function_table[function_id].starting_quadruple)
+    quads.append(gosub_quad)
+    new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    function_global_address = fD.get_variable_address("global", function_id)
+    guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
+    quads.append(guadalupano_quad)
+    stackO.push(new_temp)
+    stack_type.push(fD.function_table[function_id].return_type)
 
 
 def p_np_end_func(p):
@@ -1062,9 +1076,43 @@ def p_np_end_func(p):
     #fD.function_table[current_scope].release_var_table() lo hacemos en maq virtual
     cont_temporals = 0
 
+
 ## TODO VALIDAR RETORNO Y TIPO DE RETORNO
 def p_end_func_return(p):
     """end_func_return : """
+
+    # Obtain the function's return type
+    return_type = fD.function_table[current_scope].return_type
+
+    # Caso Void
+    if return_type == "void":
+        new_quad = quad.generate_quad("RETURN", None, None, None)
+        quads.append(new_quad)
+
+    # Caso valor de Retorno
+    else:
+        actual_return_type = pvar
+        if actual_return_type == "int" or actual_return_type == "float":
+            item_to_return = fD.get_constant(pvar)
+        else:
+            actual_return_type = fD.get_var_type(pvar, current_scope)
+            item_to_return = fD.get_variable_address(current_scope, pvar)
+
+        _ = oracle.use_oracle(return_type, actual_return_type, "=")  # Validate if the girl dances with the old guy
+
+        function_global_address = fD.get_variable_address("global", current_scope)
+        equal_global_quad = quad.generate_quad("=", item_to_return, "RETURN QUAD TO EQUAL TO GLOBAL ADDR", function_global_address)  # TODO REMOVE 3rd VAL
+        quads.append(equal_global_quad)
+        temporal_quad = quad.generate_quad("RETURN", None, None, function_global_address)
+        quads.append(temporal_quad)
+
+
+        # Parche Guadalupano Milagroso
+
+
+
+
+    """
     global pvar, function_calls
     return_type = fD.function_table[current_scope].return_type   # Ver el tipo de retorno de la funcion
     if return_type == "void":
@@ -1077,13 +1125,22 @@ def p_end_func_return(p):
             item_to_return = fD.get_constant(pvar)
         else:
             item_to_return = fD.get_variable_address(current_scope, pvar)
-        global_address = fD.function_table["global"].add_variable("global", return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
+        global_address = fD.function_table["global"].add_variable("RET" + str(len(quads)), return_type) ## caso void? Generar direccion en momoria global donde guardaremos resultado
         new_quad = quad.generate_quad("=", item_to_return, None, global_address)
         quads.append(new_quad)
+        print("QUAD ADDED FOR RETURN ")
+        new_quad.print_quad()
+        print("GLOBAL ADDR ", str(global_address))
         stackO.push(global_address)
+        print("O STACK")
+        stackO.show_all()
         stack_type.push("int")  ## TODO forzado a int
         new_quad = quad.generate_quad("RETURN", None, None, global_address)
         quads.append(new_quad)
+    """
+
+
+
 
     """
     return_type = fD.function_table[current_scope].return_type   # Ver el tipo de retorno de la funcion
@@ -1155,7 +1212,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("tests/returnValueTest.mog", 'r')
+    f = open("tests/singleFunctionCall.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:

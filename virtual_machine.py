@@ -265,7 +265,6 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         # I/O #
         #######
         elif quadruples[instruction_pointer][1] == "OUTPUT":
-            print(current_local_memory.return_val())
             print(str(get_var_from_address(quadruples[instruction_pointer][4])))
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":
