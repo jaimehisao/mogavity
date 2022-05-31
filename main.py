@@ -212,7 +212,8 @@ def p_constructor(p):
 # <VARS>
 def p_vars(p):
     """vars :   VAR tipoCompuesto new_variable_set_type ID new_variable vars2 SEMICOLON
-            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON """
+            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON
+            | empty """
 
 
 def p_vars2(p):
@@ -251,8 +252,8 @@ def p_tipoSimple(p):
 # <Instr>
 def p_instr(p):
     """instr : INSTR VOID ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
-    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
-    | empty
+              | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
+              | empty
     """
 ##  TODO INSTR modificado para soportar la declaracion de multiples funciones
 
@@ -274,7 +275,7 @@ def p_bloque(p):
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
                 |   empty'''
-    # print('here')
+    print('here')
 
 
 # <Estatuto>
@@ -325,7 +326,7 @@ def p_variable(p):
 def p_condicion(p):
     """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque np_if_2
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque condicion2"""
-    # print('here?2342423')
+    print('here?2342423')
 
 
 def p_condicion2(p):
@@ -489,17 +490,19 @@ def p_factor(p):
 
 
 def p_error(p):
-    """
-    If there is an error, the parser will resort to this instruction to inform of it.
-    :param p:
-    :return:
-    """
+
+    # get formatted representation of stack
+    stack_state_str = ' '.join([symbol.type for symbol in parser.symstack][1:])
     if p == None:
         token = "end of file"
     else:
         token = f"({p.value}) on line {p.lineno}"
+    print('Syntax error in input! Parser State:{} {} . {}'
+          .format(parser.state,
+                  stack_state_str,
+                  p))
     error("Syntax error on " + token)
-    exit()
+
 
 
 ########################################################
@@ -1212,7 +1215,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("tests/singleFunctionCall.mog", 'r')
+    f = open("tests/simpleRecursion.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
