@@ -246,12 +246,40 @@ class FunctionDirectory:
         return self.function_table[identifier]
 
     def get_variable_address(self, scope, identifier):
-        #print(scope, identifier, self.function_table[scope].variable_table.keys())
-        return self.function_table[scope].variable_table[identifier].address
+        # Check for variable in global scope
+        print("SCOPE", scope, "ID", identifier)
+        print(self.function_table["global"].variable_table.keys())
+        var_in_global_scope_address = None
+        var_in_local_scope_address = None
+        if scope != "global":
+            if identifier in self.function_table["global"].variable_table.keys():
+                var_in_global_scope_address = self.function_table["global"].variable_table[identifier].address
+                print("var_in_global_scope_address", var_in_global_scope_address)
+            else:
+                info("Var " + identifier + " is not in global scope!")
+        # Check for variable in local scope
+        if identifier in self.function_table[scope].variable_table.keys():
+            var_in_local_scope_address = self.function_table[scope].variable_table[identifier].address
+            print("var_in_local_scope_address", var_in_local_scope_address)
+        if scope == "global":
+            return var_in_local_scope_address
+        else:
+            if (
+                    var_in_global_scope_address is not None
+                    and var_in_local_scope_address is not None
+            ):
+                warning("Variable " + identifier + " exists in global scope")
+                return var_in_local_scope_address  # Local Scope maintains preference over global scope
+            elif var_in_local_scope_address is not None:
+                return var_in_local_scope_address
+            elif var_in_global_scope_address is not None:
+                return var_in_global_scope_address
+            else:
+                error("Variable " + identifier + " has not been declared previously!")
 
     def get_var_from_address(self, scope, address):
         for key, item in self.function_table[scope].variable_table.items():
-            print("KEY AND ITEM", key, item.address)
+            #print("KEY AND ITEM", key, item.address)
             if str(item.address) == str(address):
                 return item
     #  TODO move to Function class

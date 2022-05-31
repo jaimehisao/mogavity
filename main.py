@@ -375,14 +375,14 @@ def p_cicloW(p):
 
 # <CicloFor>
 def p_cicloFor(p):
-    """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4"""
+    """cicloFor :   FOR LEFTPARENTHESIS assign_for SEMICOLON exp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4"""
     # print('f')
 
 
 # TODO: update assign diagram
 # <Assign>
-def p_assign(p):
-    """assign   :   ID np_for_1 ASSIGNMENT exp np_for_2"""
+def p_assign_for(p):
+    """assign_for   :   ID np_for_1 ASSIGNMENT exp np_for_2"""
 
 
 # <Update>
@@ -853,6 +853,26 @@ def p_np_else(p):
 
 
 ####################################
+######### PUNTOS DEL FOR NUEVOS ###########
+####################################
+
+def p_for_declaration(p):
+
+    control_var = p[-1]
+
+    # Check if control var exists in either the local or global scope
+
+
+
+
+
+
+
+
+
+
+
+####################################
 ######### PUNTOS DEL FOR ###########
 ####################################
 def p_np_for_1(p):
@@ -919,7 +939,11 @@ def p_np_for_4(p):
     tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("int")
     if current_scope != "global":
         cont_temporals += 1
-    new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y)
+
+    for_updater_constant = fD.get_constant(for_updater)
+    new_quad = quad.generate_quad(for_op, vControl, for_updater_constant, tmp_y)
+
+
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
     new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl) ## TODO REMOVE 3 rd val
@@ -1275,7 +1299,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("tests/simpleRecursion.mog", 'r')
+    f = open("tests/for.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -1283,11 +1307,16 @@ except FileNotFoundError:
 
 parser.parse(r, debug=False)
 #parser.parse(r)
+print("")
+print("")
+print("")
+print("")
 print("Código Aceptado")
 
+print("====================================")
 for quad in quads:
     quad.print_quad()
-
+print("====================================")
 #  Prepare to pass code to virtual machine
 
 vm.start_virtual_machine(fD, quads)
