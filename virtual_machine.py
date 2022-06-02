@@ -77,18 +77,18 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         quadruples[instruction_pointer].print_quad()
         global current_local_memory
 
-        ##############
-        # ASSIGNMENT #
-        ##############
+        ################
+        ## ASSIGNMENT ##
+        ################
         if quadruples[instruction_pointer][1] == "=":
             value = get_var_from_address(quadruples[instruction_pointer][2])
             addr = quadruples[instruction_pointer][4]
             save_to_memory(addr, value)
             instruction_pointer += 1
 
-        ##############
-        # ARITHMETIC #
-        ##############
+        ################
+        ## ARITHMETIC ##
+        ################
         elif quadruples[instruction_pointer][1] == "+":
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
@@ -118,9 +118,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             save_to_memory(res, value)
             instruction_pointer += 1
 
-        ##############
-        # COMPARISON #
-        ##############
+        ################
+        ## COMPARISON ##
+        ################
         elif quadruples[instruction_pointer][1] == "<":
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
@@ -143,9 +143,10 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             value = bool(left != right)
             save_to_memory(res, value)
             instruction_pointer += 1
-        ############
-        # BOOLEANS #
-        ############
+
+        ##############
+        ## BOOLEANS ##
+        ##############
         elif quadruples[instruction_pointer][1] == "AND":
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
@@ -161,9 +162,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             save_to_memory(res, value)
             instruction_pointer += 1
 
-        ########
-        # GOTO #
-        ########
+        ##########
+        ## GOTO ##
+        ##########
         elif quadruples[instruction_pointer][1] == "GOTO":
             # if quadruples[instruction_pointer][4] is not None:
             info("GOTO detected, changing IP to quadruple " + str(quadruples[instruction_pointer][4] - 1))
@@ -178,9 +179,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             else:
                 instruction_pointer += 1
 
-        #############
-        # FUNCTIONS #
-        #############
+        ###############
+        ## FUNCTIONS ##
+        ###############
         elif quadruples[instruction_pointer][1] == "PARAMETER":
             # Obtain paramater index
             paramIndex = quadruples[instruction_pointer][2] - 1  ## ???
@@ -229,16 +230,16 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             info("End of Program")
             instruction_pointer += 1
 
-        #######
-        # I/O #
-        #######
+        ############
+        ## ARRAYS ##
+        ############
         elif quadruples[instruction_pointer][1] == "VERIFY":
             # Verifiy if array element is out of bounds before accessing.
             instruction_pointer += 1
 
-        #######
-        # I/O #
-        #######
+        #########
+        ## I/O ##
+        #########
         elif quadruples[instruction_pointer][1] == "OUTPUT":
             print(str(get_var_from_address(quadruples[instruction_pointer][4])))
             instruction_pointer += 1
