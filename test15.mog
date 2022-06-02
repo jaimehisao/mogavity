@@ -1,7 +1,9 @@
 program test;
 
-var int A[5][2];
+var int A[5];
 
 main {
+    A[2] = 7;
+    output -> A[2];
     return 0;
 }

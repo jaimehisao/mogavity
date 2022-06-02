@@ -4,6 +4,7 @@ Created by Clarissa V, and Hisao Y
 March 2022
 Usage for the Compiler´s Design Course
 """
+from audioop import mul
 from re import M
 import ply.yacc as yacc
 import ply.lex as lex
@@ -31,6 +32,7 @@ stackO = Stack()  # Operand Stack
 stack_type = Stack()  # Type Stack
 stackJumps = Stack()  # Jump Stack
 memory = Stack()  # Memory Stack ()?
+stack_dim = Stack()  # Dimension Stack
 
 quads = []
 
@@ -222,9 +224,10 @@ def p_vars2(p):
 
 
 def p_vars3(p):
-    '''vars3 :  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address add_dim vars3
-             |  COMMA ID new_variable vars3
-             |  empty'''
+    '''vars3 :  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address vars5
+             |  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node LEFTBRACKET CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address vars5
+             |  ID new_variable vars5
+             |  vars5'''
 
 
 def p_vars4(p):
@@ -232,6 +235,9 @@ def p_vars4(p):
              |  VAR tipoSimple ID new_variable vars3 SEMICOLON vars4
              |  empty'''
 
+def p_vars5(p):
+    '''vars5 :  COMMA vars3
+             |  empty'''
 
 # <TipoCompuesto>
 def p_tipoCompuesto(p):
@@ -290,19 +296,22 @@ def p_estatuto(p):
                 |   return
     """
 
-
+#TODO: Check how to see if we are using assingment with a temporal pointer, idea: check stackO.size like in generate_write_quad
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
     # print(p[1])
-    # print(stackO.top())
+    print(stackO.size())
     exp = stackO.pop()
+    is_array = fD.function_table[current_scope].variable_table[p[1]].has_dimensions
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     address = 0
-    if fD.get_var_type(p[1], current_scope):
+    if fD.get_var_type(p[1], current_scope) and (is_array == False):
         address = fD.get_variable_address(current_scope, p[1])
         print("ADDRESS FOR ", p[1], "in scope", current_scope, "is", address)
+    elif is_array and int(stackO.top()) >= 100000:
+        address = stackO.top()
     else:
         print("no addr?")
 
@@ -317,9 +326,12 @@ def p_asignacion(p):
 def p_variable(p):
     """variable :   ID
                 |   ID DOT ID
-                |   ID LEFTBRACKET exp RIGHTBRACKET
-                |   ID LEFTBRACKET exp RIGHTBRACKET LEFTBRACKET exp RIGHTBRACKET"""
+                |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call"""
     p[0] = p[1]
+
+def p_variable2(p):
+    """variable2 :  LEFTBRACKET verify_dims exp RIGHTBRACKET array_quads update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call
+                 |  empty"""
 
 
 # <Condicion>
@@ -558,6 +570,8 @@ def p_new_variable_set_type(p):
 def p_save_id(p):
     """save_id :"""
     global pvar
+    if stackO.is_Empty() == False:
+        return
     address = fD.get_variable_address(current_scope, pvar)
     stackO.push(address)
     var_type = fD.get_var_type(pvar, current_scope)
@@ -1212,7 +1226,7 @@ def p_set_limits(p):
     global r, id_array
     node = NodeArray()
     node.lim_inf = 0
-    node.lim_sup = int(p[-1])
+    node.lim_sup = int(p[-1]) - 1
     r = (node.lim_sup - node.lim_inf + 1) * r
     fD.function_table[current_scope].add_node(id_array, node)
 
@@ -1249,6 +1263,69 @@ def p_set_virtual_address(p):
     var_type = fD.get_var_type(id_array, current_scope)
     fD.function_table[current_scope].memory_manager.set_new_virtual_address(var_type, next_virtual_address)
 
+def p_add_array_id(p):
+    """add_array_id : """
+    if fD.function_table["global"].variable_table[p[-1]].has_dimensions:
+        stackO.push(p[-1])
+        var_type = fD.get_var_type(p[-1], current_scope)
+        stack_type.push(var_type)
+
+def p_verify_dims(p):
+    """verify_dims : """
+    global dim, array_id, array_var
+    array_id = stackO.pop()
+    array_type = stack_type.pop()
+    array_var = fD.function_table[current_scope].variable_table[array_id]
+    if array_var.has_dimensions:
+        dim = 1
+        stack_dim.push((array_id, dim))
+        poper.push("(") # FakeBottom
+
+def p_array_quads(p):
+    """array_quads : """
+    global array_id, dim, node, array_var
+    node = fD.function_table[current_scope].get_first_node(array_id)
+    verify_quad = quad.generate_quad("VER", stackO.top(), node.lim_inf, node.lim_sup) 
+    quads.append(verify_quad)
+
+    if node.next_node is not None:
+        aux = stackO.pop()
+        new_temp = temp.get_temp(array_var.type)
+        temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
+        multiply_m_quad = quad.generate_quad("*", aux, node.m, temporal) # Sn * mn
+        quads.append(multiply_m_quad)
+        stackO.push(new_temp[0])
+
+    if dim > 1:
+        aux2 = stackO.pop()
+        aux1 = stackO.pop()
+        new_temp = temp.get_temp(array_var.type)
+        temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
+        add_dims_quad = quad.generate_quad("+", aux1, aux2, temporal)   # Sn * mn + Sx
+        quads.append(add_dims_quad)
+        stackO.push(new_temp[0])
+
+def p_update_dim(p):
+    """update_dim : """
+    global dim, array_id, node
+    dim += 1
+    stack_dim.push((array_id, dim))
+    node = node.next_node
+
+def p_end_array_call(p):
+    """end_array_call : """
+    global array_var, node
+    aux1 = stackO.pop()
+    new_temp = temp.get_temp(array_var.type)
+    temporal1 = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    add_offset_quad = quad.generate_quad("+", aux1, node.k, temporal1)
+    quads.append(add_offset_quad)
+    address_temp = temp.get_temp(array_var.type)
+    temporal2 = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    add_base_address_quad = quad.generate_quad("+", temporal1, fD.get_variable_address(current_scope, array_id), temporal2)
+    quads.append(add_base_address_quad)
+    stackO.push(temporal2)
+    poper.pop()
 
 #######################
 ######## EOF ##########
@@ -1287,7 +1364,7 @@ for quad in quads:
 
 #  Prepare to pass code to virtual machine
 
-vm.start_virtual_machine(fD, quads)
+#vm.start_virtual_machine(fD, quads)
 
 #print(vars(fD.function_table["global"].variable_table["A"]))
 
