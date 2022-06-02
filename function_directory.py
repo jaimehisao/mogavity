@@ -213,7 +213,7 @@ class FunctionDirectory:
                     self.function_table["global"].variable_table[identifier].type
                 )
             else:
-                info("Var " + identifier + " is not in global scope!")
+                info("Var " + str(identifier) + " is not in global scope!")
         # Check for variable in local scope
         if identifier in self.function_table[scope].variable_table.keys():
             var_in_local_scope_type = (
@@ -233,7 +233,7 @@ class FunctionDirectory:
             elif var_in_global_scope_type is not None:
                 return var_in_global_scope_type
             else:
-                error("Variable " + identifier + " has not been declared previously!")
+                error("Variable " + str(identifier) + " has not been declared previously!")
 
     def add_elements(self, identifier, elem_type):
         self.function_table = {"identifier": identifier, "type": elem_type}
@@ -245,22 +245,22 @@ class FunctionDirectory:
     def get_function(self, identifier) -> Function:
         return self.function_table[identifier]
 
-    def get_variable_address(self, scope, identifier):
+    def get_variable_address(self, identifier, scope):
         # Check for variable in global scope
         print("SCOPE", scope, "ID", identifier)
-        print(self.function_table["global"].variable_table.keys())
+        #print(self.function_table["global"].variable_table.keys())
         var_in_global_scope_address = None
         var_in_local_scope_address = None
         if scope != "global":
             if identifier in self.function_table["global"].variable_table.keys():
                 var_in_global_scope_address = self.function_table["global"].variable_table[identifier].address
-                print("var_in_global_scope_address", var_in_global_scope_address)
+                #print("var_in_global_scope_address", var_in_global_scope_address)
             else:
                 info("Var " + identifier + " is not in global scope!")
         # Check for variable in local scope
         if identifier in self.function_table[scope].variable_table.keys():
             var_in_local_scope_address = self.function_table[scope].variable_table[identifier].address
-            print("var_in_local_scope_address", var_in_local_scope_address)
+            #print("var_in_local_scope_address", var_in_local_scope_address)
         if scope == "global":
             return var_in_local_scope_address
         else:
@@ -276,6 +276,7 @@ class FunctionDirectory:
                 return var_in_global_scope_address
             else:
                 error("Variable " + identifier + " has not been declared previously!")
+
 
     def get_var_from_address(self, scope, address):
         for key, item in self.function_table[scope].variable_table.items():
