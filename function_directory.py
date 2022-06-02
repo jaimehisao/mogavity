@@ -4,20 +4,41 @@ from memory_manager import MemoryManager
 
 from error_handling import error, warning, info
 
-class NodeArray:
+
+class NodeArray:  # TODO More descriptive name
     m: int
     k: int
     lim_inf: int
     lim_sup: int
     next_node = None
-    
-    def __init__(self, r = 0, m = 0, k = 0, lim_inf = 0, lim_sup = 0, next_node = None) -> None:
+
+    def __init__(self, r=0, m=0, k=0, lim_inf=0, lim_sup=0, next_node=None) -> None:
         self.r = r
         self.m = m
         self.k = k
         self.lim_inf = lim_inf
         self.lim_sup = lim_sup
         self.next_node = next_node
+
+
+class Class:
+    id: str
+    attributes: {}
+    methods: {}
+
+    def __init__(self, _id):
+        self.id = _id
+        self.attributes = {}
+        self.methods = {}
+
+    def add_class_attribute(self, _id, _type, address):
+        tmp_attr = Variable(_id, _type, address)
+        self.attributes[_id] = tmp_attr
+
+    def add_class_method(self, _id, return_type):
+        tmp_method = Function(_id, return_type)
+        self.methods[_id] = tmp_method
+
 
 class Function:
     id: str
@@ -93,7 +114,7 @@ class Function:
     # Deletes the local var table
     def release_var_table(self):
         pass
-        #self.variable_table.clear()
+        # self.variable_table.clear()
 
     # Set the amount of local variables defined
     def set_vars(self):
@@ -119,7 +140,7 @@ class Function:
         self.variable_table[identifier].has_dimensions = True
 
     # Store the node within the array variable
-    def add_node(self, identifier, node : NodeArray):
+    def add_node(self, identifier, node: NodeArray):
         self.variable_table[identifier].nodes.append(node)
 
     # Get the first node of the array varible
@@ -138,7 +159,7 @@ class Variable:
     has_dimensions: bool
     nodes = []  # NodeArray
 
-    def __init__(self, _id, _type, address, has_dimensions = False):
+    def __init__(self, _id, _type, address, has_dimensions=False):
         self.id = _id
         self.type = _type
         self.address = address
@@ -175,8 +196,8 @@ class FunctionDirectory:
         # self.function_table[scope].variable_table[identifier].address)
 
     def print_variable_table(self, current_scope):
-        pass
-        #info(str(self.function_table[current_scope].variable_table))
+        print(str(self.function_table[current_scope].variable_table))
+        print(self.function_table[current_scope].variable_table["A"].address)
 
     def print_all_variable_tables(self):
         pass
@@ -248,19 +269,19 @@ class FunctionDirectory:
     def get_variable_address(self, identifier, scope):
         # Check for variable in global scope
         print("SCOPE", scope, "ID", identifier)
-        #print(self.function_table["global"].variable_table.keys())
+        # print(self.function_table["global"].variable_table.keys())
         var_in_global_scope_address = None
         var_in_local_scope_address = None
         if scope != "global":
             if identifier in self.function_table["global"].variable_table.keys():
                 var_in_global_scope_address = self.function_table["global"].variable_table[identifier].address
-                #print("var_in_global_scope_address", var_in_global_scope_address)
+                # print("var_in_global_scope_address", var_in_global_scope_address)
             else:
                 info("Var " + identifier + " is not in global scope!")
         # Check for variable in local scope
         if identifier in self.function_table[scope].variable_table.keys():
             var_in_local_scope_address = self.function_table[scope].variable_table[identifier].address
-            #print("var_in_local_scope_address", var_in_local_scope_address)
+            # print("var_in_local_scope_address", var_in_local_scope_address)
         if scope == "global":
             return var_in_local_scope_address
         else:
@@ -277,12 +298,12 @@ class FunctionDirectory:
             else:
                 error("Variable " + identifier + " has not been declared previously!")
 
-
     def get_var_from_address(self, scope, address):
         for key, item in self.function_table[scope].variable_table.items():
-            #print("KEY AND ITEM", key, item.address)
+            # print("KEY AND ITEM", key, item.address)
             if str(item.address) == str(address):
                 return item
+
     #  TODO move to Function class
 
     def get_constant(self, cte_value):

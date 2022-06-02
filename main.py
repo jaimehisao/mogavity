@@ -330,6 +330,7 @@ def p_variable(p):
                 |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call"""
     p[0] = p[1]
 
+
 def p_variable2(p):
     """variable2 :  LEFTBRACKET verify_dims exp RIGHTBRACKET array_quads update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call
                  |  empty"""
@@ -1379,6 +1380,7 @@ def p_verify_dims(p):
         dim = 1
         stack_dim.push((array_id, dim))
         poper.push("(") # FakeBottom
+
 
 def p_array_quads(p):
     """array_quads : """
