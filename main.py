@@ -584,8 +584,8 @@ def p_new_variable_set_type(p):
 def p_save_id(p):
     """save_id :"""
     global pvar
-    # if stackO.is_Empty() == False:
-    #     return
+    if stackO.is_Empty() == False:
+        return
     address = fD.get_variable_address(pvar, current_scope)
     stackO.push(address)
     var_type = fD.get_var_type(pvar, current_scope)
@@ -1423,7 +1423,8 @@ def p_end_array_call(p):
     quads.append(add_offset_quad)
     address_temp = temp.get_temp(array_var.type)
     temporal2 = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    add_base_address_quad = quad.generate_quad("+", temporal1, fD.get_variable_address(array_id, current_scope), temporal2)
+    base_address_cte = fD.get_constant(fD.get_variable_address(array_id, current_scope))
+    add_base_address_quad = quad.generate_quad("+", temporal1, base_address_cte, temporal2)
     quads.append(add_base_address_quad)
     stackO.push(temporal2)
     poper.pop()
