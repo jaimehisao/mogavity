@@ -1385,7 +1385,7 @@ def p_array_quads(p):
     """array_quads : """
     global array_id, dim, node, array_var
     node = fD.function_table[current_scope].get_first_node(array_id)
-    verify_quad = quad.generate_quad("VER", stackO.top(), node.lim_inf, node.lim_sup) 
+    verify_quad = quad.generate_quad("VERIFY", stackO.top(), node.lim_inf, node.lim_sup) 
     quads.append(verify_quad)
 
     if node.next_node is not None:
@@ -1469,7 +1469,7 @@ for quad in quads:
 print("====================================")
 #  Prepare to pass code to virtual machine
 
-#vm.start_virtual_machine(fD, quads)
+vm.start_virtual_machine(fD, quads)
 
 #print(vars(fD.function_table["global"].variable_table["A"]))
 

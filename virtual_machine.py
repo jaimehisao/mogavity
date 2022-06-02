@@ -6,7 +6,7 @@ generated during compilation.
 from function_directory import FunctionDirectory, Function
 from quadruple import Quadruple
 from constants import STARTING_ADDRESS, GLOBAL_OFFSET
-from error_handling import info
+from error_handling import info, error
 from Stack import Stack
 
 class ExecutionMemory:
@@ -251,15 +251,20 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             info("End of Program")
             instruction_pointer += 1
 
-        #######
-        # I/O #
-        #######
+        ##########
+        # ARRAYS #
+        ##########
         elif quadruples[instruction_pointer][1] == "VERIFY":
 
             # Verificar out of bounds
+            limit_i = quadruples[instruction_pointer][3]
+            limit_s = quadruples[instruction_pointer][4]
+            cell = get_var_from_address(quadruples[instruction_pointer][2]) 
 
-
-            instruction_pointer += 1
+            if cell >= limit_i and cell <= limit_s:
+                instruction_pointer += 1
+            else:
+                error("Array access is out of bouds")
 
         #######
         # I/O #
