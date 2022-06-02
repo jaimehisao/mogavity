@@ -22,11 +22,13 @@ class MemoryManager:
     assigned_chars: int
     assigned_temps: int
     assigned_constants: int
+    assigned_poiners: int
     MAX_INTS: int
     MAX_FLOATS: int
     MAX_CHARS: int
     MAX_TEMPS: int
     MAX_CONSTANTS: int
+    MAX_POINTERS: int
 
     def __init__(self, is_global: bool):
         self.is_global = is_global
@@ -43,12 +45,17 @@ class MemoryManager:
         self.MAX_TEMPS = self.assigned_temps + MAX_PER_VAR - 1
         self.assigned_constants = self.MAX_TEMPS + 1
         self.MAX_CONSTANTS = self.assigned_constants + MAX_PER_VAR - 1
+        self.assigned_constants = self.MAX_TEMPS + 1
+        self.MAX_CONSTANTS = self.assigned_constants + MAX_PER_VAR - 1
+        self.assigned_poiners = self.MAX_POINTERS + 1
+        self.MAX_CONSTANTS = self.assigned_poiners + MAX_PER_VAR - 1
 
         print("int", str(self.assigned_ints), str(self.MAX_INTS))
         print("float", str(self.assigned_floats), str(self.MAX_FLOATS))
         print("char", str(self.assigned_chars), str(self.MAX_CHARS))
         print("tmp", str(self.assigned_temps), str(self.MAX_TEMPS))
         print("CTE", str(self.assigned_constants), str(self.MAX_CONSTANTS))
+        print("POINTERS", str(self.assigned_poiners), str(self.MAX_POINTERS))
 
     def assign_new_int_address(self):
         if self.assigned_ints < self.MAX_INTS:
@@ -85,11 +92,18 @@ class MemoryManager:
             return assigned
         error("Too much Constants, please optimize your operations!")
 
-    def set_new_virtual_address(self, type, new_address):
-        if type == "int":
+    def assign_new_pointer(self):
+        if self.assigned_poiners < self.MAX_POINTERS:
+            assigned = self.assigned_poiners
+            self.assigned_poiners += 1
+            return assigned
+        error("Too much Pointers!")
+
+    def set_new_virtual_address(self, _type, new_address):
+        if _type == "int":
             if self.assigned_ints < self.MAX_INTS:
                 self.assigned_ints = new_address
-        elif type == "float":
+        elif _type == "float":
             if self.assigned_floats < self.MAX_FLOATS:
                 self.assigned_floats = new_address
         else:
@@ -112,6 +126,8 @@ class MemoryManager:
             return "temp"
         elif self.MAX_TEMPS + 1 <= address <= self.MAX_CONSTANTS:
             return "CTE"
+        elif self.MAX_CONSTANTS + 1 <= address <= self.MAX_POINTERS:
+            return "POINTER"
         else:
             error("Given address does not match any address type interval.")
 
