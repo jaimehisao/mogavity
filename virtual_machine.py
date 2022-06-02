@@ -168,9 +168,6 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             # if quadruples[instruction_pointer][4] is not None:
             info("GOTO detected, changing IP to quadruple " + str(quadruples[instruction_pointer][4] - 1))
             instruction_pointer = quadruples[instruction_pointer][4] - 1
-            ## TODO ALERTA DE PARCHE AQUI; PROBLEMA DE GOTO o bueno talvez ya no
-            # else:
-            # instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "GOTOF":
             # print("GOTOF",quadruples[instruction_pointer][2])
             # print("GOTOF VAL", get_var_from_address(quadruples[instruction_pointer][2]))
