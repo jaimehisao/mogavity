@@ -1,0 +1,20 @@
+program test;
+
+var int a, b;
+
+main
+{
+    a = 1;
+    b = 2;
+    if (a < b) {
+        output -> "b es mayor que a";
+    }
+    elif (b < a) {
+        output -> "error";
+    }
+    otherwise {
+        output -> "galo";
+    }
+    output -> "hola mundo";
+    return 0;
+}
