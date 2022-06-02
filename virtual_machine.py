@@ -49,9 +49,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     ## Initial VM Declarations
 
     instruction_pointer = 0
-
     #  Load Global Memory
     global_scope = function_directory.function_table["global"]
+    print("Global scope", global_scope)
 
     #  Constants are stored in a table only inside the global scope, so we load them from here
     # print(global_scope.constants_table)
@@ -75,7 +75,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     while quadruples[instruction_pointer][1] != "EOF":
         #print("Quad", quadruples[instruction_pointer][0])
         # rint(global_memory.scope_memory)
-        #quadruples[instruction_pointer].print_quad()
+        quadruples[instruction_pointer].print_quad()
         global current_local_memory
 
         ##############
@@ -286,8 +286,8 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
 ## TODO validate no trash in var
 def get_var_from_address(address):
     global current_local_memory
-    #print("global", global_memory.return_val())
-    #print("local", current_local_memory.return_val())
+    print("global", global_memory.return_val())
+    print("local", current_local_memory.return_val())
     if is_global_variable(address):
         return global_memory.get_value_by_address(address)
     else:
