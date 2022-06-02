@@ -1424,7 +1424,7 @@ def p_end_array_call(p):
     add_offset_quad = quad.generate_quad("+", aux1, node_k_address, temporal1)
     quads.append(add_offset_quad)
     address_temp = temp.get_temp(array_var.type)
-    temporal2 = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    temporal2 = fD.function_table[current_scope].memory_manager.assign_new_pointer()
     base_address_cte = fD.get_constant(fD.get_variable_address(array_id, current_scope))
     add_base_address_quad = quad.generate_quad("+", temporal1, base_address_cte, temporal2)
     quads.append(add_base_address_quad)
