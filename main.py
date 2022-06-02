@@ -1359,7 +1359,7 @@ def p_set_each_node(p):
 def p_set_virtual_address(p):
     """set_virtual_address : """
     global next_virtual_address, id_array, size
-    next_virtual_address = fD.get_variable_address(current_scope, id_array) + size
+    next_virtual_address = fD.get_variable_address(id_array, current_scope) + size
     var_type = fD.get_var_type(id_array, current_scope)
     fD.function_table[current_scope].memory_manager.set_new_virtual_address(var_type, next_virtual_address)
 
@@ -1422,7 +1422,7 @@ def p_end_array_call(p):
     quads.append(add_offset_quad)
     address_temp = temp.get_temp(array_var.type)
     temporal2 = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    add_base_address_quad = quad.generate_quad("+", temporal1, fD.get_variable_address(current_scope, array_id), temporal2)
+    add_base_address_quad = quad.generate_quad("+", temporal1, fD.get_variable_address(array_id, current_scope), temporal2)
     quads.append(add_base_address_quad)
     stackO.push(temporal2)
     poper.pop()
@@ -1449,7 +1449,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("tests/singleFunctionCall.mog", 'r')
+    f = open("test15.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
