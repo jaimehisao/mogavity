@@ -193,20 +193,17 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             memory_stack.top().scope_memory[destination_address_in_new_scope] = origin_value
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "ERA":
-            function_name = quadruples[instruction_pointer][4]  # Get the name of func to load
+            function_name = quadruples[instruction_pointer][4]  # Get the name of function to load
             function = function_directory.get_function(function_name)
-            scope_memory = ExecutionMemory(function.id)
+            scope_memory = ExecutionMemory(function.id)  # Create Memory Segment
             for _, var in function.variable_table.items():
                 # print(var.address, var.id)
                 scope_memory.insert(var.address, None)
             # print(scope_memory.return_val())
-            memory_stack.push(
-                scope_memory)  # Cargamos la memoria en el stack para no desactivar la actual aun pero ya tener la jerarquia
+            memory_stack.push(scope_memory)  # Load into memory_stack
             instruction_pointer += 1
-
-        elif quadruples[instruction_pointer][1] == "GOSUB":  # Need to asign ARGUMENTS  to PARAMETERS
+        elif quadruples[instruction_pointer][1] == "GOSUB":
             global current_local_memory
-            # local_memory = memory_stack[-1]  # Load Function Memory
             pending_jumps.append(instruction_pointer + 1)  # Add where we are to return after execution
             info("Function Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
             current_local_memory = memory_stack.top()
