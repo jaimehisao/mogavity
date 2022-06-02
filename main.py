@@ -1405,12 +1405,14 @@ def p_array_quads(p):
         quads.append(add_dims_quad)
         stackO.push(new_temp[0])
 
+
 def p_update_dim(p):
     """update_dim : """
     global dim, array_id, node
     dim += 1
     stack_dim.push((array_id, dim))
     node = node.next_node
+
 
 def p_end_array_call(p):
     """end_array_call : """
@@ -1427,6 +1429,7 @@ def p_end_array_call(p):
     quads.append(add_base_address_quad)
     stackO.push(temporal2)
     poper.pop()
+    fD.print_variable_table(current_scope)
 
 ###########################
 ######## CLASSES ##########
