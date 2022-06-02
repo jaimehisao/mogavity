@@ -45,7 +45,7 @@ class MemoryManager:
         self.MAX_TEMPS = self.assigned_temps + MAX_PER_VAR - 1
         self.assigned_constants = self.MAX_TEMPS + 1
         self.MAX_CONSTANTS = self.assigned_constants + MAX_PER_VAR - 1
-        self.assigned_poiners = self.MAX_POINTERS + 1
+        self.assigned_poiners = self.MAX_CONSTANTS + 1
         self.MAX_POINTERS = self.assigned_poiners + MAX_PER_VAR - 1
 
         print("int", str(self.assigned_ints), str(self.MAX_INTS))
