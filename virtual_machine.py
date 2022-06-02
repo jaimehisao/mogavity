@@ -9,6 +9,7 @@ from constants import STARTING_ADDRESS, GLOBAL_OFFSET
 from error_handling import info, error
 from Stack import Stack
 
+
 class ExecutionMemory:
     """This way we can handle memory in scopes rather than having a ton of variables."""
 
@@ -36,8 +37,6 @@ memory_stack.push(global_memory)
 pending_jumps = []  # Addresses to return to previous point of executions
 
 
-
-
 def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Quadruple]):
     print("")
     print("")
@@ -45,7 +44,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     print("")
     print("")
     print("Starting the Mogavity Virtual Machine")
-    pending_jumps.append(len(quadruples)-1) #TODO parche
+    pending_jumps.append(len(quadruples) - 1)  # TODO parche
     ## Initial VM Declarations
 
     instruction_pointer = 0
@@ -73,7 +72,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     # print(global_memory.scope_memory)
 
     while quadruples[instruction_pointer][1] != "EOF":
-        #print("Quad", quadruples[instruction_pointer][0])
+        # print("Quad", quadruples[instruction_pointer][0])
         # rint(global_memory.scope_memory)
         quadruples[instruction_pointer].print_quad()
         global current_local_memory
@@ -188,25 +187,23 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         elif quadruples[instruction_pointer][1] == "PARAMETER":
             # Obtain paramater index
             paramIndex = quadruples[instruction_pointer][2] - 1  ## ???
-            #print(current_local_memory.return_val())
+            # print(current_local_memory.return_val())
             origin_value = get_var_from_address(quadruples[instruction_pointer][2])
             destination_address_in_new_scope = quadruples[instruction_pointer][4]
             memory_stack.top().scope_memory[destination_address_in_new_scope] = origin_value
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "ERA":
-            function_name = quadruples[instruction_pointer][4]  # Get the name of func to load
+            function_name = quadruples[instruction_pointer][4]  # Get the name of function to load
             function = function_directory.get_function(function_name)
-            scope_memory = ExecutionMemory(function.id)
+            scope_memory = ExecutionMemory(function.id)  # Create Memory Segment
             for _, var in function.variable_table.items():
-                #print(var.address, var.id)
+                # print(var.address, var.id)
                 scope_memory.insert(var.address, None)
-            #print(scope_memory.return_val())
-            memory_stack.push(scope_memory)  # Cargamos la memoria en el stack para no desactivar la actual aun pero ya tener la jerarquia
+            # print(scope_memory.return_val())
+            memory_stack.push(scope_memory)  # Load into memory_stack
             instruction_pointer += 1
-
-        elif quadruples[instruction_pointer][1] == "GOSUB":  # Need to asign ARGUMENTS  to PARAMETERS
+        elif quadruples[instruction_pointer][1] == "GOSUB":
             global current_local_memory
-            # local_memory = memory_stack[-1]  # Load Function Memory
             pending_jumps.append(instruction_pointer + 1)  # Add where we are to return after execution
             info("Function Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
             current_local_memory = memory_stack.top()
@@ -215,34 +212,18 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         elif quadruples[instruction_pointer][1] == "RETURN":
             #  Guardar Valor de Retorno en Memoria global (hay que obtener direccion antes)
             instruction_pointer += 1
-            """
-            destination = quadruples[instruction_pointer][4]
-            if destination is None:
-                instruction_pointer += 1
-                continue
-            origin_address = quadruples[instruction_pointer][2]
-
-            origin_value = get_var_from_address(origin_address)
-            print("ORIGIN VALUE ", origin_value)
-            #memory_stack.pop()
-            #memory_stack.top().insert(destination, origin_value)
-            save_to_memory(destination, origin_value)
-            info("Saving return value in global memory")
-            instruction_pointer += 1
-            """
-
 
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
             return_pointer = 0
             if not (memory_stack.size() <= 1):
                 trashed_mem = memory_stack.pop()  # Offload memory
-                #print("TRASHED MEM " + trashed_mem.id)
-                #print(trashed_mem.return_val())
+                # print("TRASHED MEM " + trashed_mem.id)
+                # print(trashed_mem.return_val())
                 new_memory = memory_stack.top()
-                #print("NEW MEM " + new_memory.id)
-                #print(new_memory.return_val())
-               # print("GLOBAL MEM")
-                #print(global_memory.return_val())
+                # print("NEW MEM " + new_memory.id)
+                # print(new_memory.return_val())
+                # print("GLOBAL MEM")
+                # print(global_memory.return_val())
                 current_local_memory = new_memory
                 return_pointer = pending_jumps.pop()
                 info("End of function - returning execution to quadruple " + str(return_pointer))
@@ -289,6 +270,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
 # HELPERS #
 ###########
 ## TODO validate no trash in var
+
 def get_var_from_address(address):
     global current_local_memory
     print("global", global_memory.return_val())

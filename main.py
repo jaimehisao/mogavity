@@ -1427,6 +1427,24 @@ def p_end_array_call(p):
     stackO.push(temporal2)
     poper.pop()
 
+###########################
+######## CLASSES ##########
+###########################
+
+def p_declare_class(p):
+    """declare_class :"""
+    pass
+
+
+def p_declare_class_attribute(p):
+    """declare_class_attribute :"""
+    pass
+
+
+def p_declare_class_method(p):
+    """declare_class_method :"""
+    pass
+
 #######################
 ######## EOF ##########
 #######################
