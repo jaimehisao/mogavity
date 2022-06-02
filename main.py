@@ -1350,6 +1350,24 @@ def p_set_virtual_address(p):
     fD.function_table[current_scope].memory_manager.set_new_virtual_address(var_type, next_virtual_address)
 
 
+###########################
+######## CLASSES ##########
+###########################
+
+def p_declare_class(p):
+    """declare_class :"""
+    pass
+
+
+def p_declare_class_attribute(p):
+    """declare_class_attribute :"""
+    pass
+
+
+def p_declare_class_method(p):
+    """declare_class_method :"""
+    pass
+
 #######################
 ######## EOF ##########
 #######################
