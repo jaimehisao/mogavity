@@ -316,7 +316,6 @@ def p_asignacion(p):
         address = stackO.top()
     else:
         print("no addr?")
-
     new_quad = quad.generate_quad('=', exp, None, address)
     #print("ASIGN QUAD")
     #new_quad.print_quad()
@@ -1467,7 +1466,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("tests/returnValueTest.mog", 'r')
+    f = open("test15.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
