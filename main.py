@@ -310,13 +310,12 @@ def p_asignacion(p):
     _ = stack_type.pop()
     address = 0
     if fD.get_var_type(p[1], current_scope) and (is_array == False):
-        address = fD.get_variable_address(current_scope, p[1])
+        address = fD.get_variable_address(p[1], current_scope)
         #print("ADDRESS FOR ", p[1], "in scope", current_scope, "is", address)
     elif is_array and int(stackO.top()) >= 100000:
         address = stackO.top()
     else:
         print("no addr?")
-
     new_quad = quad.generate_quad('=', exp, None, address)
     #print("ASIGN QUAD")
     #new_quad.print_quad()
