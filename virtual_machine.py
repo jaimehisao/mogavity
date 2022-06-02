@@ -49,9 +49,9 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     ## Initial VM Declarations
 
     instruction_pointer = 0
-
     #  Load Global Memory
     global_scope = function_directory.function_table["global"]
+    print("Global scope", global_scope)
 
     #  Constants are stored in a table only inside the global scope, so we load them from here
     # print(global_scope.constants_table)
@@ -236,13 +236,13 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             return_pointer = 0
             if not (memory_stack.size() <= 1):
                 trashed_mem = memory_stack.pop()  # Offload memory
-                print("TRASHED MEM " + trashed_mem.id)
-                print(trashed_mem.return_val())
+                #print("TRASHED MEM " + trashed_mem.id)
+                #print(trashed_mem.return_val())
                 new_memory = memory_stack.top()
-                print("NEW MEM " + new_memory.id)
-                print(new_memory.return_val())
-                print("GLOBAL MEM")
-                print(global_memory.return_val())
+                #print("NEW MEM " + new_memory.id)
+                #print(new_memory.return_val())
+               # print("GLOBAL MEM")
+                #print(global_memory.return_val())
                 current_local_memory = new_memory
                 return_pointer = pending_jumps.pop()
                 info("End of function - returning execution to quadruple " + str(return_pointer))
@@ -286,8 +286,8 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
 ## TODO validate no trash in var
 def get_var_from_address(address):
     global current_local_memory
-    #print("global", global_memory.return_val())
-    #print("local", current_local_memory.return_val())
+    print("global", global_memory.return_val())
+    print("local", current_local_memory.return_val())
     if is_global_variable(address):
         return global_memory.get_value_by_address(address)
     else:

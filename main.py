@@ -20,6 +20,7 @@ from pprint import pprint
 # logging.basicConfig(level=logging.DEBUG)
 
 fD = fD()
+fD.function_table["global"].add_variable("global", "int")
 quad = Quadruple(0, "", "", "", "")
 temp = Temporal()
 
@@ -215,7 +216,8 @@ def p_constructor(p):
 # <VARS>
 def p_vars(p):
     """vars :   VAR tipoCompuesto new_variable_set_type ID new_variable vars2 SEMICOLON
-            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON """
+            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON
+            | empty """
 
 
 def p_vars2(p):
@@ -258,8 +260,8 @@ def p_tipoSimple(p):
 # <Instr>
 def p_instr(p):
     """instr : INSTR VOID ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
-    | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
-    | empty
+              | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
+              | empty
     """
 ##  TODO INSTR modificado para soportar la declaracion de multiples funciones
 
@@ -281,7 +283,7 @@ def p_bloque(p):
 def p_bloque2(p):
     '''bloque2  :   estatuto bloque2
                 |   empty'''
-    # print('here')
+    print('here')
 
 
 # <Estatuto>
@@ -309,15 +311,15 @@ def p_asignacion(p):
     address = 0
     if fD.get_var_type(p[1], current_scope) and (is_array == False):
         address = fD.get_variable_address(current_scope, p[1])
-        print("ADDRESS FOR ", p[1], "in scope", current_scope, "is", address)
+        #print("ADDRESS FOR ", p[1], "in scope", current_scope, "is", address)
     elif is_array and int(stackO.top()) >= 100000:
         address = stackO.top()
     else:
         print("no addr?")
 
     new_quad = quad.generate_quad('=', exp, None, address)
-    print("ASIGN QUAD")
-    new_quad.print_quad()
+    #print("ASIGN QUAD")
+    #new_quad.print_quad()
     # new_quad.print_quad()
     quads.append(new_quad)
 
@@ -338,7 +340,7 @@ def p_variable2(p):
 def p_condicion(p):
     """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque np_if_2
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque condicion2"""
-    # print('here?2342423')
+    print('here?2342423')
 
 
 def p_condicion2(p):
@@ -386,14 +388,25 @@ def p_cicloW(p):
 
 # <CicloFor>
 def p_cicloFor(p):
-    """cicloFor :   FOR LEFTPARENTHESIS assign SEMICOLON exp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4"""
+    """cicloFor :   FOR LEFTPARENTHESIS assign_for SEMICOLON exp for_exp_comp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4"""
     # print('f')
+
+"""
+# <CicloFor>
+def p_cicloFor(p):
+    cicloFor :   
+    FOR LEFTPARENTHESIS assign_for SEMICOLON exp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4
+    # print('f')
+"""
 
 
 # TODO: update assign diagram
 # <Assign>
-def p_assign(p):
-    """assign   :   ID np_for_1 ASSIGNMENT exp np_for_2"""
+def p_assign_for(p):
+    """assign_for   :   ID for_declaration ASSIGNMENT exp"""
+
+
+"""assign_for   :   ID np_for_1 ASSIGNMENT exp np_for_2"""
 
 
 # <Update>
@@ -502,17 +515,18 @@ def p_factor(p):
 
 
 def p_error(p):
-    """
-    If there is an error, the parser will resort to this instruction to inform of it.
-    :param p:
-    :return:
-    """
+    # get formatted representation of stack
+    stack_state_str = ' '.join([symbol.type for symbol in parser.symstack][1:])
     if p == None:
         token = "end of file"
     else:
         token = f"({p.value}) on line {p.lineno}"
+    print('Syntax error in input! Parser State:{} {} . {}'
+          .format(parser.state,
+                  stack_state_str,
+                  p))
     error("Syntax error on " + token)
-    exit()
+
 
 
 ########################################################
@@ -548,8 +562,9 @@ def p_np_main(p):
 def p_new_variable(p):
     """new_variable : """
     #print("TMP TYPE", tmp_type, "VAR", p[-1])
-    #print("CURRENT SCOPE", current_scope, "VAR", p[-1])
-    fD.function_table[current_scope].add_variable(p[-1], tmp_type)
+    print("Adding new variable", "CURRENT SCOPE", current_scope, "VAR", p[-1])
+    address = fD.function_table[current_scope].add_variable(p[-1], tmp_type)
+    print("New variable address", address)
     #fD.function_table.print_all_variable_tables()
 
 
@@ -570,9 +585,9 @@ def p_new_variable_set_type(p):
 def p_save_id(p):
     """save_id :"""
     global pvar
-    if stackO.is_Empty() == False:
-        return
-    address = fD.get_variable_address(current_scope, pvar)
+    # if stackO.is_Empty() == False:
+    #     return
+    address = fD.get_variable_address(pvar, current_scope)
     stackO.push(address)
     var_type = fD.get_var_type(pvar, current_scope)
     stack_type.push(var_type)
@@ -864,6 +879,83 @@ def p_np_else(p):
 
 
 ####################################
+######### PUNTOS DEL FOR NUEVOS ###########
+####################################
+
+def p_for_declaration_control(p):
+    """for_declaration : """
+
+    control_var = p[-1]
+
+    # Check if control var exists in either the local or global scope
+    print("CURR SCOPE", current_scope, control_var)
+    address = fD.get_variable_address(control_var, current_scope)
+    _type = fD.get_var_type(control_var, current_scope)
+
+    if _type != "int":
+        error("Type mismatch on for statement in line " + str(p.lexer.lineno))
+
+    stackO.push(address)
+    stack_type.push(_type)
+
+
+def p_for_exp_assign(p):
+    """for_exp_assign : """
+    _type = stack_type.pop()
+    op_addr = stackO.pop()
+    if _type != "int":
+        error("1 Type mismatch on for statement in line " + str(p.lexer.lineno))
+
+    v_control = stackO.top()
+    v_control_type = stack_type.top()
+
+    _ = oracle.use_oracle(v_control_type, _type, "=")
+
+    _quad = quad.generate_quad("=", op_addr, "EXP FOR ASSIGN", v_control) #TODO REMOVE
+    quads.append(_quad)
+
+    control_var = p[-4]
+
+    # Check if control var exists in either the local or global scope
+    address = fD.get_variable_address(control_var, current_scope)
+    _type = fD.get_var_type(control_var, current_scope)
+
+    if _type != "int":
+        error("2 Type mismatch on FOR statement in line " + str(p.lexer.lineno))
+
+    stackO.push(address)
+    stack_type.push(_type)
+
+
+def p_for_exp_comp(p):
+    """for_exp_comp : """
+    op = stackO.pop()
+    _type = stack_type.pop()
+    print("TYPE", _type, op)
+    """
+        if _type != "int":
+        error("3 Type mismatch on FOR statement in line " + str(p.lexer.lineno))
+    """
+
+    v_final = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    _quad = quad.generate_quad("=", op, None, v_final)
+    quads.append(_quad)
+
+    v_control = stackO.top()
+    addr = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    _quad_2 = quad.generate_quad("<", v_control, v_final, addr)
+    quads.append(_quad_2)
+    stackJumps.push(_quad_2.id - 1)
+    _quad_3 = quad.generate_quad("GOTOF", None, None, addr)
+    quads.append(_quad_3)
+    stackJumps.push(_quad_3.id-1)
+
+
+
+
+
+
+####################################
 ######### PUNTOS DEL FOR ###########
 ####################################
 def p_np_for_1(p):
@@ -930,7 +1022,11 @@ def p_np_for_4(p):
     tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("int")
     if current_scope != "global":
         cont_temporals += 1
-    new_quad = quad.generate_quad(for_op, vControl, for_updater, tmp_y)
+
+    for_updater_constant = fD.get_constant(for_updater)
+    new_quad = quad.generate_quad(for_op, vControl, for_updater_constant, tmp_y)
+
+
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
     new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl) ## TODO REMOVE 3 rd val
@@ -1075,7 +1171,8 @@ def p_function_gosub(p):
     gosub_quad = quad.generate_quad("GOSUB", function_id, None, fD.function_table[function_id].starting_quadruple)
     quads.append(gosub_quad)
     new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    function_global_address = fD.get_variable_address("global", function_id)
+    function_global_address = fD.get_variable_address(function_id, "global")
+    print("ID", function_id)
     guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
     quads.append(guadalupano_quad)
     stackO.push(new_temp)
@@ -1106,16 +1203,19 @@ def p_end_func_return(p):
 
     # Caso valor de Retorno
     else:
-        actual_return_type = pvar
-        if actual_return_type == "int" or actual_return_type == "float":
+        actual_return_type = type(pvar)
+        if isinstance(pvar, int) or isinstance(pvar, float):
             item_to_return = fD.get_constant(pvar)
+            if isinstance(item_to_return, int):
+                actual_return_type = "int"
+            elif isinstance(item_to_return, float):
+                actual_return_type = "float"
         else:
             actual_return_type = fD.get_var_type(pvar, current_scope)
-            item_to_return = fD.get_variable_address(current_scope, pvar)
-
+            item_to_return = fD.get_variable_address(pvar, current_scope)
         _ = oracle.use_oracle(return_type, actual_return_type, "=")  # Validate if the girl dances with the old guy
 
-        function_global_address = fD.get_variable_address("global", current_scope)
+        function_global_address = fD.get_variable_address(current_scope, "global")
         equal_global_quad = quad.generate_quad("=", item_to_return, "RETURN QUAD TO EQUAL TO GLOBAL ADDR", function_global_address)  # TODO REMOVE 3rd VAL
         quads.append(equal_global_quad)
         temporal_quad = quad.generate_quad("RETURN", None, None, function_global_address)
@@ -1349,7 +1449,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test15.mog", 'r')
+    f = open("tests/singleFunctionCall.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -1357,11 +1457,16 @@ except FileNotFoundError:
 
 parser.parse(r, debug=False)
 #parser.parse(r)
+print("")
+print("")
+print("")
+print("")
 print("Código Aceptado")
 
+print("====================================")
 for quad in quads:
     quad.print_quad()
-
+print("====================================")
 #  Prepare to pass code to virtual machine
 
 #vm.start_virtual_machine(fD, quads)
