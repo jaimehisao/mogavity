@@ -234,8 +234,16 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         ## ARRAYS ##
         ############
         elif quadruples[instruction_pointer][1] == "VERIFY":
-            # Verifiy if array element is out of bounds before accessing.
-            instruction_pointer += 1
+
+            # Verificar out of bounds
+            limit_i = quadruples[instruction_pointer][3]
+            limit_s = quadruples[instruction_pointer][4]
+            cell_pos = get_var_from_address(quadruples[instruction_pointer][2])
+
+            if limit_i <= cell_pos <= limit_s:
+                instruction_pointer += 1
+            else:
+                error("Array access is out of bouds")
 
         #########
         ## I/O ##
