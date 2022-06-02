@@ -1391,7 +1391,8 @@ def p_array_quads(p):
         aux = stackO.pop()
         new_temp = temp.get_temp(array_var.type)
         temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
-        multiply_m_quad = quad.generate_quad("*", aux, node.m, temporal) # Sn * mn
+        node_m_address = fD.get_constant(node.m)
+        multiply_m_quad = quad.generate_quad("*", aux, node_m_address, temporal) # Sn * mn
         quads.append(multiply_m_quad)
         stackO.push(new_temp[0])
 
@@ -1417,7 +1418,8 @@ def p_end_array_call(p):
     aux1 = stackO.pop()
     new_temp = temp.get_temp(array_var.type)
     temporal1 = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    add_offset_quad = quad.generate_quad("+", aux1, node.k, temporal1)
+    node_k_address = fD.get_constant(node.k)
+    add_offset_quad = quad.generate_quad("+", aux1, node_k_address, temporal1)
     quads.append(add_offset_quad)
     address_temp = temp.get_temp(array_var.type)
     temporal2 = fD.function_table[current_scope].memory_manager.assign_new_temp()
