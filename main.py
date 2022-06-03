@@ -293,9 +293,10 @@ def p_declare_class_method(p):
     last_scope = current_scope
     global current_method
     current_method = p[-1]
-    fD.function_table[current_scope].class_table[current_class].add_class_method(p[-1], tmp_type)
+    fD.function_table[current_scope].class_table[current_class].add_class_method(current_class + "." + current_method, tmp_type)
     if tmp_type != "void":
-        fD.function_table["global"].add_variable(current_class + "." + p[-1], tmp_type)
+        fD.function_table["global"].add_variable(current_class + "." + current_method, tmp_type)
+    current_method = current_class + "." + current_method
 
 
 def p_save_curr_quad_method(p):
@@ -315,7 +316,7 @@ def p_np_end_method(p):
 def p_new_variable_from_class(p):
     """new_variable_from_class : """
     tmp_name = p[-1]
-    print("Adding new variable from class", "CURRENT SCOPE", current_scope, "VAR",tmp_name)
+    print("Adding new variable from class", current_class, "CURRENT SCOPE", current_scope, "VAR",tmp_name)
     address = fD.function_table[current_scope].add_variable(tmp_name, tmp_type)
     print("New variable address", address)
 
@@ -389,11 +390,15 @@ def p_tipoSimple(p):
 # TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
+    """instr : INSTR VOID set_void_type ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
               | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
               | empty
     """
 
+def p_set_void_type(p):
+    """set_void_type : """
+    global tmp_type
+    tmp_type = "void"
 
 ##  TODO INSTR modificado para soportar la declaracion de multiples funciones
 
@@ -508,7 +513,29 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON"""
+    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON
+                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON"""
+
+
+def p_method_detection_class_save(p):
+    """method_detection_class_save :"""
+    global method_call_class_var
+    method_call_class_var = p[-1]
+    print("method_call_class_var", method_call_class_var)
+
+
+def p_method_detection(p):
+    """method_detection :"""
+    global param_counter, function_id
+    method_name = p[-1]
+    print("method_name", method_name)
+    original_class = fD.get_var_type(method_call_class_var, current_scope)
+    fD.function_table["global"].class_table[original_class].check_if_method_exists(method_name)
+    # Verify function exists
+    # Start handling execution
+    new_quad = quad.generate_quad("ERA", None, None, method_call_class_var + "." + method_name)
+    quads.append(new_quad)
+    param_counter = 0
 
 
 def p_llamada2(p):
@@ -710,6 +737,7 @@ def p_new_variable_set_type(p):
     global tmp_type
     if p[-1] is not None:
         tmp_type = p[-1]
+    print("TMNP TYPE", tmp_type, p[-1])
 
 
 def p_save_id(p):
@@ -1284,6 +1312,7 @@ def p_new_function(p):
     last_scope = current_scope
     current_scope = p[-1]
     fD.add_function(p[-1], tmp_type)
+    print(tmp_type, "NEW FUNC")
     if tmp_type != "void":
         fD.function_table["global"].add_variable(p[-1], tmp_type)
 
@@ -1334,13 +1363,15 @@ def p_function_gosub(p):
     """function_gosub : """
     gosub_quad = quad.generate_quad("GOSUB", function_id, None, fD.function_table[function_id].starting_quadruple)
     quads.append(gosub_quad)
-    new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    function_global_address = fD.get_variable_address(function_id, "global")
-    print("ID", function_id)
-    guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
-    quads.append(guadalupano_quad)
-    stackO.push(new_temp)
-    stack_type.push(fD.function_table[function_id].return_type)
+    #print("ID", function_id)
+    function_type = fD.function_table[function_id].return_type
+    if function_type != "void":
+        new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
+        function_global_address = fD.get_variable_address(function_id, "global")
+        guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
+        quads.append(guadalupano_quad)
+        stackO.push(new_temp)
+        stack_type.push(fD.function_table[function_id].return_type)
 
 
 def p_np_end_func(p):
@@ -1606,13 +1637,9 @@ def p_end_array_call(p):
     fD.print_variable_table(current_scope)
 
 
-
-
-
 #######################
 ######## EOF ##########
 #######################
-
 def p_end_of_file(p):
     """end_of_file :"""
     quads.append(quad.generate_quad("EOF", None, None, None))
@@ -1621,8 +1648,8 @@ def p_end_of_file(p):
 # Compute column.
 #     input is the input text string
 #     token is a token instance
-def find_column(input, token):
-    line_start = input.rfind('\n', 0, token.lexpos) + 1
+def find_column(_input, token):
+    line_start = _input.rfind('\n', 0, token.lexpos) + 1
     return (token.lexpos - line_start) + 1
 
 
@@ -1631,7 +1658,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test5.mog", 'r')
+    f = open("tests/class.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
