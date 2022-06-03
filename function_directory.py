@@ -42,6 +42,12 @@ class Class:
     def add_class_attributes(self, identifier, _type, _class):
         self.attributes[identifier] = _type
 
+    def check_if_method_exists(self, identifier):
+        if identifier in self.methods.keys():
+            return True
+        else:
+            return False
+
 
 class Function:
     id: str
@@ -87,7 +93,6 @@ class Function:
     def add_class_attribute_instantiation(self, attr_name, _type, address):
         tmp_attr = Variable(attr_name, _type, address)
         self.variable_table[tmp_attr.id] = tmp_attr
-
 
     def add_variable(self, identifier, _type):
         address = ""
