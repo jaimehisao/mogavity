@@ -25,19 +25,22 @@ class Class:
     id: str
     attributes: {}
     methods: {}
+    memory_manager: MemoryManager  # Never Mind  -- Since classes maintain scope separatley, this handles it.
 
     def __init__(self, _id):
         self.id = _id
         self.attributes = {}
         self.methods = {}
 
-    def add_class_attribute(self, _id, _type, address):
-        tmp_attr = Variable(_id, _type, address)
-        self.attributes[_id] = tmp_attr
-
     def add_class_method(self, _id, return_type):
         tmp_method = Function(_id, return_type)
         self.methods[_id] = tmp_method
+
+    def add_class_constructor(self):
+        self.methods[self.id] = Function(self.id, "void", is_method=True)
+
+    def add_class_attributes(self, identifier, _type, _class):
+        self.attributes[identifier] = _type
 
 
 class Function:
@@ -45,6 +48,7 @@ class Function:
     return_type: str
 
     #  Tables
+    class_table = {}
     variable_table = {}  # id: Variable(id, type, address)
     constants_table = {}  # key(constant): address (only in global)
     parameter_table_types = []  # [type1 ... typeN]
@@ -56,17 +60,34 @@ class Function:
     number_of_ints: int
     number_of_floats: int
 
-    def __init__(self, _id, return_type):
-        self.variable_table = {}
-        self.constants_table = {}
-        self.parameter_table_types = []
-        self.parameter_table = []
-        self.id = _id
-        self.return_type = return_type
-        if _id == "global":
-            self.memory_manager = MemoryManager(True)
+    def __init__(self, _id, return_type, is_method=False, parent_class=None):
+        if is_method:
+            self.parameter_table_types = []
+            self.parameter_table = []
+            self.id = _id
+            self.return_type = return_type
+            self.parent_class = parent_class
         else:
-            self.memory_manager = MemoryManager(False)
+            self.variable_table = {}
+            self.constants_table = {}
+            self.parameter_table_types = []
+            self.parameter_table = []
+            self.class_table = {}
+            self.id = _id
+            self.return_type = return_type
+            if _id == "global":
+                self.memory_manager = MemoryManager(True)
+            else:
+                self.memory_manager = MemoryManager(False)
+
+    def add_class(self, identifier):
+        tmp_class = Class(identifier)
+        self.class_table[identifier] = tmp_class
+
+    def add_class_attribute_instantiation(self, attr_name, _type, address):
+        tmp_attr = Variable(attr_name, _type, address)
+        self.variable_table[tmp_attr.id] = tmp_attr
+
 
     def add_variable(self, identifier, _type):
         address = ""

@@ -147,6 +147,7 @@ reserved = {
     "inherits": "INHERITS",
     "attr": "ATTR",
     "methods": "METHODS",
+    "method": "METHOD",
     "var": "VAR",
     "return": "RETURN",
     "otherwise": "OTHERWISE"
@@ -201,9 +202,9 @@ def p_empty(p):
 ## GRAMATICA CLASES ##
 ######################
 def p_class(p):
-    """class : CLASS ID declare_class INHERITS ID LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
-    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
-    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs METHODS COLON instr RIGHTCURLYBRACKET
+    """class : CLASS ID declare_class INHERITS ID LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET
+    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET
+    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs METHODS COLON class_method RIGHTCURLYBRACKET
     | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor RIGHTCURLYBRACKET
     """
 
@@ -221,7 +222,7 @@ def p_declare_class(p):
 def p_attrs(p):
     """attrs :  tipoCompuesto new_attr_set_type ID new_attribute attrs2 SEMICOLON
             |   tipoSimple new_attr_set_type ID new_attribute attrs3 SEMICOLON
-            | empty """
+            |    empty """
 
 
 def p_attrs2(p):
@@ -232,8 +233,8 @@ def p_attrs2(p):
 def p_attrs3(p):
     '''attrs3 :  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address attrs5
              |  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node LEFTBRACKET CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address attrs5
-             |  ID new_attribute vars5
-             |  vars5'''
+             |  ID new_attribute attrs5
+             |  attrs5'''
 
 
 def p_attrs4(p):
@@ -258,7 +259,7 @@ def p_new_attr_set_type(p):
 def p_new_attribute(p):
     """new_attribute : """
     print("Adding new attribute on ", current_class, "ATTR", p[-1])
-    fD.function_table[current_scope].add_class_attributes(p[-1], tmp_type, current_class)
+    fD.function_table[current_scope].class_table[current_class].add_class_attributes(p[-1], tmp_type, current_class)
 
 
 # <CONSTRUCTOR>
@@ -273,21 +274,78 @@ def p_constructor_declaration(p):
     if p[-1] != current_class:
         error("Constructor must have the same name of the class!")
     # As the grammar is strict in where and how the constr is declared, i see no reason to manually check for it before init.
-    fD.function_table[current_scope].class_table = None
+    fD.function_table[current_scope].class_table[current_class].add_class_constructor()
+
+
+def p_method(p):
+    """class_method : METHOD VOID ID declare_class_method LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars save_curr_quad_method bloque2 RIGHTCURLYBRACKET np_end_method class_method
+              | METHOD tipoSimple ID declare_class_method LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars save_curr_quad_method bloque2 RIGHTCURLYBRACKET np_end_method class_method
+              | empty
+    """
+    # Nos podemos ahorrar set_local_vars por el momento
 
 
 def p_declare_class_method(p):
-    """declare_class_method :"""
-    pass
+    """declare_class_method : """
+    global num_params, cont_temporals, last_scope
+    num_params = 0
+    cont_temporals = 0
+    last_scope = current_scope
+    global current_method
+    current_method = p[-1]
+    fD.function_table[current_scope].class_table[current_class].add_class_method(p[-1], tmp_type)
+    if tmp_type != "void":
+        fD.function_table["global"].add_variable(current_class + "." + p[-1], tmp_type)
+
+
+def p_save_curr_quad_method(p):
+    """save_curr_quad_method : """
+    fD.function_table[current_scope].class_table[current_class].methods[current_method].set_quadruple(quads[-1].id + 1)
+
+
+def p_np_end_method(p):
+    """np_end_method : """
+    global cont_temporals
+    new_quad = quad.generate_quad("ENDFUNC", None, None, None)
+    quads.append(new_quad)
+    fD.function_table[current_scope].class_table[current_class].methods[current_method].set_temporals(cont_temporals)
+    cont_temporals = 0
+
+
+def p_new_variable_from_class(p):
+    """new_variable_from_class : """
+    tmp_name = p[-1]
+    print("Adding new variable from class", "CURRENT SCOPE", current_scope, "VAR",tmp_name)
+    address = fD.function_table[current_scope].add_variable(tmp_name, tmp_type)
+    print("New variable address", address)
+
+    _class = fD.function_table[current_scope].class_table[curr_class_var_declaration]
+
+    for attribute in _class.attributes.keys():
+        attr_name = tmp_name + "." + attribute
+        if _class.attributes[attribute] == "int":
+            address = fD.function_table[current_scope].memory_manager.assign_new_int_address()
+            fD.function_table[current_scope].add_class_attribute_instantiation(attr_name, "int", address)
+        elif _class.attributes[attribute] == "float":
+            address = fD.function_table[current_scope].memory_manager.assign_new_float()
+            fD.function_table[current_scope].add_class_attribute_instantiation(attr_name, "float", address)
 
 
 
 
 # <VARS>
 def p_vars(p):
-    """vars :   VAR tipoCompuesto new_variable_set_type ID new_variable vars2 SEMICOLON
-            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON
+    """vars :   VAR tipoCompuesto new_variable_set_type ID new_variable_from_class vars2 SEMICOLON vars
+            |   VAR tipoSimple new_variable_set_type ID new_variable vars3 SEMICOLON vars
             | empty """
+
+
+def p_class_exists(p):
+    """class_exists : """
+    global curr_class_var_declaration
+    curr_class_var_declaration = p[-1]
+    if not fD.function_table["global"].class_table.keys().__contains__(curr_class_var_declaration):
+        error("No class exists with name " + curr_class_var_declaration)
 
 
 def p_vars2(p):
@@ -315,7 +373,7 @@ def p_vars5(p):
 
 # <TipoCompuesto>
 def p_tipoCompuesto(p):
-    """tipoCompuesto : ID new_variable_set_type
+    """tipoCompuesto : ID class_exists new_variable_set_type
     """
 
 
@@ -404,7 +462,7 @@ def p_asignacion(p):
 # <Variable>
 def p_variable(p):
     """variable :   ID
-                |   ID DOT ID
+                |   ID check_if_class_is_instanciated DOT ID check_if_class_attribute_exists
                 |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call"""
     p[0] = p[1]
 
