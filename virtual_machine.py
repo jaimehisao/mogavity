@@ -128,7 +128,13 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             else:
                 right_type = _function_directory.function_table[current_local_memory.id].memory_manager.get_variable_type_from_address(right_address)
 
-            if left_type == "int" and right_type == "int":
+            if left_type == "CTE":
+                left_type = type(get_var_from_address(left_address))
+
+            if right_type == "CTE":
+                right_type = type(get_var_from_address(right_address))
+
+            if left_type == "int" or left_type == int and right_type == "int" or right_type == int:
                 value = left // right
             else:
                 value = left / right
