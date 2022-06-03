@@ -111,7 +111,27 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
-            value = left / right
+
+            left_address = quadruples[instruction_pointer][2]
+            if is_global_variable(left_address):
+                # print("IS GLOBAL")
+                left_type = _function_directory.function_table["global"].memory_manager.get_variable_type_from_address(left_address)
+            else:
+                left_type = _function_directory.function_table[current_local_memory.id].memory_manager.get_variable_type_from_address(left_address)
+
+            right_address = quadruples[instruction_pointer][2]
+            if is_global_variable(right_address):
+                # print("IS GLOBAL")
+                right_type = _function_directory.function_table["global"].memory_manager.get_variable_type_from_address(
+                    right_address)
+            else:
+                right_type = _function_directory.function_table[
+                    current_local_memory.id].memory_manager.get_variable_type_from_address(right_address)
+
+            if left_type == "int" and right_type == "int":
+                value = left // right
+            else:
+                value = left / right
             save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "*":
