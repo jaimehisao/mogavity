@@ -54,6 +54,7 @@ vControl = ""
 vFinal = ""
 for_op = ""
 for_updater = 0
+complex_variable = None
 
 tokens = [
     "ID",
@@ -278,7 +279,7 @@ def p_constructor_declaration(p):
 
 
 def p_method(p):
-    """class_method : METHOD VOID ID declare_class_method LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars save_curr_quad_method bloque2 RIGHTCURLYBRACKET np_end_method class_method
+    """class_method : METHOD VOID set_void_type ID declare_class_method LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars save_curr_quad_method bloque2 RIGHTCURLYBRACKET np_end_method class_method
               | METHOD tipoSimple ID declare_class_method LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars save_curr_quad_method bloque2 RIGHTCURLYBRACKET np_end_method class_method
               | empty
     """
@@ -293,9 +294,10 @@ def p_declare_class_method(p):
     last_scope = current_scope
     global current_method
     current_method = p[-1]
-    fD.function_table[current_scope].class_table[current_class].add_class_method(p[-1], tmp_type)
+    fD.function_table[current_scope].class_table[current_class].add_class_method(current_class + "." + current_method, tmp_type)
     if tmp_type != "void":
-        fD.function_table["global"].add_variable(current_class + "." + p[-1], tmp_type)
+        fD.function_table["global"].add_variable(current_class + "." + current_method, tmp_type)
+    current_method = current_class + "." + current_method
 
 
 def p_save_curr_quad_method(p):
@@ -306,7 +308,7 @@ def p_save_curr_quad_method(p):
 def p_np_end_method(p):
     """np_end_method : """
     global cont_temporals
-    new_quad = quad.generate_quad("ENDFUNC", None, None, None)
+    new_quad = quad.generate_quad("ENDFUNC", 1, None, None)
     quads.append(new_quad)
     fD.function_table[current_scope].class_table[current_class].methods[current_method].set_temporals(cont_temporals)
     cont_temporals = 0
@@ -315,8 +317,8 @@ def p_np_end_method(p):
 def p_new_variable_from_class(p):
     """new_variable_from_class : """
     tmp_name = p[-1]
-    print("Adding new variable from class", "CURRENT SCOPE", current_scope, "VAR",tmp_name)
-    address = fD.function_table[current_scope].add_variable(tmp_name, tmp_type)
+    print("Adding new variable from class", current_class, "CURRENT SCOPE", current_scope, "VAR",tmp_name)
+    address = fD.function_table[current_scope].add_variable(tmp_name, current_class)
     print("New variable address", address)
 
     _class = fD.function_table[current_scope].class_table[curr_class_var_declaration]
@@ -389,11 +391,15 @@ def p_tipoSimple(p):
 # TODO: Actualizar el diagrama instr
 # <Instr>
 def p_instr(p):
-    """instr : INSTR VOID ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
+    """instr : INSTR VOID set_void_type ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
               | INSTR tipoSimple ID new_function LEFTPARENTHESIS params set_number_params RIGHTPARENTHESIS LEFTCURLYBRACKET vars set_local_vars save_curr_quad bloque2 RIGHTCURLYBRACKET np_end_func instr
               | empty
     """
 
+def p_set_void_type(p):
+    """set_void_type : """
+    global tmp_type
+    tmp_type = "void"
 
 ##  TODO INSTR modificado para soportar la declaracion de multiples funciones
 
@@ -462,10 +468,27 @@ def p_asignacion(p):
 # <Variable>
 def p_variable(p):
     """variable :   ID
-                |   ID DOT ID
+                |   ID verify_class_parent DOT ID verify_class_attr_id
                 |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call
                 |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call"""
-    p[0] = p[1]
+    global complex_variable
+    if complex_variable is not None:
+        p[0] = complex_variable
+        complex_variable = None
+    else:
+        p[0] = p[1]
+
+
+def p_verify_class_parent(p):
+    """verify_class_parent : """
+    global complex_variable
+    complex_variable = p[-1]
+
+
+def p_verify_class_attr_id(p):
+    """verify_class_attr_id : """
+    global complex_variable
+    complex_variable = complex_variable + "." + p[-1]
 
 
 def p_variable2(p):
@@ -509,7 +532,41 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON"""
+    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON
+                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method SEMICOLON"""
+
+
+def p_method_detection_class_save(p):
+    """method_detection_class_save :"""
+    global method_call_class_var
+    method_call_class_var = p[-1]
+    print("method_call_class_var", method_call_class_var)
+
+
+def p_method_detection(p):
+    """method_detection :"""
+    global param_counter, function_id, method_name
+    method_name = p[-1]
+    print("method_name", method_name)
+    original_class = fD.get_var_type(method_call_class_var, current_scope)
+    fD.function_table["global"].class_table[original_class].check_if_method_exists(method_name)
+    # Verify function exists
+    # Start handling execution
+    new_quad = quad.generate_quad("ERA", None, None, method_call_class_var + "." + method_name)
+    quads.append(new_quad)
+    param_counter = 0
+
+def method_invocation(p):
+    """method_invocation : """
+    if fD.check_if_exists_vars(p[-1], current_scope):
+        error("Variable has not been declared")
+    global verified_id
+    verified_id = p[-1]
+
+def p_method_invocation_check_class_obj(p):
+    """method_invocation_check_class_obj : """
+    _check = verified_id + "." + p[-1]
+    fD.get_variable_address(_check, current_scope) # NO LOL TODO
 
 
 def p_llamada2(p):
@@ -711,6 +768,7 @@ def p_new_variable_set_type(p):
     global tmp_type
     if p[-1] is not None:
         tmp_type = p[-1]
+    print("TMNP TYPE", tmp_type, p[-1])
 
 
 def p_save_id(p):
@@ -1285,6 +1343,7 @@ def p_new_function(p):
     last_scope = current_scope
     current_scope = p[-1]
     fD.add_function(p[-1], tmp_type)
+    print(tmp_type, "NEW FUNC")
     if tmp_type != "void":
         fD.function_table["global"].add_variable(p[-1], tmp_type)
 
@@ -1335,13 +1394,40 @@ def p_function_gosub(p):
     """function_gosub : """
     gosub_quad = quad.generate_quad("GOSUB", function_id, None, fD.function_table[function_id].starting_quadruple)
     quads.append(gosub_quad)
-    new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    function_global_address = fD.get_variable_address(function_id, "global")
-    print("ID", function_id)
-    guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
-    quads.append(guadalupano_quad)
-    stackO.push(new_temp)
-    stack_type.push(fD.function_table[function_id].return_type)
+    #print("ID", function_id)
+    function_type = fD.function_table[function_id].return_type
+    if function_type != "void":
+        new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
+        function_global_address = fD.get_variable_address(function_id, "global")
+        guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
+        quads.append(guadalupano_quad)
+        stackO.push(new_temp)
+        stack_type.push(fD.function_table[function_id].return_type)
+
+
+def p_function_gosub_method(p):
+    """function_gosub_method : """
+    original_class = fD.get_var_type(method_call_class_var, current_scope)
+    starting_quadruple = fD.function_table["global"].class_table[original_class].methods[original_class+"."+method_name].starting_quadruple
+    gosub_quad = quad.generate_quad("GOSUB", "2", None, starting_quadruple)
+    quads.append(gosub_quad)
+    method_type = fD.function_table["global"].class_table[original_class].methods[original_class+"."+method_name].return_type
+    if method_type != "void":
+        new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
+        function_global_address = fD.get_variable_address(function_id, "global")
+        guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
+        quads.append(guadalupano_quad)
+        stackO.push(new_temp)
+        stack_type.push(fD.function_table[function_id].return_type)
+
+def p_verify_coherence_of_params_method(p):
+    """verify_coherence_of_params_method : """
+    global param_counter
+    # print("param count", param_counter, "len", len(fD.function_table[function_id].parameter_table))
+    if param_counter == len(fD.function_table[function_id].parameter_table):
+        pass
+    else:
+        error("Amount of parameters is incorrect for scope " + current_scope)
 
 
 def p_np_end_func(p):
@@ -1485,7 +1571,7 @@ def p_set_limits(p):
     """set_limits : """
     global r, id_array
     # check if its the first node created or there are more
-    if len(fD.function_table[current_scope].variable_table[id_array].nodes)  == 0:
+    if len(fD.function_table[current_scope].variable_table[id_array].nodes) == 0:
         node = NodeArray()
         node.lim_inf = 0
         node.lim_sup = int(p[-1]) - 1
@@ -1574,7 +1660,6 @@ def p_array_quads(p):
 
     if node.next_node is not None:
         aux = stackO.pop()
-        new_temp = temp.get_temp(array_var.type)
         temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
         node_m_address = fD.get_constant(node.m)
         multiply_m_quad = quad.generate_quad("*", aux, node_m_address, temporal)  # Sn * mn
@@ -1584,7 +1669,6 @@ def p_array_quads(p):
     if dim > 1:
         aux2 = stackO.pop()
         aux1 = stackO.pop()
-        new_temp = temp.get_temp(array_var.type)
         temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
         add_dims_quad = quad.generate_quad("+", aux1, aux2, temporal)  # Sn * mn + Sx
         quads.append(add_dims_quad)
@@ -1623,13 +1707,9 @@ def p_end_array_call(p):
     fD.print_variable_table(current_scope)
 
 
-
-
-
 #######################
 ######## EOF ##########
 #######################
-
 def p_end_of_file(p):
     """end_of_file :"""
     quads.append(quad.generate_quad("EOF", None, None, None))
@@ -1638,8 +1718,8 @@ def p_end_of_file(p):
 # Compute column.
 #     input is the input text string
 #     token is a token instance
-def find_column(input, token):
-    line_start = input.rfind('\n', 0, token.lexpos) + 1
+def find_column(_input, token):
+    line_start = _input.rfind('\n', 0, token.lexpos) + 1
     return (token.lexpos - line_start) + 1
 
 
