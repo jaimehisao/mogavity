@@ -273,7 +273,7 @@ def p_constructor_declaration(p):
     if p[-1] != current_class:
         error("Constructor must have the same name of the class!")
     # As the grammar is strict in where and how the constr is declared, i see no reason to manually check for it before init.
-    fD.function_table[current_scope].class_table =
+    fD.function_table[current_scope].class_table = None
 
 
 def p_declare_class_method(p):
