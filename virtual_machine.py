@@ -113,6 +113,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             res = quadruples[instruction_pointer][4]
 
             left_address = quadruples[instruction_pointer][2]
+
             if is_global_variable(left_address):
                 # print("IS GLOBAL")
                 left_type = _function_directory.function_table["global"].memory_manager.get_variable_type_from_address(left_address)
@@ -125,8 +126,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
                 right_type = _function_directory.function_table["global"].memory_manager.get_variable_type_from_address(
                     right_address)
             else:
-                right_type = _function_directory.function_table[
-                    current_local_memory.id].memory_manager.get_variable_type_from_address(right_address)
+                right_type = _function_directory.function_table[current_local_memory.id].memory_manager.get_variable_type_from_address(right_address)
 
             if left_type == "int" and right_type == "int":
                 value = left // right
@@ -233,7 +233,6 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
                 instruction_pointer += 1
                 #print("Changing method stack due to func call")
         elif quadruples[instruction_pointer][1] == "GOSUB":
-            global current_local_memory
             function_or_method = str(quadruples[instruction_pointer][2])
             if function_or_method == "2":
                 #  when we encounter a method, we treat it differently than if it is a function
@@ -248,7 +247,6 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         elif quadruples[instruction_pointer][1] == "RETURN":
             #  Guardar Valor de Retorno en Memoria global (hay que obtener direccion antes)
             instruction_pointer += 1
-
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
             if quadruples[instruction_pointer][2] is not None:
                 return_pointer = pending_jumps.pop()
