@@ -52,7 +52,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     instruction_pointer = 0
     #  Load Global Memory
     global_scope = function_directory.function_table["global"]
-    print("Global scope", global_scope)
+    #print("Global scope", global_scope)
 
     #  Constants are stored in a table only inside the global scope, so we load them from here
     # print(global_scope.constants_table)
@@ -76,7 +76,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     while quadruples[instruction_pointer][1] != "EOF":
         # print("Quad", quadruples[instruction_pointer][0])
         # rint(global_memory.scope_memory)
-        quadruples[instruction_pointer].print_quad()
+        #quadruples[instruction_pointer].print_quad()
         global current_local_memory
 
         ################
@@ -84,7 +84,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         ################
         if quadruples[instruction_pointer][1] == "=":
             value = get_var_from_address(quadruples[instruction_pointer][2])
-            addr = quadruples[instruction_pointer][4]
+            addr = get_var_from_address(quadruples[instruction_pointer][4], False)
             save_to_memory(addr, value)
             instruction_pointer += 1
 
@@ -245,20 +245,13 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             if limit_i <= cell_pos <= limit_s:
                 instruction_pointer += 1
             else:
-                error("Array access is out of bouds")
+                error("Array access is out of bounds")
 
         #########
         ## I/O ##
         #########
         elif quadruples[instruction_pointer][1] == "OUTPUT":
             print(str(get_var_from_address(quadruples[instruction_pointer][4])))
-            addr = quadruples[instruction_pointer][4]
-            # Pointer Check
-            if is_pointer(addr):
-                print(str(get_var_from_address(get_var_from_address(addr))))
-            else:
-                print(str(get_var_from_address(addr)))
-
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":
             #  here theres an issue, because if it is a constant, the address is generic and doesnt specify a type,
@@ -275,13 +268,13 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
 
 def is_pointer(address):  ## TODO HACER MAS ELEGANTE
     if is_global_variable(address):
-        print("IS GLOBAL")
+        #print("IS GLOBAL")
         if address >= _function_directory.function_table["global"].memory_manager.MAX_CONSTANTS + 1:
-            print("IS POINTER")
+            #print("IS POINTER")
             return True
     else:
         if address >= _function_directory.function_table[current_local_memory.id].memory_manager.MAX_CONSTANTS + 1:
-            print("IS POINTER")
+            #print("IS POINTER")
             return True
     return False
 
@@ -290,15 +283,38 @@ def is_pointer(address):  ## TODO HACER MAS ELEGANTE
 # HELPERS #
 ###########
 ## TODO validate no trash in var
-
-def get_var_from_address(address):
+def get_var_from_address2(address):
     global current_local_memory
-    print("global", global_memory.return_val())
-    print("local", current_local_memory.return_val())
+    #print("global", global_memory.return_val())
+    #print("local", current_local_memory.return_val())
+
     if is_global_variable(address):
         return global_memory.get_value_by_address(address)
     else:
         return current_local_memory.get_value_by_address(address)
+
+
+def get_var_from_address(address, not_assign=True):
+    global current_local_memory
+    #print("global", global_memory.return_val())
+    #print("local", current_local_memory.return_val())
+    if not_assign:
+        if is_global_variable(address):
+            """"""
+            if is_pointer(address):
+                return global_memory.get_value_by_address(global_memory.get_value_by_address(address))
+            else:
+                return global_memory.get_value_by_address(address)
+        else:
+            if is_pointer(address):
+                return current_local_memory.get_value_by_address(current_local_memory.get_value_by_address(address))
+            else:
+                return current_local_memory.get_value_by_address(address)
+    else:
+        if is_global_variable(address):
+            return global_memory.get_value_by_address(address)
+        else:
+            return current_local_memory.get_value_by_address(address)
 
 
 def save_to_memory(address, val):
