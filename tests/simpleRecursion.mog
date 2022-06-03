@@ -1,0 +1,18 @@
+program test;
+
+var int a,b,c;
+
+instr int local(int val)
+{
+    if(val != 10){
+        val = 1 + _local(val);;
+    }
+    return val;
+}
+
+main{
+    a = _local(1);;
+    output -> "Should output 10";
+    output -> a;
+    return 0;
+}
