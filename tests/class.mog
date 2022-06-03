@@ -1,13 +1,23 @@
 program test;
 
-class perro {
-    attr: int a, b;
-    constr:perro(){
+class Perro {
+    attr:
+        int a, b;
+    constr:
+        Perro(){
 
-    }
+        }
+    methods:
+        method void pelos(){
+            output -> "Hola";
+        }
 }
 
+var Perro perro;
+var int a;
+
 main {
-    output -> "HOLA";
+    perro.a = 1;
+    output -> perro.a;
     return 0;
 }
