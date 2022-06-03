@@ -110,7 +110,6 @@ class MemoryManager:
                 self.assigned_chars = new_address
     """
 
-
     def get_variable_type_from_address(self, address):
         """
         Returns the type of a variable, in string, depending on the address given.

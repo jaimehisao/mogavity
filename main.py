@@ -15,6 +15,10 @@ from Stack import Stack
 import oracle
 import virtual_machine as vm
 from error_handling import info, error, warning
+import argparse
+from prettytable import PrettyTable
+
+argument_parser = argparse.ArgumentParser()
 from pprint import pprint
 
 # logging.basicConfig(level=logging.DEBUG)
@@ -294,7 +298,8 @@ def p_declare_class_method(p):
     last_scope = current_scope
     global current_method
     current_method = p[-1]
-    fD.function_table[current_scope].class_table[current_class].add_class_method(current_class + "." + current_method, tmp_type)
+    fD.function_table[current_scope].class_table[current_class].add_class_method(current_class + "." + current_method,
+                                                                                 tmp_type)
     if tmp_type != "void":
         fD.function_table["global"].add_variable(current_class + "." + current_method, tmp_type)
     current_method = current_class + "." + current_method
@@ -317,7 +322,7 @@ def p_np_end_method(p):
 def p_new_variable_from_class(p):
     """new_variable_from_class : """
     tmp_name = p[-1]
-    print("Adding new variable from class", current_class, "CURRENT SCOPE", current_scope, "VAR",tmp_name)
+    print("Adding new variable from class", current_class, "CURRENT SCOPE", current_scope, "VAR", tmp_name)
     address = fD.function_table[current_scope].add_variable(tmp_name, current_class)
     print("New variable address", address)
 
@@ -331,8 +336,6 @@ def p_new_variable_from_class(p):
         elif _class.attributes[attribute] == "float":
             address = fD.function_table[current_scope].memory_manager.assign_new_float()
             fD.function_table[current_scope].add_class_attribute_instantiation(attr_name, "float", address)
-
-
 
 
 # <VARS>
@@ -396,10 +399,12 @@ def p_instr(p):
               | empty
     """
 
+
 def p_set_void_type(p):
     """set_void_type : """
     global tmp_type
     tmp_type = "void"
+
 
 ##  TODO INSTR modificado para soportar la declaracion de multiples funciones
 
@@ -447,7 +452,14 @@ def p_asignacion(p):
     print("STACK")
     stackO.show_all()
     exp = stackO.pop()
-    is_array = fD.function_table[current_scope].variable_table[p[1]].has_dimensions
+
+    if current_scope != "global":
+        try:
+            is_array = fD.function_table["global"].variable_table[p[1]].has_dimensions
+        except KeyError:
+            is_array = fD.function_table[current_scope].variable_table[p[1]].has_dimensions
+    else:
+        is_array = fD.function_table[current_scope].variable_table[p[1]].has_dimensions
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     address = 0
@@ -459,6 +471,7 @@ def p_asignacion(p):
     else:
         print("no addr?")
     new_quad = quad.generate_quad('=', exp, None, address)
+    stackO.push(address)
     # print("ASIGN QUAD")
     # new_quad.print_quad()
     # new_quad.print_quad()
@@ -532,8 +545,8 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON
-                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method SEMICOLON"""
+    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
+                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
 
 
 def p_method_detection_class_save(p):
@@ -556,6 +569,7 @@ def p_method_detection(p):
     quads.append(new_quad)
     param_counter = 0
 
+
 def method_invocation(p):
     """method_invocation : """
     if fD.check_if_exists_vars(p[-1], current_scope):
@@ -563,10 +577,11 @@ def method_invocation(p):
     global verified_id
     verified_id = p[-1]
 
+
 def p_method_invocation_check_class_obj(p):
     """method_invocation_check_class_obj : """
     _check = verified_id + "." + p[-1]
-    fD.get_variable_address(_check, current_scope) # NO LOL TODO
+    fD.get_variable_address(_check, current_scope)  # NO LOL TODO
 
 
 def p_llamada2(p):
@@ -774,12 +789,17 @@ def p_new_variable_set_type(p):
 def p_save_id(p):
     """save_id :"""
     global pvar
-    if fD.function_table[current_scope].variable_table[pvar].has_dimensions:
-        return
-    address = fD.get_variable_address(pvar, current_scope)
-    stackO.push(address)
-    var_type = fD.get_var_type(pvar, current_scope)
-    stack_type.push(var_type)
+
+    if current_scope != "global":
+        try:
+            if fD.function_table["global"].variable_table[pvar].has_dimensions:
+                return
+        except KeyError:
+            if fD.function_table[current_scope].variable_table[pvar].has_dimensions:
+                return
+    else:
+        if fD.function_table[current_scope].variable_table[pvar].has_dimensions:
+            return
 
 
 def p_save_constant_int(p):
@@ -930,7 +950,7 @@ def p_add_operator_and(p):
         result_type = oracle.use_oracle(left_type, right_type, op)
         print(result_type)
         if result_type != -1:
-            #tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            # tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(result_type)
             if current_scope != "global":
                 cont_temporals += 1
@@ -978,8 +998,13 @@ def p_generate_write_quad(p):
         new_quad = quad.generate_quad("OUTPUT", None, None, address)  # Quad is generated using CTE address.
         quads.append(new_quad)
     else:
+        print("OUTPUT")
+        stackO.show_all()
+        poper.show_all()
         res = stackO.pop()
-        stack_type.pop()
+        #res = fD.get_variable_address(res, current_scope)
+        # res = stackO.pop()
+        # stack_type.pop()
         new_quad = quad.generate_quad("OUTPUT", None, None, res)  # Quad is generated based on operand stack.
         quads.append(new_quad)
 
@@ -1113,7 +1138,7 @@ def p_for_exp_assign(p):
     quads.append(_quad)
 
     v_control_tmp = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    _quad = quad.generate_quad("=", v_control, None, v_control_tmp) 
+    _quad = quad.generate_quad("=", v_control, None, v_control_tmp)
     quads.append(_quad)
 
     control_var = p[-4]
@@ -1128,16 +1153,16 @@ def p_for_exp_assign(p):
     stackO.push(address)
     stack_type.push(_type)
 
+
 def p_for_exp_comp(p):
     """for_exp_comp : """
     global v_control_tmp
     op = stackO.pop()
     _type = stack_type.pop()
     print("TYPE", _type, op)
-    
+
     if _type != "int":
         error("3 Type mismatch on FOR statement in line " + str(p.lexer.lineno))
-
 
     v_final = fD.function_table[current_scope].memory_manager.assign_new_temp()
     _quad = quad.generate_quad("=", op, None, v_final)
@@ -1150,7 +1175,8 @@ def p_for_exp_comp(p):
     stackJumps.push(_quad_2.id)
     _quad_3 = quad.generate_quad("GOTOF", addr, None, None)
     quads.append(_quad_3)
-    stackJumps.push(_quad_3.id-1)
+    stackJumps.push(_quad_3.id - 1)
+
 
 def p_for_update(p):
     """for_update : """
@@ -1158,15 +1184,15 @@ def p_for_update(p):
     tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("int")
     if current_scope != "global":
         cont_temporals += 1
-    
+
     vcontrol = stackO.top()
-    
+
     for_updater_constant = fD.get_constant(int(for_updater))
     new_quad = quad.generate_quad(for_op, v_control_tmp, for_updater_constant, tmp_y)
 
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
-    new_quad = quad.generate_quad("=", tmp_y, None, v_control_tmp)  
+    new_quad = quad.generate_quad("=", tmp_y, None, v_control_tmp)
     quads.append(new_quad)
     new_quad = quad.generate_quad("=", tmp_y, None, stackO.pop())  # stackO.pop() has to be the original ID
     quads.append(new_quad)
@@ -1177,6 +1203,7 @@ def p_for_update(p):
     tmp_quad = quads[final]
     tmp_quad.fill_quad(len(quads) + 1)
     stack_type.pop()
+
 
 ####################################
 ######### PUNTOS DEL FOR ###########
@@ -1251,8 +1278,8 @@ def p_np_for_4(p):
 
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
-    #new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl)  ## TODO REMOVE 3 rd val
-    #quads.append(new_quad)
+    # new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl)  ## TODO REMOVE 3 rd val
+    # quads.append(new_quad)
     new_quad = quad.generate_quad("=", tmp_y, "STACK 0. pop", stackO.pop())  # stackO.pop() has to be the original ID
     quads.append(new_quad)
     final = stackJumps.pop()
@@ -1394,12 +1421,13 @@ def p_function_gosub(p):
     """function_gosub : """
     gosub_quad = quad.generate_quad("GOSUB", function_id, None, fD.function_table[function_id].starting_quadruple)
     quads.append(gosub_quad)
-    #print("ID", function_id)
+    # print("ID", function_id)
     function_type = fD.function_table[function_id].return_type
     if function_type != "void":
         new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
         function_global_address = fD.get_variable_address(function_id, "global")
-        guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
+        guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO",
+                                              new_temp)  # TODO REMOVE
         quads.append(guadalupano_quad)
         stackO.push(new_temp)
         stack_type.push(fD.function_table[function_id].return_type)
@@ -1408,17 +1436,21 @@ def p_function_gosub(p):
 def p_function_gosub_method(p):
     """function_gosub_method : """
     original_class = fD.get_var_type(method_call_class_var, current_scope)
-    starting_quadruple = fD.function_table["global"].class_table[original_class].methods[original_class+"."+method_name].starting_quadruple
+    starting_quadruple = fD.function_table["global"].class_table[original_class].methods[
+        original_class + "." + method_name].starting_quadruple
     gosub_quad = quad.generate_quad("GOSUB", "2", None, starting_quadruple)
     quads.append(gosub_quad)
-    method_type = fD.function_table["global"].class_table[original_class].methods[original_class+"."+method_name].return_type
+    method_type = fD.function_table["global"].class_table[original_class].methods[
+        original_class + "." + method_name].return_type
     if method_type != "void":
         new_temp = fD.function_table[current_scope].memory_manager.assign_new_temp()
         function_global_address = fD.get_variable_address(function_id, "global")
-        guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO", new_temp)  # TODO REMOVE
+        guadalupano_quad = quad.generate_quad("=", function_global_address, "PARCHE GUADALUPANO",
+                                              new_temp)  # TODO REMOVE
         quads.append(guadalupano_quad)
         stackO.push(new_temp)
         stack_type.push(fD.function_table[function_id].return_type)
+
 
 def p_verify_coherence_of_params_method(p):
     """verify_coherence_of_params_method : """
@@ -1578,7 +1610,7 @@ def p_set_limits(p):
         r = (node.lim_sup - node.lim_inf + 1) * r
         fD.function_table[current_scope].add_node(id_array, node)
     else:
-        node = fD.function_table[current_scope].get_last_node(id_array) 
+        node = fD.function_table[current_scope].get_last_node(id_array)
         node.lim_inf = 0
         node.lim_sup = int(p[-1]) - 1
         r = (node.lim_sup - node.lim_inf + 1) * r
@@ -1589,7 +1621,7 @@ def p_add_dim(p):
     global dim, id_array
     dim += 1
     next_node = NodeArray()
-    last_node = fD.function_table[current_scope].get_last_node(id_array) 
+    last_node = fD.function_table[current_scope].get_last_node(id_array)
     fD.function_table[current_scope].add_node(id_array, next_node)
     last_node.next_node = next_node
 
@@ -1649,7 +1681,6 @@ def p_verify_dims(p):
         stack_dim.push((array_id, dim))
         node = fD.function_table[current_scope].get_first_node(array_id)
         poper.push("(")  # FakeBottom
-        
 
 
 def p_array_quads(p):
@@ -1724,11 +1755,39 @@ def find_column(_input, token):
 
 
 parser = yacc.yacc()
-# parser = yacc.yacc(debug=True)
 
+
+def print_function_table():
+    # FUNCTIONS
+
+    table_main = []
+    table = ["Function Name (Scope)", "Function Type"]
+    table_main.append(table)
+    for func in fD.function_table:
+        table_main.append([func, fD.function_table[func].return_type])
+    table_functions = PrettyTable(table_main[0])
+    table_functions.add_rows(table_main[1:])
+    print(table_functions)
+
+    # Objects
+    objects = []
+    table = ["Object Name", "Attributes", "Methods"]
+    objects.append(table)
+    for obj in fD.function_table["global"].class_table:
+        objects.append([obj, fD.function_table["global"].class_table[obj].attributes,
+                        fD.function_table["global"].class_table[obj].methods])
+    objects_table = PrettyTable(objects[0])
+    objects_table.add_rows(objects[1:])
+    print(objects_table)
+
+
+# parser = yacc.yacc(debug=True)
+argument_parser.add_argument("-f", "--file", help="Filename")
+# argument_parser.add_argument("-q", "--quadruples", default="False", help="Show Quadruples")
+args = argument_parser.parse_args()
 r = None
 try:
-    f = open("tests/class.mog", 'r')
+    f = open(args.file, 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -1748,9 +1807,8 @@ for quad in quads:
 print("====================================")
 #  Prepare to pass code to virtual machine
 print(vars(fD.function_table["global"]))
-
+print_function_table()
 vm.start_virtual_machine(fD, quads)
-
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
