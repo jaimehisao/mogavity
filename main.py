@@ -636,7 +636,7 @@ def p_expMD(p):
 # TODO: Update factor diagram
 # <Factor>
 def p_factor(p):
-    '''factor   :   LEFTPARENTHESIS exp RIGHTPARENTHESIS
+    '''factor   :   LEFTPARENTHESIS add_fake_bottom exp delete_fake_bottom RIGHTPARENTHESIS
                 |   CTE_INT save_pvar_int save_constant_int
                 |   CTE_FLOAT save_pvar_float save_constant_float
                 |   CTE_CHAR save_pvar_int save_constant_int
@@ -1209,13 +1209,13 @@ def p_np_for_4(p):
 ###############################
 ######## FAKE BOTTOM ##########
 ###############################
-def p_create_fake_bottom(p):
-    """create_fake_bottom :"""
-    poper.push(p[-1])
-
-
 def p_add_fake_bottom(p):
-    """erase_fake_bottom :"""
+    """add_fake_bottom :"""
+    poper.push("(")
+
+
+def p_delete_fake_bottom(p):
+    """delete_fake_bottom :"""
     poper.pop()
 
 
@@ -1648,7 +1648,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test16.mog", 'r')
+    f = open("test17.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -1667,7 +1667,7 @@ for quad in quads:
     quad.print_quad()
 print("====================================")
 #  Prepare to pass code to virtual machine
-print(vars(fD.function_table["global"]))
+print(vars(fD.function_table["global"].variable_table["a"]))
 
 vm.start_virtual_machine(fD, quads)
 
