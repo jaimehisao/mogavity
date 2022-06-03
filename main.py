@@ -355,8 +355,8 @@ def p_vars2(p):
 
 def p_vars3(p):
     '''vars3 :  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address vars5
-             |  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node LEFTBRACKET CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address vars5
-             |  ID new_variable vars5
+             |  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node add_dim LEFTBRACKET CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address vars5
+             |  ID new_variable vars3
              |  vars5'''
 
 
@@ -463,12 +463,13 @@ def p_asignacion(p):
 def p_variable(p):
     """variable :   ID
                 |   ID DOT ID
-                |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call"""
+                |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call
+                |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call"""
     p[0] = p[1]
 
 
 def p_variable2(p):
-    """variable2 :  LEFTBRACKET verify_dims exp RIGHTBRACKET array_quads update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call
+    """variable2 :  LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call
                  |  empty"""
 
 
@@ -1483,11 +1484,18 @@ def p_set_dim_and_r(p):
 def p_set_limits(p):
     """set_limits : """
     global r, id_array
-    node = NodeArray()
-    node.lim_inf = 0
-    node.lim_sup = int(p[-1]) - 1
-    r = (node.lim_sup - node.lim_inf + 1) * r
-    fD.function_table[current_scope].add_node(id_array, node)
+    # check if its the first node created or there are more
+    if len(fD.function_table[current_scope].variable_table[id_array].nodes)  == 0:
+        node = NodeArray()
+        node.lim_inf = 0
+        node.lim_sup = int(p[-1]) - 1
+        r = (node.lim_sup - node.lim_inf + 1) * r
+        fD.function_table[current_scope].add_node(id_array, node)
+    else:
+        node = fD.function_table[current_scope].get_last_node(id_array) 
+        node.lim_inf = 0
+        node.lim_sup = int(p[-1]) - 1
+        r = (node.lim_sup - node.lim_inf + 1) * r
 
 
 def p_add_dim(p):
@@ -1495,7 +1503,8 @@ def p_add_dim(p):
     global dim, id_array
     dim += 1
     next_node = NodeArray()
-    last_node = fD.function_table[current_scope].get_last_node(id_array)
+    last_node = fD.function_table[current_scope].get_last_node(id_array) 
+    fD.function_table[current_scope].add_node(id_array, next_node)
     last_node.next_node = next_node
 
 
@@ -1503,6 +1512,8 @@ def p_set_each_node(p):
     """set_each_node : """
     global dim, id_array, r, offset, size, k
     last_node = fD.function_table[current_scope].get_last_node(id_array)
+    print("LAST NODE")
+    print(last_node)
     last_node.next_node = None
     node = fD.function_table[current_scope].get_first_node(id_array)
     dim = 1
@@ -1543,20 +1554,21 @@ def p_add_array_id(p):
 
 def p_verify_dims(p):
     """verify_dims : """
-    global dim, array_id, array_var
+    global dim, array_id, array_var, node
     array_id = stackO.pop()
     array_type = stack_type.pop()
     array_var = fD.function_table[current_scope].variable_table[array_id]
     if array_var.has_dimensions:
         dim = 1
         stack_dim.push((array_id, dim))
+        node = fD.function_table[current_scope].get_first_node(array_id)
         poper.push("(")  # FakeBottom
+        
 
 
 def p_array_quads(p):
     """array_quads : """
     global array_id, dim, node, array_var
-    node = fD.function_table[current_scope].get_first_node(array_id)
     verify_quad = quad.generate_quad("VERIFY", stackO.top(), node.lim_inf, node.lim_sup)
     quads.append(verify_quad)
 
@@ -1567,7 +1579,7 @@ def p_array_quads(p):
         node_m_address = fD.get_constant(node.m)
         multiply_m_quad = quad.generate_quad("*", aux, node_m_address, temporal)  # Sn * mn
         quads.append(multiply_m_quad)
-        stackO.push(new_temp[0])
+        stackO.push(temporal)
 
     if dim > 1:
         aux2 = stackO.pop()
@@ -1576,15 +1588,20 @@ def p_array_quads(p):
         temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
         add_dims_quad = quad.generate_quad("+", aux1, aux2, temporal)  # Sn * mn + Sx
         quads.append(add_dims_quad)
-        stackO.push(new_temp[0])
+        stackO.push(temporal)
 
 
 def p_update_dim(p):
     """update_dim : """
     global dim, array_id, node
     dim += 1
+    print("KJDKLASJDLAKSD")
+    print(node.lim_sup)
     stack_dim.push((array_id, dim))
+    print(node.next_node)
     node = node.next_node
+    print("KJDKLASJDLAKSD")
+    print(node.lim_sup)
 
 
 def p_end_array_call(p):
@@ -1631,7 +1648,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test5.mog", 'r')
+    f = open("test16.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
