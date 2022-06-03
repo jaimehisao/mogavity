@@ -9,15 +9,22 @@ class Perro {
         }
     methods:
         method void pelos(){
-            output -> "Hola";
+            output -> "Hola, pelos de perro";
         }
 }
 
 var Perro perro;
 var int a;
 
+instr void pelos(){
+     output -> "Hola Pelos pero no de perro";
+     return 0;
+}
+
 main {
     perro.a = 1;
     output -> perro.a;
+    _pelos();
+    _perro.pelos();
     return 0;
 }
