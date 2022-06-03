@@ -103,7 +103,7 @@ class Function:
             address = self.memory_manager.assign_new_float()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
-        elif _type == "char":
+        else:
             address = self.memory_manager.assign_new_char()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
@@ -302,10 +302,10 @@ class FunctionDirectory:
         # Check for variable in global scope
         # print("SCOPE", scope, "ID", identifier)
         # print(self.function_table["global"].variable_table.keys())
-        split_id = identifier.split(".")
+        #split_id = identifier.split(".")
         print(identifier)
         print("split")
-        print(split_id)
+        #print(split_id)
         #if len(split_id) == 1:  # Traditional Variables
         var_in_global_scope_address = None
         var_in_local_scope_address = None
