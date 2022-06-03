@@ -524,7 +524,7 @@ def p_cicloW(p):
 
 # <CicloFor>
 def p_cicloFor(p):
-    """cicloFor :   FOR LEFTPARENTHESIS assign_for SEMICOLON exp for_exp_comp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4"""
+    """cicloFor :   FOR LEFTPARENTHESIS assign_for SEMICOLON exp for_exp_comp SEMICOLON update RIGHTPARENTHESIS bloque for_update"""
     # print('f')
 
 
@@ -540,7 +540,7 @@ def p_cicloFor(p):
 # TODO: update assign diagram
 # <Assign>
 def p_assign_for(p):
-    """assign_for   :   ID for_declaration ASSIGNMENT exp"""
+    """assign_for   :   ID for_declaration ASSIGNMENT exp for_exp_assign"""
 
 
 """assign_for   :   ID np_for_1 ASSIGNMENT exp np_for_2"""
@@ -549,19 +549,13 @@ def p_assign_for(p):
 # <Update>
 def p_update(p):
     """update   :   ID PLUSEQUAL CTE_INT 
-                |   ID MINUSEQUAL CTE_INT
-                |   ID TIMESEQUAL CTE_INT
-                |   ID DIVIDEEQUAL CTE_INT"""
+                |   ID TIMESEQUAL CTE_INT"""
     global for_op
     global for_updater
     if p[2] == "+=":
         for_op = "+"
-    elif p[2] == "-=":
-        for_op = "-"
-    elif p[2] == "*=":
-        for_op = "*"
     else:
-        for_op = "/"
+        for_op = "*"
     for_updater = p[3]
 
 
@@ -1045,6 +1039,7 @@ def p_for_declaration_control(p):
 
 def p_for_exp_assign(p):
     """for_exp_assign : """
+    global v_control_tmp
     _type = stack_type.pop()
     op_addr = stackO.pop()
     if _type != "int":
@@ -1055,7 +1050,11 @@ def p_for_exp_assign(p):
 
     _ = oracle.use_oracle(v_control_type, _type, "=")
 
-    _quad = quad.generate_quad("=", op_addr, "EXP FOR ASSIGN", v_control)  # TODO REMOVE
+    _quad = quad.generate_quad("=", op_addr, None, v_control)  # TODO REMOVE
+    quads.append(_quad)
+
+    v_control_tmp = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    _quad = quad.generate_quad("=", v_control, None, v_control_tmp) 
     quads.append(_quad)
 
     control_var = p[-4]
@@ -1070,16 +1069,16 @@ def p_for_exp_assign(p):
     stackO.push(address)
     stack_type.push(_type)
 
-
 def p_for_exp_comp(p):
     """for_exp_comp : """
+    global v_control_tmp
     op = stackO.pop()
     _type = stack_type.pop()
     print("TYPE", _type, op)
-    """
-        if _type != "int":
+    
+    if _type != "int":
         error("3 Type mismatch on FOR statement in line " + str(p.lexer.lineno))
-    """
+
 
     v_final = fD.function_table[current_scope].memory_manager.assign_new_temp()
     _quad = quad.generate_quad("=", op, None, v_final)
@@ -1087,13 +1086,38 @@ def p_for_exp_comp(p):
 
     v_control = stackO.top()
     addr = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    _quad_2 = quad.generate_quad("<", v_control, v_final, addr)
+    _quad_2 = quad.generate_quad("<", v_control_tmp, v_final, addr)
     quads.append(_quad_2)
-    stackJumps.push(_quad_2.id - 1)
-    _quad_3 = quad.generate_quad("GOTOF", None, None, addr)
+    stackJumps.push(_quad_2.id)
+    _quad_3 = quad.generate_quad("GOTOF", addr, None, None)
     quads.append(_quad_3)
-    stackJumps.push(_quad_3.id - 1)
+    stackJumps.push(_quad_3.id-1)
 
+def p_for_update(p):
+    """for_update : """
+    global cont_temporals, v_control_tmp
+    tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("int")
+    if current_scope != "global":
+        cont_temporals += 1
+    
+    vcontrol = stackO.top()
+    
+    for_updater_constant = fD.get_constant(int(for_updater))
+    new_quad = quad.generate_quad(for_op, v_control_tmp, for_updater_constant, tmp_y)
+
+    quads.append(new_quad)
+    # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
+    new_quad = quad.generate_quad("=", tmp_y, None, v_control_tmp)  
+    quads.append(new_quad)
+    new_quad = quad.generate_quad("=", tmp_y, None, stackO.pop())  # stackO.pop() has to be the original ID
+    quads.append(new_quad)
+    final = stackJumps.pop()
+    ret = stackJumps.pop()
+    new_quad = quad.generate_quad("GOTO", None, None, ret)
+    quads.append(new_quad)
+    tmp_quad = quads[final]
+    tmp_quad.fill_quad(len(quads) + 1)
+    stack_type.pop()
 
 ####################################
 ######### PUNTOS DEL FOR ###########
@@ -1168,8 +1192,8 @@ def p_np_for_4(p):
 
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
-    new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl)  ## TODO REMOVE 3 rd val
-    quads.append(new_quad)
+    #new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl)  ## TODO REMOVE 3 rd val
+    #quads.append(new_quad)
     new_quad = quad.generate_quad("=", tmp_y, "STACK 0. pop", stackO.pop())  # stackO.pop() has to be the original ID
     quads.append(new_quad)
     final = stackJumps.pop()
@@ -1607,7 +1631,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("tests/class.mog", 'r')
+    f = open("test5.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:
@@ -1626,10 +1650,10 @@ for quad in quads:
     quad.print_quad()
 print("====================================")
 #  Prepare to pass code to virtual machine
+print(vars(fD.function_table["global"]))
 
 vm.start_virtual_machine(fD, quads)
 
-# print(vars(fD.function_table["global"].variable_table["A"]))
 
 #  TODO implement warning when a variable is unused.
 #  TODO implement warning when function is unused.
