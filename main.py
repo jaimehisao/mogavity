@@ -462,7 +462,7 @@ def p_asignacion(p):
 # <Variable>
 def p_variable(p):
     """variable :   ID
-                |   ID check_if_class_is_instanciated DOT ID check_if_class_attribute_exists
+                |   ID DOT ID
                 |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call"""
     p[0] = p[1]
 
