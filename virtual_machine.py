@@ -76,7 +76,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     while quadruples[instruction_pointer][1] != "EOF":
         # print("Quad", quadruples[instruction_pointer][0])
         # rint(global_memory.scope_memory)
-        #quadruples[instruction_pointer].print_quad()
+        quadruples[instruction_pointer].print_quad()
         global current_local_memory
 
         ################
