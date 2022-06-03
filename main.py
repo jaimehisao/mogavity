@@ -358,7 +358,7 @@ def p_vars2(p):
 def p_vars3(p):
     '''vars3 :  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address vars5
              |  LEFTBRACKET set_array set_dim_and_r CTE_INT set_limits RIGHTBRACKET set_each_node add_dim LEFTBRACKET CTE_INT set_limits RIGHTBRACKET set_each_node set_virtual_address vars5
-             |  ID new_variable vars5
+             |  ID new_variable vars3
              |  vars5'''
 
 
@@ -470,8 +470,7 @@ def p_variable(p):
     """variable :   ID
                 |   ID verify_class_parent DOT ID verify_class_attr_id
                 |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call
-                |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET update_dim variable2"""
-    #print("P@", p[0], p[1], p[2])
+                |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call"""
     global complex_variable
     if complex_variable is not None:
         p[0] = complex_variable
@@ -493,7 +492,7 @@ def p_verify_class_attr_id(p):
 
 
 def p_variable2(p):
-    """variable2 :  LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call
+    """variable2 :  LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call
                  |  empty"""
 
 
@@ -1571,11 +1570,18 @@ def p_set_dim_and_r(p):
 def p_set_limits(p):
     """set_limits : """
     global r, id_array
-    node = NodeArray()
-    node.lim_inf = 0
-    node.lim_sup = int(p[-1]) - 1
-    r = (node.lim_sup - node.lim_inf + 1) * r
-    fD.function_table[current_scope].add_node(id_array, node)
+    # check if its the first node created or there are more
+    if len(fD.function_table[current_scope].variable_table[id_array].nodes) == 0:
+        node = NodeArray()
+        node.lim_inf = 0
+        node.lim_sup = int(p[-1]) - 1
+        r = (node.lim_sup - node.lim_inf + 1) * r
+        fD.function_table[current_scope].add_node(id_array, node)
+    else:
+        node = fD.function_table[current_scope].get_last_node(id_array) 
+        node.lim_inf = 0
+        node.lim_sup = int(p[-1]) - 1
+        r = (node.lim_sup - node.lim_inf + 1) * r
 
 
 def p_add_dim(p):
@@ -1583,7 +1589,8 @@ def p_add_dim(p):
     global dim, id_array
     dim += 1
     next_node = NodeArray()
-    last_node = fD.function_table[current_scope].get_last_node(id_array)
+    last_node = fD.function_table[current_scope].get_last_node(id_array) 
+    fD.function_table[current_scope].add_node(id_array, next_node)
     last_node.next_node = next_node
 
 
@@ -1591,6 +1598,8 @@ def p_set_each_node(p):
     """set_each_node : """
     global dim, id_array, r, offset, size, k
     last_node = fD.function_table[current_scope].get_last_node(id_array)
+    print("LAST NODE")
+    print(last_node)
     last_node.next_node = None
     node = fD.function_table[current_scope].get_first_node(id_array)
     dim = 1
@@ -1631,20 +1640,21 @@ def p_add_array_id(p):
 
 def p_verify_dims(p):
     """verify_dims : """
-    global dim, array_id, array_var
+    global dim, array_id, array_var, node
     array_id = stackO.pop()
     array_type = stack_type.pop()
     array_var = fD.function_table[current_scope].variable_table[array_id]
     if array_var.has_dimensions:
         dim = 1
         stack_dim.push((array_id, dim))
+        node = fD.function_table[current_scope].get_first_node(array_id)
         poper.push("(")  # FakeBottom
+        
 
 
 def p_array_quads(p):
     """array_quads : """
     global array_id, dim, node, array_var
-    node = fD.function_table[current_scope].get_first_node(array_id)
     verify_quad = quad.generate_quad("VERIFY", stackO.top(), node.lim_inf, node.lim_sup)
     quads.append(verify_quad)
 
@@ -1669,8 +1679,13 @@ def p_update_dim(p):
     """update_dim : """
     global dim, array_id, node
     dim += 1
+    print("KJDKLASJDLAKSD")
+    print(node.lim_sup)
     stack_dim.push((array_id, dim))
+    print(node.next_node)
     node = node.next_node
+    print("KJDKLASJDLAKSD")
+    print(node.lim_sup)
 
 
 def p_end_array_call(p):
