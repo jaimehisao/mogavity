@@ -84,7 +84,8 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         ################
         if quadruples[instruction_pointer][1] == "=":
             value = get_var_from_address(quadruples[instruction_pointer][2])
-            addr = get_var_from_address(quadruples[instruction_pointer][4], False)
+            #addr = get_var_from_address(quadruples[instruction_pointer][4], False)
+            addr = quadruples[instruction_pointer][4]
             save_to_memory(addr, value)
             instruction_pointer += 1
 
@@ -135,7 +136,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = bool(left > right)
-            print("resval", res, value)
+            #print("resval", res, value)
             save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "!=":
