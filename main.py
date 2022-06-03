@@ -116,8 +116,8 @@ t_RIGHTCURLYBRACKET = r'\}'
 t_LEFTBRACKET = r'\['
 t_RIGHTBRACKET = r'\]'
 t_CTE_STRING = r'"([^\\"\n]+|\\.)*"'
-t_CTE_FLOAT = r'[+-]?[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
-t_CTE_INT = r'[0-9]+'
+t_CTE_FLOAT = r'[-]?[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
+t_CTE_INT = r'[-]?[0-9]+'
 # t_CTE_CHAR = r'[a-zA-Z0-9]'
 t_CTE_CHAR = r'[a-zA]'
 t_DOT = r'\.'
@@ -434,21 +434,21 @@ def p_return(p):
 
 # <Exp>
 def p_exp(p):
-    """exp  :   expA add_operator_or expOR"""
+    """exp  :   expA expOR"""
 
 
 def p_expOR(p):
-    """expOR    :   OR save_op expA expOR
+    """expOR    :   OR save_op expA add_operator_or expOR
                 |   empty"""
 
 
 # <ExpA>
 def p_expA(p):
-    """expA :   expB add_operator_and expAND"""
+    """expA :   expB expAND"""
 
 
 def p_expAND(p):
-    """expAND   :   AND save_op expB expAND
+    """expAND   :   AND save_op expB add_operator_and expAND
                 |   empty"""
 
 
@@ -584,7 +584,7 @@ def p_new_variable_set_type(p):
 def p_save_id(p):
     """save_id :"""
     global pvar
-    if stackO.is_Empty() == False:
+    if fD.function_table[current_scope].variable_table[pvar].has_dimensions:
         return
     address = fD.get_variable_address(pvar, current_scope)
     stackO.push(address)
@@ -726,24 +726,27 @@ def p_add_operator_loop(p):
 def p_add_operator_and(p):
     """add_operator_and :"""
     global cont_temporals
-    if poper.top() == 'AND':
+    if poper.top() == 'and':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
         left_type = stack_type.pop()
         op = poper.pop()
+        print(left_type, right_type, op)
         result_type = oracle.use_oracle(left_type, right_type, op)
+        print(result_type)
         if result_type != -1:
-            # tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            res = temp.get_temp(tmp_type)
+            #tmp_type = oracle.convert_number_type_to_string_name(result_type)
+            res = temp.get_temp(result_type)
             if current_scope != "global":
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res[0])
+            stackO.push(temporal)
             stack_type.push(res[1])
+            print(res[1])
         else:
             error("Type Mismatched")
 
@@ -751,7 +754,7 @@ def p_add_operator_and(p):
 def p_add_operator_or(p):
     """add_operator_or :"""
     global cont_temporals
-    if poper.top() == 'OR':
+    if poper.top() == 'or':
         right_op = stackO.pop()
         right_type = stack_type.pop()
         left_op = stackO.pop()
@@ -760,14 +763,14 @@ def p_add_operator_or(p):
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             # tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            res = temp.get_temp(tmp_type)
+            res = temp.get_temp(result_type)
             if current_scope != "global":
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             # new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res[0])
+            stackO.push(temporal)
             stack_type.push(res[1])
         else:
             error("Operator type mismatched at line: " + str(p.lineno()))    
@@ -811,6 +814,7 @@ def p_np_if_1(p):
     cond = stackO.pop()
     print("cond", cond)
     type_cond = stack_type.pop()
+    print(type_cond)
     # if type_cond then it is a malformed if
     if type_cond != "bool":
         error("Expected type bool")
@@ -1472,7 +1476,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test15.mog", 'r')
+    f = open("test16.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:

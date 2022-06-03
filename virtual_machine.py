@@ -147,14 +147,14 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         ##############
         ## BOOLEANS ##
         ##############
-        elif quadruples[instruction_pointer][1] == "AND":
+        elif quadruples[instruction_pointer][1] == "and":
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = bool(left and right)
             save_to_memory(res, value)
             instruction_pointer += 1
-        elif quadruples[instruction_pointer][1] == "OR":
+        elif quadruples[instruction_pointer][1] == "or":
             left = get_var_from_address(quadruples[instruction_pointer][2])
             right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
@@ -243,7 +243,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             if limit_i <= cell_pos <= limit_s:
                 instruction_pointer += 1
             else:
-                error("Array access is out of bouds")
+                error("Array access is out of bounds")
 
         #########
         ## I/O ##
