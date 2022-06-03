@@ -130,6 +130,7 @@ t_UNDERSCORE = r'\_'
 reserved = {
     "program": "PROGRAM",
     "class": "CLASS",
+    "constr": "CONSTR",
     "instr": "INSTR",
     "int": "INT",
     "float": "FLOAT",
@@ -199,10 +200,10 @@ def p_empty(p):
 
 # <CLASS>
 def p_class(p):
-    """class : CLASS ID INHERITS ID LEFTCURLYBRACKET ATTR COLON vars constructor COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
-    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars constructor COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
+    """class : CLASS ID INHERITS ID LEFTCURLYBRACKET ATTR COLON vars CONSTR COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
+    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars CONSTR COLON constructor METHODS COLON instr RIGHTCURLYBRACKET
     | CLASS ID LEFTCURLYBRACKET ATTR COLON vars METHODS COLON instr RIGHTCURLYBRACKET
-    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars constructor COLON constructor RIGHTCURLYBRACKET
+    | CLASS ID LEFTCURLYBRACKET ATTR COLON vars CONSTR COLON constructor RIGHTCURLYBRACKET
     """
 
 
@@ -299,11 +300,14 @@ def p_estatuto(p):
     """
 
 #TODO: Check how to see if we are using assingment with a temporal pointer, idea: check stackO.size like in generate_write_quad
+
+
 # <Asignación>
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
     # print(p[1])
-    print(stackO.size())
+    print("STACK")
+    stackO.show_all()
     exp = stackO.pop()
     is_array = fD.function_table[current_scope].variable_table[p[1]].has_dimensions
     # exp_type = stack_type.pop()
@@ -329,6 +333,7 @@ def p_variable(p):
                 |   ID DOT ID
                 |   ID add_array_id LEFTBRACKET verify_dims exp array_quads RIGHTBRACKET end_array_call"""
     p[0] = p[1]
+
 
 def p_variable2(p):
     """variable2 :  LEFTBRACKET verify_dims exp RIGHTBRACKET array_quads update_dim LEFTBRACKET exp array_quads RIGHTBRACKET end_array_call
@@ -552,7 +557,7 @@ def p_np_main(p):
     global current_scope, last_scope
     last_scope = current_scope
     current_scope = "global"
-    num_quad = stackJumps.pop() #it should always be 1
+    num_quad = stackJumps.pop()  #it should always be 1
     tmp_quad = quads[num_quad-1]
     tmp_quad.fill_quad(len(quads) + 1)
 
@@ -657,6 +662,7 @@ def p_add_operator_plusminus(p):
         if result_type != -1:
             # tmp_type = oracle.convert_number_type_to_string_name(result_type)
             res = temp.get_temp(result_type)
+            print("RES", res)
             if current_scope != "global":
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
@@ -684,15 +690,18 @@ def p_add_operator_multiplydivide(p):
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             # tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            res = temp.get_temp(tmp_type)
+            # res = temp.get_temp(tmp_type)
+            # print("RES", res)
             if current_scope != "global":
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
             new_quad = quad.generate_quad(op, left_op, right_op, temporal)
             #new_quad.print_quad()
             quads.append(new_quad)
-            stackO.push(res[0])
-            stack_type.push(res[1])
+            stackO.push(temporal)
+            stack_type.push(result_type)
+            #stackO.push(res[0])
+            #stack_type.push(res[1])
         else:
             error("Type Mismatched")
 
@@ -1359,12 +1368,22 @@ def p_set_each_node(p):
     k = offset
     node.k = k
 
+
 def p_set_virtual_address(p):
     """set_virtual_address : """
     global next_virtual_address, id_array, size
-    next_virtual_address = fD.get_variable_address(id_array, current_scope) + size
+    #next_virtual_address = fD.get_variable_address(id_array, current_scope) + size
     var_type = fD.get_var_type(id_array, current_scope)
-    fD.function_table[current_scope].memory_manager.set_new_virtual_address(var_type, next_virtual_address)
+
+    for x in range(0, size):
+        if var_type == "int":
+            fD.function_table[current_scope].memory_manager.assign_new_int_address()
+        elif var_type == "float":
+            fD.function_table[current_scope].memory_manager.assign_new_float()
+
+
+    #fD.function_table[current_scope].memory_manager.set_new_virtual_address(var_type, next_virtual_address)
+
 
 def p_add_array_id(p):
     """add_array_id : """
@@ -1372,6 +1391,7 @@ def p_add_array_id(p):
         stackO.push(p[-1])
         var_type = fD.get_var_type(p[-1], current_scope)
         stack_type.push(var_type)
+
 
 def p_verify_dims(p):
     """verify_dims : """
@@ -1382,7 +1402,8 @@ def p_verify_dims(p):
     if array_var.has_dimensions:
         dim = 1
         stack_dim.push((array_id, dim))
-        poper.push("(") # FakeBottom
+        poper.push("(")  # FakeBottom
+
 
 def p_array_quads(p):
     """array_quads : """
@@ -1476,7 +1497,7 @@ parser = yacc.yacc()
 
 r = None
 try:
-    f = open("test16.mog", 'r')
+    f = open("tests/class.mog", 'r')
     r = f.read()
     f.close()
 except FileNotFoundError:

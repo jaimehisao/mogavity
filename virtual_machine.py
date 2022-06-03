@@ -31,7 +31,7 @@ class ExecutionMemory:
 global current_local_memory
 current_local_memory = ExecutionMemory(None)
 global_memory = ExecutionMemory("global")
-
+_function_directory: FunctionDirectory
 memory_stack = Stack()  # To store different memory segments
 memory_stack.push(global_memory)
 pending_jumps = []  # Addresses to return to previous point of executions
@@ -46,6 +46,8 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     print("Starting the Mogavity Virtual Machine")
     pending_jumps.append(len(quadruples) - 1)  # TODO parche
     ## Initial VM Declarations
+    global _function_directory
+    _function_directory = function_directory
 
     instruction_pointer = 0
     #  Load Global Memory
@@ -250,6 +252,13 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         #########
         elif quadruples[instruction_pointer][1] == "OUTPUT":
             print(str(get_var_from_address(quadruples[instruction_pointer][4])))
+            addr = quadruples[instruction_pointer][4]
+            # Pointer Check
+            if is_pointer(addr):
+                print(str(get_var_from_address(get_var_from_address(addr))))
+            else:
+                print(str(get_var_from_address(addr)))
+
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "INPUT":
             #  here theres an issue, because if it is a constant, the address is generic and doesnt specify a type,
@@ -262,6 +271,19 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
                 res = float(res)
             save_to_memory(quadruples[instruction_pointer][4], res)
             instruction_pointer += 1
+
+
+def is_pointer(address):  ## TODO HACER MAS ELEGANTE
+    if is_global_variable(address):
+        print("IS GLOBAL")
+        if address >= _function_directory.function_table["global"].memory_manager.MAX_CONSTANTS + 1:
+            print("IS POINTER")
+            return True
+    else:
+        if address >= _function_directory.function_table[current_local_memory.id].memory_manager.MAX_CONSTANTS + 1:
+            print("IS POINTER")
+            return True
+    return False
 
 
 ###########
