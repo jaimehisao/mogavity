@@ -137,7 +137,6 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             right = get_var_from_address(quadruples[instruction_pointer][3])
             res = quadruples[instruction_pointer][4]
             value = bool(left > right)
-            #print("resval", res, value)
             save_to_memory(res, value)
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "!=":
@@ -196,43 +195,63 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             instruction_pointer += 1
         elif quadruples[instruction_pointer][1] == "ERA":
             function_name = quadruples[instruction_pointer][4]  # Get the name of function to load
-            function = function_directory.get_function(function_name)
-            scope_memory = ExecutionMemory(function.id)  # Create Memory Segment
-            for _, var in function.variable_table.items():
-                # print(var.address, var.id)
-                scope_memory.insert(var.address, None)
-            # print(scope_memory.return_val())
-            memory_stack.push(scope_memory)  # Load into memory_stack
-            instruction_pointer += 1
+
+            function_name_split = function_name.split(".")
+            #print("function_name_split", function_name_split)
+            if len(function_name_split) != 1:
+                # Method call, do not change scope memory, just continue
+                #print("Not changing scope due to method call")
+                instruction_pointer += 1
+            else:
+                function = function_directory.get_function(function_name)
+                scope_memory = ExecutionMemory(function.id)  # Create Memory Segment
+                for _, var in function.variable_table.items():
+                    # print(var.address, var.id)
+                    scope_memory.insert(var.address, None)
+                # print(scope_memory.return_val())
+                memory_stack.push(scope_memory)  # Load into memory_stack
+                instruction_pointer += 1
+                #print("Changing method stack due to func call")
         elif quadruples[instruction_pointer][1] == "GOSUB":
             global current_local_memory
-            pending_jumps.append(instruction_pointer + 1)  # Add where we are to return after execution
-            info("Function Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
-            current_local_memory = memory_stack.top()
-            instruction_pointer = quadruples[instruction_pointer][4] - 1  # Send IP to Function Start
-
+            function_or_method = str(quadruples[instruction_pointer][2])
+            if function_or_method == "2":
+                #  when we encounter a method, we treat it differently than if it is a function
+                info("Method Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
+                pending_jumps.append(instruction_pointer + 1)  # Add where we are to return after execution
+                instruction_pointer = quadruples[instruction_pointer][4] - 1  # Send IP to Function Start
+            else:
+                pending_jumps.append(instruction_pointer + 1)  # Add where we are to return after execution
+                info("Function Invocation - moving execution to quadruple " + str(quadruples[instruction_pointer][4]))
+                current_local_memory = memory_stack.top()
+                instruction_pointer = quadruples[instruction_pointer][4] - 1  # Send IP to Function Start
         elif quadruples[instruction_pointer][1] == "RETURN":
             #  Guardar Valor de Retorno en Memoria global (hay que obtener direccion antes)
             instruction_pointer += 1
 
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
-            return_pointer = 0
-            if not (memory_stack.size() <= 1):
-                trashed_mem = memory_stack.pop()  # Offload memory
-                # print("TRASHED MEM " + trashed_mem.id)
-                # print(trashed_mem.return_val())
-                new_memory = memory_stack.top()
-                # print("NEW MEM " + new_memory.id)
-                # print(new_memory.return_val())
-                # print("GLOBAL MEM")
-                # print(global_memory.return_val())
-                current_local_memory = new_memory
+            if quadruples[instruction_pointer][2] is not None:
                 return_pointer = pending_jumps.pop()
-                info("End of function - returning execution to quadruple " + str(return_pointer))
-                instruction_pointer = return_pointer
+                instruction_pointer += return_pointer
                 continue
-            info("End of Program")
-            instruction_pointer += 1
+            else:
+                return_pointer = 0
+                if not (memory_stack.size() <= 1):
+                    trashed_mem = memory_stack.pop()  # Offload memory
+                    # print("TRASHED MEM " + trashed_mem.id)
+                    # print(trashed_mem.return_val())
+                    new_memory = memory_stack.top()
+                    # print("NEW MEM " + new_memory.id)
+                    # print(new_memory.return_val())
+                    # print("GLOBAL MEM")
+                    # print(global_memory.return_val())
+                    current_local_memory = new_memory
+                    return_pointer = pending_jumps.pop()
+                    info("End of function - returning execution to quadruple " + str(return_pointer))
+                    instruction_pointer = return_pointer
+                    continue
+                info("End of Program")
+                instruction_pointer += 1
 
         ############
         ## ARRAYS ##

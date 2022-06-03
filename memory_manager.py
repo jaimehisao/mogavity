@@ -97,7 +97,8 @@ class MemoryManager:
             return assigned
         error("Too much Pointers!")
 
-    def set_new_virtual_address(self, _type, new_address):
+    """
+        def set_new_virtual_address(self, _type, new_address):
         if _type == "int":
             if self.assigned_ints < self.MAX_INTS:
                 self.assigned_ints = new_address
@@ -107,6 +108,8 @@ class MemoryManager:
         else:
             if self.assigned_chars < self.MAX_CHARS:
                 self.assigned_chars = new_address
+    """
+
 
     def get_variable_type_from_address(self, address):
         """

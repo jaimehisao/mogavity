@@ -25,7 +25,6 @@ class Class:
     id: str
     attributes: {}
     methods: {}
-    memory_manager: MemoryManager  # Never Mind  -- Since classes maintain scope separatley, this handles it.
 
     def __init__(self, _id):
         self.id = _id
@@ -243,6 +242,13 @@ class FunctionDirectory:
         else:
             return False
 
+    def check_if_exists_vars(self, identifier, scope):
+        """Will verify if the given scope exists in the function table"""
+        if identifier in self.function_table[scope].variable_table.keys():
+            return True
+        else:
+            return False
+
     def check_for_vars(self, identifier):
         if "vars" in self.function_table[identifier].keys():
             error("Vars Table already exists for this function")
@@ -294,8 +300,13 @@ class FunctionDirectory:
 
     def get_variable_address(self, identifier, scope):
         # Check for variable in global scope
-        print("SCOPE", scope, "ID", identifier)
+        # print("SCOPE", scope, "ID", identifier)
         # print(self.function_table["global"].variable_table.keys())
+        split_id = identifier.split(".")
+        print(identifier)
+        print("split")
+        print(split_id)
+        #if len(split_id) == 1:  # Traditional Variables
         var_in_global_scope_address = None
         var_in_local_scope_address = None
         if scope != "global":
