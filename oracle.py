@@ -257,7 +257,7 @@ def convert_string_name_to_number_operand(name):
             return 8
         elif name == "=":
             return 9
-        elif name == "!=":
+        elif name == "==":
             return 10
         else:
             error("Operator" + name + " not supported.")

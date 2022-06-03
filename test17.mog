@@ -1,0 +1,9 @@
+program test;
+
+var int a;
+
+main {
+    a = (7 + (6 / 2)) * (20-10);
+    output -> a;
+    return 0;
+}
