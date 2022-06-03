@@ -1,0 +1,13 @@
+program test;
+
+class perro {
+    attr: int a, b;
+    constr:perro(){
+
+    }
+}
+
+main {
+    output -> "HOLA";
+    return 0;
+}

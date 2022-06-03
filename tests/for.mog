@@ -1,0 +1,12 @@
+program test;
+
+var int a,b,c;
+
+main{
+    a = 10;
+    for (a = 10; a > 1; a-=1){
+      output -> "holaaaaa";
+      output -> a;
+    }
+    return 0;
+}
