@@ -1710,13 +1710,8 @@ def p_update_dim(p):
     """update_dim : """
     global dim, array_id, node
     dim += 1
-    print("KJDKLASJDLAKSD")
-    print(node.lim_sup)
     stack_dim.push((array_id, dim))
-    print(node.next_node)
     node = node.next_node
-    print("KJDKLASJDLAKSD")
-    print(node.lim_sup)
 
 
 def p_end_array_call(p):
