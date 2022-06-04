@@ -143,3 +143,10 @@ class MemoryManager:
         number_of_constants = self.assigned_constants - (self.MAX_TEMPS + 1)
         return number_of_int_variables, number_of_float_variables, number_of_char_variables, number_of_tmp_variables, number_of_constants
 
+    def is_address_global(self, address):
+        if address < STARTING_ADDRESS + GLOBAL_OFFSET:
+            print("ADRESSS IS IN FACT GLOBAL")
+            return True
+        else:
+            print("ADRESSS IS IN FACT NOT GLOBAL")
+            return False

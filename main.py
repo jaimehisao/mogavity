@@ -463,10 +463,13 @@ def p_asignacion(p):
     # exp_type = stack_type.pop()
     _ = stack_type.pop()
     address = 0
-    if fD.get_var_type(p[1], current_scope) and (is_array == False):
+    print("VARIABLE THAT WE ARE TRYING TO GET", p[1])
+    stackO.show_all()
+    if fD.get_var_type(p[1], current_scope) and (is_array is False):
         address = fD.get_variable_address(p[1], current_scope)
         # print("ADDRESS FOR ", p[1], "in scope", current_scope, "is", address)
-    elif is_array and int(stackO.top()) >= 100000:
+    elif is_array:
+        print("IS ARRAY")
         address = stackO.top()
     else:
         print("no addr?")
@@ -545,8 +548,8 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
-                |   ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
+    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
+                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
 
 
 def p_method_detection_class_save(p):
@@ -708,12 +711,12 @@ def p_expMD(p):
 # TODO: Update factor diagram
 # <Factor>
 def p_factor(p):
-    '''factor   :   LEFTPARENTHESIS add_fake_bottom exp delete_fake_bottom RIGHTPARENTHESIS
+    '''factor   :   llamada
+                |   LEFTPARENTHESIS add_fake_bottom exp delete_fake_bottom RIGHTPARENTHESIS
                 |   CTE_INT save_pvar_int save_constant_int
                 |   CTE_FLOAT save_pvar_float save_constant_float
                 |   CTE_CHAR save_pvar_int save_constant_int
                 |   variable save_pvar_var save_id
-                |   llamada
                 '''
     pass
 
@@ -800,7 +803,10 @@ def p_save_id(p):
     else:
         if fD.function_table[current_scope].variable_table[pvar].has_dimensions:
             return
-
+    address = fD.get_variable_address(pvar, current_scope)
+    stackO.push(address)
+    var_type = fD.get_var_type(pvar, current_scope)
+    stack_type.push(var_type)
 
 def p_save_constant_int(p):
     """save_constant_int : """
@@ -1106,14 +1112,11 @@ def p_np_else(p):
 
 def p_for_declaration_control(p):
     """for_declaration : """
-
     control_var = p[-1]
-
     # Check if control var exists in either the local or global scope
     print("CURR SCOPE", current_scope, control_var)
     address = fD.get_variable_address(control_var, current_scope)
     _type = fD.get_var_type(control_var, current_scope)
-
     if _type != "int":
         error("Type mismatch on for statement in line " + str(p.lexer.lineno))
 
@@ -1302,17 +1305,6 @@ def p_add_fake_bottom(p):
 def p_delete_fake_bottom(p):
     """delete_fake_bottom :"""
     poper.pop()
-
-
-####################################
-######## ARRAYS ##########
-####################################
-def p_new_array(p):
-    """new_array : """
-    #  WE need to reserve the memory space for all the size of the array.
-    size = p[-1]  # suponiendo, prob es diferente
-    for i in range(0, size):
-        fD.function_table[current_scope].memory_manager.assign_new_int_address()
 
 
 ####################################
@@ -1664,10 +1656,22 @@ def p_set_virtual_address(p):
 
 def p_add_array_id(p):
     """add_array_id : """
-    if fD.function_table["global"].variable_table[p[-1]].has_dimensions:
-        stackO.push(p[-1])
-        var_type = fD.get_var_type(p[-1], current_scope)
-        stack_type.push(var_type)
+    if current_scope != "global":
+        try:
+            if fD.function_table["global"].variable_table[p[-1]].has_dimensions:
+                stackO.push(p[-1])
+                var_type = fD.get_var_type(p[-1], "global")
+                stack_type.push(var_type)
+        except KeyError:
+            if fD.function_table[current_scope].variable_table[p[-1]].has_dimensions:
+                stackO.push(p[-1])
+                var_type = fD.get_var_type(p[-1], current_scope)
+                stack_type.push(var_type)
+    else:
+        if fD.function_table[current_scope].variable_table[p[-1]].has_dimensions:
+            stackO.push(p[-1])
+            var_type = fD.get_var_type(p[-1], current_scope)
+            stack_type.push(var_type)
 
 
 def p_verify_dims(p):
@@ -1675,12 +1679,29 @@ def p_verify_dims(p):
     global dim, array_id, array_var, node
     array_id = stackO.pop()
     array_type = stack_type.pop()
-    array_var = fD.function_table[current_scope].variable_table[array_id]
-    if array_var.has_dimensions:
-        dim = 1
-        stack_dim.push((array_id, dim))
-        node = fD.function_table[current_scope].get_first_node(array_id)
-        poper.push("(")  # FakeBottom
+
+    if current_scope != "global":
+        try:
+            array_var = fD.function_table["global"].variable_table[array_id]
+            if array_var.has_dimensions:
+                dim = 1
+                stack_dim.push((array_id, dim))
+                node = fD.function_table["global"].get_first_node(array_id)
+                poper.push("(")  # FakeBottom
+        except KeyError:
+            array_var = fD.function_table[current_scope].variable_table[array_id]
+            if array_var.has_dimensions:
+                dim = 1
+                stack_dim.push((array_id, dim))
+                node = fD.function_table[current_scope].get_first_node(array_id)
+                poper.push("(")  # FakeBottom
+    else:
+        array_var = fD.function_table[current_scope].variable_table[array_id]
+        if array_var.has_dimensions:
+            dim = 1
+            stack_dim.push((array_id, dim))
+            node = fD.function_table[current_scope].get_first_node(array_id)
+            poper.push("(")  # FakeBottom
 
 
 def p_array_quads(p):
@@ -1724,13 +1745,18 @@ def p_end_array_call(p):
     add_offset_quad = quad.generate_quad("+", aux1, node_k_address, temporal1)
     quads.append(add_offset_quad)
     address_temp = temp.get_temp(array_var.type)
-    temporal2 = fD.function_table[current_scope].memory_manager.assign_new_pointer()
     base_address_cte = fD.get_constant(fD.get_variable_address(array_id, current_scope))
+
+    if fD.function_table[current_scope].memory_manager.is_address_global(base_address_cte):
+        temporal2 = fD.function_table["global"].memory_manager.assign_new_pointer()
+    else:
+        temporal2 = fD.function_table[current_scope].memory_manager.assign_new_pointer()
+
     add_base_address_quad = quad.generate_quad("+", temporal1, base_address_cte, temporal2)
     quads.append(add_base_address_quad)
     stackO.push(temporal2)
     poper.pop()
-    fD.print_variable_table(current_scope)
+    #fD.print_variable_table(current_scope)
 
 
 #######################
@@ -1768,13 +1794,30 @@ def print_function_table():
     objects = []
     table = ["Object Name", "Attributes", "Methods"]
     objects.append(table)
+    number_objects = 0
     for obj in fD.function_table["global"].class_table:
         objects.append([obj, fD.function_table["global"].class_table[obj].attributes,
                         fD.function_table["global"].class_table[obj].methods])
+        number_objects += 1
     objects_table = PrettyTable(objects[0])
     objects_table.add_rows(objects[1:])
-    print(objects_table)
+    if number_objects > 0:
+        print(objects_table)
 
+    # Variables
+    variables = []
+    var_print_table = ["Variable", "Scope", "Type", "Address", "Dimensioned"]
+    variables.append(var_print_table)
+    for scope in fD.function_table:
+        for var in fD.function_table[scope].variable_table:
+            var_in_table = [fD.function_table[scope].variable_table[var].id,
+                            scope, fD.function_table[scope].variable_table[var].type,
+                            fD.function_table[scope].variable_table[var].address,
+                            fD.function_table[scope].variable_table[var].has_dimensions]
+            variables.append(var_in_table)
+    var_table_2 = PrettyTable(variables[0])
+    var_table_2.add_rows(variables[1:])
+    print(var_table_2)
 
 # parser = yacc.yacc(debug=True)
 argument_parser.add_argument("-f", "--file", help="Filename")
@@ -1801,9 +1844,9 @@ for quad in quads:
     quad.print_quad()
 print("====================================")
 #  Prepare to pass code to virtual machine
-print(vars(fD.function_table["global"].variable_table["a"]))
+#print(vars(fD.function_table["global"].variable_table["a"]))
 
-print(vars(fD.function_table["global"]))
+#print(vars(fD.function_table["global"]))
 print_function_table()
 vm.start_virtual_machine(fD, quads)
 

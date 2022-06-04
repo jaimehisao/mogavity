@@ -1,0 +1,38 @@
+program test;
+
+var int a;
+
+instr int fibo_recursive(int num, int a, int b){
+    if(num == 0){
+        return a;
+    }
+    if(num == 1){
+        return b;
+    }
+    a = _fibo_recursive(num-1, b, a+b);
+    return a;
+}
+
+instr int fibo_iterative(int num){
+    var int sequence[100];
+    var int i;
+    i = 2;
+    sequence[0] = 0;
+    sequence[1] = 1;
+
+    while(i<=num){
+        sequence[i] = sequence[i-2] + sequence[i-1];
+        i = i + 1;
+    }
+    return sequence[num];
+}
+
+main{
+    output -> "Recursive";
+    a = _fibo_recursive(9,0,1);
+    output -> a;
+    output -> "Iterative";
+    a = _fibo_iterative(9);
+    output -> a;
+    return 0;
+}

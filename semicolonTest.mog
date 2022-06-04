@@ -11,7 +11,7 @@ instr int local()
 
 main{
     b = 1 + 56;
-    a = local() + local();
+    a = local();
     output -> a;
     output -> b;
     return 0;
