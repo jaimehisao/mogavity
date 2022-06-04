@@ -1467,7 +1467,9 @@ def p_np_end_func(p):
 ## TODO VALIDAR RETORNO Y TIPO DE RETORNO
 def p_end_func_return(p):
     """end_func_return : """
-
+    print("RETURN STACKO STACK_TYPE")
+    print(stackO.top())
+    print(stack_type.top())
     # Obtain the function's return type
     return_type = fD.function_table[current_scope].return_type
 
@@ -1477,17 +1479,30 @@ def p_end_func_return(p):
         quads.append(new_quad)
 
     # Caso valor de Retorno
+    # else:
+    #     actual_return_type = type(pvar)
+    #     if isinstance(pvar, int) or isinstance(pvar, float):
+    #         item_to_return = fD.get_constant(pvar)
+    #         if isinstance(item_to_return, int):
+    #             actual_return_type = "int"
+    #         elif isinstance(item_to_return, float):
+    #             actual_return_type = "float"
+    #     else:
+    #         actual_return_type = fD.get_var_type(pvar, current_scope)
+    #         item_to_return = fD.get_variable_address(pvar, current_scope)
+    #     _ = oracle.use_oracle(return_type, actual_return_type, "=")  # Validate if the girl dances with the old guy """
+
     else:
-        actual_return_type = type(pvar)
-        if isinstance(pvar, int) or isinstance(pvar, float):
-            item_to_return = fD.get_constant(pvar)
-            if isinstance(item_to_return, int):
+        if stack_type.top() == "int" or stack_type.top() == "float":
+            item_to_return = stackO.top()
+            if  stack_type.top() == "int":
                 actual_return_type = "int"
-            elif isinstance(item_to_return, float):
+            elif stack_type.top() == "float":
                 actual_return_type = "float"
         else:
-            actual_return_type = fD.get_var_type(pvar, current_scope)
-            item_to_return = fD.get_variable_address(pvar, current_scope)
+            actual_return_type = stack_type.top()
+            item_to_return = stackO.top()
+        
         _ = oracle.use_oracle(return_type, actual_return_type, "=")  # Validate if the girl dances with the old guy
 
         function_global_address = fD.get_variable_address(current_scope, "global")
