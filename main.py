@@ -120,8 +120,8 @@ t_RIGHTCURLYBRACKET = r'\}'
 t_LEFTBRACKET = r'\['
 t_RIGHTBRACKET = r'\]'
 t_CTE_STRING = r'"([^\\"\n]+|\\.)*"'
-t_CTE_FLOAT = r'[-]?[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
-t_CTE_INT = r'[-]?[0-9]+'
+t_CTE_FLOAT = r'[0-9]+\.[0-9]+([Ee][+-]?[0-9]*)?'
+t_CTE_INT = r'[0-9]+'
 # t_CTE_CHAR = r'[a-zA-Z0-9]'
 t_CTE_CHAR = r'[a-zA]'
 t_DOT = r'\.'
@@ -514,7 +514,6 @@ def p_variable2(p):
 def p_condicion(p):
     """condicion    :   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque np_if_2
                     |   IF LEFTPARENTHESIS exp RIGHTPARENTHESIS np_if_1 bloque condicion2"""
-    print('here?2342423')
 
 
 def p_condicion2(p):
@@ -709,12 +708,12 @@ def p_expMD(p):
 # TODO: Update factor diagram
 # <Factor>
 def p_factor(p):
-    '''factor   :   llamada
-                |   LEFTPARENTHESIS exp RIGHTPARENTHESIS
+    '''factor   :   LEFTPARENTHESIS add_fake_bottom exp delete_fake_bottom RIGHTPARENTHESIS
                 |   CTE_INT save_pvar_int save_constant_int
                 |   CTE_FLOAT save_pvar_float save_constant_float
                 |   CTE_CHAR save_pvar_int save_constant_int
                 |   variable save_pvar_var save_id
+                |   llamada
                 '''
     pass
 
@@ -1295,13 +1294,13 @@ def p_np_for_4(p):
 ###############################
 ######## FAKE BOTTOM ##########
 ###############################
-def p_create_fake_bottom(p):
-    """create_fake_bottom :"""
-    poper.push(p[-1])
-
-
 def p_add_fake_bottom(p):
-    """erase_fake_bottom :"""
+    """add_fake_bottom :"""
+    poper.push("(")
+
+
+def p_delete_fake_bottom(p):
+    """delete_fake_bottom :"""
     poper.pop()
 
 
@@ -1807,6 +1806,8 @@ for quad in quads:
     quad.print_quad()
 print("====================================")
 #  Prepare to pass code to virtual machine
+print(vars(fD.function_table["global"].variable_table["a"]))
+
 print(vars(fD.function_table["global"]))
 print_function_table()
 vm.start_virtual_machine(fD, quads)
