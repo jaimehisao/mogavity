@@ -172,7 +172,27 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             value = bool(left != right)
             save_to_memory(res, value)
             instruction_pointer += 1
-
+        elif quadruples[instruction_pointer][1] == "==":
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
+            res = quadruples[instruction_pointer][4]
+            value = bool(left == right)
+            save_to_memory(res, value)
+            instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == ">=":
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
+            res = quadruples[instruction_pointer][4]
+            value = bool(left >= right)
+            save_to_memory(res, value)
+            instruction_pointer += 1
+        elif quadruples[instruction_pointer][1] == "<=":
+            left = get_var_from_address(quadruples[instruction_pointer][2])
+            right = get_var_from_address(quadruples[instruction_pointer][3])
+            res = quadruples[instruction_pointer][4]
+            value = bool(left <= right)
+            save_to_memory(res, value)
+            instruction_pointer += 1
         ##############
         ## BOOLEANS ##
         ##############
