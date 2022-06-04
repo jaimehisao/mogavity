@@ -12,6 +12,7 @@ import sys
 import logging
 from constants import STARTING_ADDRESS, MAX_PER_VAR, GLOBAL_OFFSET
 from error_handling import error, info, warning
+
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -145,8 +146,6 @@ class MemoryManager:
 
     def is_address_global(self, address):
         if address < STARTING_ADDRESS + GLOBAL_OFFSET:
-            print("ADRESSS IS IN FACT GLOBAL")
             return True
         else:
-            print("ADRESSS IS IN FACT NOT GLOBAL")
             return False

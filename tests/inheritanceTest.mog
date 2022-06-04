@@ -1,0 +1,47 @@
+program test;
+
+class Animal {
+    attr:
+        int animal;
+    constr:
+        Animal(){
+            output -> "Un animal nace!";
+        }
+    methods:
+        method void que_soy(){
+            output -> "Hola, soy un animal";
+        }
+}
+
+
+class Perro inherits Animal {
+    attr:
+        int a, b;
+    constr:
+        Perro(){
+
+        }
+    methods:
+        method void pelos2(){
+            output -> "Hola, pelos de perro";
+        }
+}
+
+
+var Perro perro;
+var int a;
+
+instr void pelos(){
+     output -> "Hola Pelos pero no de perro";
+     return 0;
+}
+
+main {
+    perro.a = 1;
+    perro.b = 2;
+    output -> perro.a;
+    _pelos();
+    _perro.que_soy();
+    output -> perro.b;
+    return 0;
+}

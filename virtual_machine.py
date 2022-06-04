@@ -38,11 +38,6 @@ pending_jumps = []  # Addresses to return to previous point of executions
 
 
 def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Quadruple]):
-    print("")
-    print("")
-    print("")
-    print("")
-    print("")
     print("Starting the Mogavity Virtual Machine")
     pending_jumps.append(len(quadruples) - 1)  # TODO parche
     ## Initial VM Declarations

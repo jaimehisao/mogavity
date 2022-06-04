@@ -222,7 +222,6 @@ class FunctionDirectory:
 
     def print_variable_table(self, current_scope):
         print(str(self.function_table[current_scope].variable_table))
-        print(self.function_table[current_scope].variable_table["A"].address)
 
     def print_all_variable_tables(self):
         pass
@@ -303,8 +302,6 @@ class FunctionDirectory:
         # print("SCOPE", scope, "ID", identifier)
         # print(self.function_table["global"].variable_table.keys())
         #split_id = identifier.split(".")
-        print(identifier)
-        print("split")
         #print(split_id)
         #if len(split_id) == 1:  # Traditional Variables
         var_in_global_scope_address = None
