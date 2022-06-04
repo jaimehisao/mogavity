@@ -545,8 +545,8 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
-                |   ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
+    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
+                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
 
 
 def p_method_detection_class_save(p):
@@ -800,7 +800,10 @@ def p_save_id(p):
     else:
         if fD.function_table[current_scope].variable_table[pvar].has_dimensions:
             return
-
+    address = fD.get_variable_address(pvar, current_scope)
+    stackO.push(address)
+    var_type = fD.get_var_type(pvar, current_scope)
+    stack_type.push(var_type)
 
 def p_save_constant_int(p):
     """save_constant_int : """
