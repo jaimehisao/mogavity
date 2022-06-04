@@ -1,0 +1,21 @@
+program test;
+
+var int a;
+
+instr int fibo(int num, int a, int b){
+
+    if(num == 0){
+        return a;
+    }
+
+    if(num == 1){
+        return b;
+    }
+    a = _fibo(n-1, b, a+b);
+    return a;
+}
+
+main{
+    a = _fibo(9,0,1);
+    return 0;
+}
