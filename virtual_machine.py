@@ -76,7 +76,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
     while quadruples[instruction_pointer][1] != "EOF":
         # print("Quad", quadruples[instruction_pointer][0])
         # rint(global_memory.scope_memory)
-        quadruples[instruction_pointer].print_quad()
+        #quadruples[instruction_pointer].print_quad()
         global current_local_memory
 
         ################
@@ -275,7 +275,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
             #instruction_pointer += 1
             if quadruples[instruction_pointer][2] is not None:
                 return_pointer = pending_jumps.pop()
-                instruction_pointer += return_pointer
+                instruction_pointer = return_pointer
                 continue
             else:
                 return_pointer = 0
@@ -298,7 +298,7 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
         elif quadruples[instruction_pointer][1] == "ENDFUNC":
             if quadruples[instruction_pointer][2] is not None:
                 return_pointer = pending_jumps.pop()
-                instruction_pointer += return_pointer
+                instruction_pointer = return_pointer
                 continue
             else:
                 return_pointer = 0

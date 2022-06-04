@@ -207,11 +207,34 @@ def p_empty(p):
 ## GRAMATICA CLASES ##
 ######################
 def p_class(p):
-    """class : CLASS ID declare_class INHERITS ID LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET
-    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET
-    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs METHODS COLON class_method RIGHTCURLYBRACKET
-    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor RIGHTCURLYBRACKET
+    """class : CLASS ID declare_class INHERITS ID inherits_init LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET class
+    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET class
+    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs METHODS COLON class_method RIGHTCURLYBRACKET class
+    | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor RIGHTCURLYBRACKET class
+    | empty
     """
+
+
+def p_inherits_init(p):
+    """inherits_init : """
+    class_to_inherit = p[-1]
+    if not fD.function_table["global"].class_table.keys().__contains__(class_to_inherit):
+        error("Class you are trying to inherit does not exist!")
+    print("CURR CLASS", current_class, "INHERITS", class_to_inherit)
+
+    for attr in fD.function_table["global"].class_table[class_to_inherit].attributes:
+        fD.function_table["global"].class_table[current_class].attributes[attr] = \
+            fD.function_table["global"].class_table[class_to_inherit].attributes[attr]
+
+    for method in fD.function_table["global"].class_table[class_to_inherit].methods:
+        if method != class_to_inherit:
+            met = fD.function_table["global"].class_table[class_to_inherit].methods[method]
+            met_split_name = met.id.split(".")
+            curr_met_name = current_class + "." + met_split_name[1]
+            met.id = curr_met_name
+            print("curr_met_name", curr_met_name)
+            print("METID", met.id)
+            fD.function_table["global"].class_table[current_class].methods[met.id] = met
 
 
 # Initializes new class in class directory.
@@ -432,7 +455,7 @@ def p_bloque2(p):
 # <Estatuto>
 def p_estatuto(p):
     """estatuto :   asignacion
-                |   llamada
+                |   llamada_void
                 |   condicion
                 |   escritura
                 |   lectura
@@ -552,6 +575,11 @@ def p_llamada(p):
                 |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
 
 
+def p_llamada_void(p):
+    """llamada_void  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON
+                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method SEMICOLON"""
+
+
 def p_method_detection_class_save(p):
     """method_detection_class_save :"""
     global method_call_class_var
@@ -568,8 +596,11 @@ def p_method_detection(p):
     fD.function_table["global"].class_table[original_class].check_if_method_exists(method_name)
     # Verify function exists
     # Start handling execution
-    new_quad = quad.generate_quad("ERA", None, None, method_call_class_var + "." + method_name)
+    global era_call
+    era_call = method_call_class_var + "." + method_name
+    new_quad = quad.generate_quad("ERA", None, None, era_call)
     quads.append(new_quad)
+    new_quad.print_quad()
     param_counter = 0
 
 
@@ -1427,9 +1458,10 @@ def p_function_gosub(p):
 
 def p_function_gosub_method(p):
     """function_gosub_method : """
+    print("ORIGINAL CLASS", method_call_class_var)
     original_class = fD.get_var_type(method_call_class_var, current_scope)
-    starting_quadruple = fD.function_table["global"].class_table[original_class].methods[
-        original_class + "." + method_name].starting_quadruple
+    print("ORIGINAL CLASS method_call_class_var", original_class)
+    starting_quadruple = fD.function_table["global"].class_table[original_class].methods[original_class + "." + method_name].starting_quadruple
     gosub_quad = quad.generate_quad("GOSUB", "2", None, starting_quadruple)
     quads.append(gosub_quad)
     method_type = fD.function_table["global"].class_table[original_class].methods[
@@ -1495,7 +1527,7 @@ def p_end_func_return(p):
     else:
         if stack_type.top() == "int" or stack_type.top() == "float":
             item_to_return = stackO.top()
-            if  stack_type.top() == "int":
+            if stack_type.top() == "int":
                 actual_return_type = "int"
             elif stack_type.top() == "float":
                 actual_return_type = "float"
@@ -1811,9 +1843,12 @@ def print_function_table():
     objects.append(table)
     number_objects = 0
     for obj in fD.function_table["global"].class_table:
-        objects.append([obj, fD.function_table["global"].class_table[obj].attributes,
-                        fD.function_table["global"].class_table[obj].methods])
+        meth_list = []
+        for mt in fD.function_table["global"].class_table[obj].methods:
+            meth_list.append(mt)
         number_objects += 1
+        tmp = [obj, fD.function_table["global"].class_table[obj].attributes, meth_list]
+        objects.append(tmp)
     objects_table = PrettyTable(objects[0])
     objects_table.add_rows(objects[1:])
     if number_objects > 0:
