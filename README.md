@@ -20,3 +20,6 @@ Para este avance terminamos la generación de código para las funciones. Dentro
 
 ## Avance #7 Generación de Código de Arreglos y Ejecución de Condicionales 30/05/2022
 Para este avance implementamos la generación de código para arreglos. Se realizó la implementación de recursividad. La máquina virtual ya maneja diferentes alcances, es decir que ya puede despertar y dormir memoria para las diferentes funciones. Añadiendo a eso, ya guardamos los valores de retorno para cada llamda de función. También ya terminamos de implementar la generación de código de las funciones. 
+
+## Avance #8 Avance de Documentación y Ejecución de Aplicación propia 03/06/2022
+Para este avance terminamos de implementar todas las funcionalidades que teníamos previstos para el compilador. Tenemos pendiente arreglar algunos aspectos "estéticos" para reducir las restricciones. Iniciamos la documentación, sin embargo solo hemos podido actualizar unos cuantos diagramas y agregar sus puntos neurálgicos. 
