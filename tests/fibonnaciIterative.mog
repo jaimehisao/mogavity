@@ -14,8 +14,7 @@ instr int fibo_iterative(int num){
         sequence[i] = sequence[i-2] + sequence[i-1];
         i = i + 1;
      }
-     c = sequence[num];
-    return c;
+    return sequence[num];
 }
 
 main{

@@ -1,0 +1,27 @@
+program test;
+
+var int i, a, b, c, d, result;
+var int A[100];
+
+instr int search(int to_find){
+    for (i = 1; 100; i+=1){
+        d = i;
+        if (to_find == A[d]){
+            return i;
+        }
+    }
+    return 9999999;
+}
+main{
+    b = 100;
+    for (a = 0; 100; a+=1){
+      c = a+1;
+      output -> c;
+      A[c] = c;
+    }
+    input <- b;
+    result = _search(b);
+    output -> result;
+
+    return 0;
+}

@@ -12,6 +12,7 @@ import sys
 import logging
 from constants import STARTING_ADDRESS, MAX_PER_VAR, GLOBAL_OFFSET
 from error_handling import error, info, warning
+
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -48,12 +49,12 @@ class MemoryManager:
         self.assigned_poiners = self.MAX_CONSTANTS + 1
         self.MAX_POINTERS = self.assigned_poiners + MAX_PER_VAR - 1
 
-        print("int", str(self.assigned_ints), str(self.MAX_INTS))
-        print("float", str(self.assigned_floats), str(self.MAX_FLOATS))
-        print("char", str(self.assigned_chars), str(self.MAX_CHARS))
-        print("tmp", str(self.assigned_temps), str(self.MAX_TEMPS))
-        print("CTE", str(self.assigned_constants), str(self.MAX_CONSTANTS))
-        print("POINTERS", str(self.assigned_poiners), str(self.MAX_POINTERS))
+        #print("int", str(self.assigned_ints), str(self.MAX_INTS))
+        #print("float", str(self.assigned_floats), str(self.MAX_FLOATS))
+        #print("char", str(self.assigned_chars), str(self.MAX_CHARS))
+        #print("tmp", str(self.assigned_temps), str(self.MAX_TEMPS))
+        #print("CTE", str(self.assigned_constants), str(self.MAX_CONSTANTS))
+        #print("POINTERS", str(self.assigned_poiners), str(self.MAX_POINTERS))
 
     def assign_new_int_address(self):
         if self.assigned_ints < self.MAX_INTS:
@@ -145,8 +146,6 @@ class MemoryManager:
 
     def is_address_global(self, address):
         if address < STARTING_ADDRESS + GLOBAL_OFFSET:
-            print("ADRESSS IS IN FACT GLOBAL")
             return True
         else:
-            print("ADRESSS IS IN FACT NOT GLOBAL")
             return False
