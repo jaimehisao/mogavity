@@ -1,12 +1,13 @@
 program test;
 
-var int a,b,c;
+var int a,b,c, D[10];
 
 main{
-    a = 10;
-    for (a = 10; a > 1; a-=1){
-      output -> "holaaaaa";
-      output -> a;
+    b = 0;
+    for (a = 0; 10; a+=1){
+      D[a] = a;
+      output -> D[a];
+
     }
     return 0;
 }
