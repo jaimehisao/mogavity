@@ -3,10 +3,16 @@ program test;
 var int a,b,c;
 
 main{
-    a = 10;
-    for (a = 10; a > 1; a-=1){
+    b = 10;
+    for (a = 0; b; a+=1){
       output -> "holaaaaa";
       output -> a;
     }
     return 0;
 }
+
+for (a = 0; c; a+=1){
+        output -> a;
+        A[a] = a*5;
+        output -> A[a];
+    }

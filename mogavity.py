@@ -464,8 +464,8 @@ def p_estatuto(p):
 def p_asignacion(p):
     '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
     # print(p[1])
-    print("STACK")
-    stackO.show_all()
+    #print("STACK")
+    #stackO.show_all()
     exp = stackO.pop()
 
     if current_scope != "global":
@@ -482,7 +482,7 @@ def p_asignacion(p):
         address = fD.get_variable_address(p[1], current_scope)
         # print("ADDRESS FOR ", p[1], "in scope", current_scope, "is", address)
     elif is_array:
-        print("IS ARRAY")
+        #print("IS ARRAY")
         address = stackO.top()
     else:
         print("no addr?")
@@ -553,7 +553,7 @@ def p_escritura2(p):
 # <Lectura>
 def p_lectura(p):
     """lectura  :   INPUT LEFTARROW variable SEMICOLON"""
-    address = fD.get_variable_address(current_scope, p[3])
+    address = fD.get_variable_address(p[3], current_scope)
     ## TODO VALIDATE VARIABLE EXISTANCE
     new_quad = quad.generate_quad('INPUT', None, None, address)
     quads.append(new_quad)
@@ -602,12 +602,6 @@ def method_invocation(p):
     verified_id = p[-1]
 
 
-def p_method_invocation_check_class_obj(p):
-    """method_invocation_check_class_obj : """
-    _check = verified_id + "." + p[-1]
-    fD.get_variable_address(_check, current_scope)  # NO LOL TODO
-
-
 def p_llamada2(p):
     """llamada2 :   add_to_param_counter exp verify_param llamada2
                 |   COMMA add_to_param_counter exp verify_param llamada2
@@ -625,22 +619,10 @@ def p_cicloFor(p):
     # print('f')
 
 
-"""
-# <CicloFor>
-def p_cicloFor(p):
-    cicloFor :   
-    FOR LEFTPARENTHESIS assign_for SEMICOLON exp SEMICOLON update np_for_3 RIGHTPARENTHESIS bloque np_for_4
-    # print('f')
-"""
-
-
 # TODO: update assign diagram
 # <Assign>
 def p_assign_for(p):
     """assign_for   :   ID for_declaration ASSIGNMENT exp for_exp_assign"""
-
-
-"""assign_for   :   ID np_for_1 ASSIGNMENT exp np_for_2"""
 
 
 # <Update>
@@ -828,6 +810,7 @@ def p_save_id(p):
     stackO.push(address)
     var_type = fD.get_var_type(pvar, current_scope)
     stack_type.push(var_type)
+
 
 def p_save_constant_int(p):
     """save_constant_int : """
@@ -1067,27 +1050,6 @@ def p_np_if_1(p):
         quads.append(new_quad)
 
 
-def p_np_if_elif(p):
-    """np_if_elif : """
-    stackJumps.show_all()
-
-    global elif_num
-    cond = stackO.pop()
-    print("cond", cond)
-    type_cond = stack_type.pop()
-    # if type_cond then it is a malformed if
-    if type_cond != "bool":
-        error("Expected type bool")
-    else:
-        new_quad = quad.generate_quad("GOTOF", cond, None, None)
-        stackJumps.push(new_quad.id - 1)
-        quads.append(new_quad)
-        new_quad = quad.generate_quad("GOTO", None, None, None)
-        stackJumps.push(new_quad.id - 1)
-        quads.append(new_quad)
-    elif_num += 1
-
-
 def p_np_if_2(p):
     """np_if_2 : """
     stackJumps.show_all()
@@ -1226,90 +1188,8 @@ def p_for_update(p):
     stack_type.pop()
 
 
-####################################
-######### PUNTOS DEL FOR ###########
-####################################
-def p_np_for_1(p):
-    """np_for_1 : """
-    address = fD.get_variable_address(current_scope, p[-1])
-    stackO.push(address)
-    id_type = fD.get_var_type(p[-1], current_scope)
-    # vailidate that tit is numeric, if not break (var we mean)
-    print(id_type)
-    stack_type.show_all()
-    if id_type == "int":
-        stack_type.push(id_type)
-    else:
-        error("Expected type int")
 
 
-def p_np_for_2(p):
-    """np_for_2 : """
-    global vControl
-    exp_type = stack_type.pop()
-    if exp_type != "int":
-        error("Type mismatch in linex " + str(p.lexer.lineno))
-    else:
-        exp = stackO.pop()
-        vControl = stackO.top()
-        control_type = stack_type.top()
-        _ = oracle.use_oracle(control_type, exp_type, "=")  # Cubo semantico se encarga de errores aqui
-        new_quad = quad.generate_quad("=", exp, None, vControl)  ## Ahi va en none?
-        print("NP FOR 2 - Generated Quad")
-        new_quad.print_quad()
-        quads.append(new_quad)
-
-
-def p_np_for_3(p):
-    """np_for_3 : """
-    global cont_temporals
-    stack_type.show_all()
-    stackO.show_all()
-    stack_type.pop()  ## TODO PARCHE
-    exp_type = stack_type.pop()
-    if exp_type != "int":
-        error("Type mismatch in linez " + str(p.lexer.lineno))
-    else:
-        exp = stackO.pop()
-        vFinal = fD.function_table[current_scope].memory_manager.assign_new_temp()
-        if current_scope != "global":
-            cont_temporals += 1
-        new_quad = quad.generate_quad("=", exp, "vFinal", vFinal)
-        quads.append(new_quad)
-        tmp_x = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("bool")
-        if current_scope != "global":
-            cont_temporals += 1
-        new_quad = quad.generate_quad("<", vControl, vFinal, tmp_x)
-        quads.append(new_quad)
-        stackJumps.push(len(quads))
-        new_quad = quad.generate_quad("GOTOF", tmp_x, None, None)
-        quads.append(new_quad)
-        stackJumps.push(len(quads) - 1)
-
-
-def p_np_for_4(p):
-    """np_for_4 : """
-    global cont_temporals
-    tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("int")
-    if current_scope != "global":
-        cont_temporals += 1
-
-    for_updater_constant = fD.get_constant(for_updater)
-    new_quad = quad.generate_quad(for_op, vControl, for_updater_constant, tmp_y)
-
-    quads.append(new_quad)
-    # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
-    # new_quad = quad.generate_quad("=", tmp_y, "VCONTROL", vControl)  ## TODO REMOVE 3 rd val
-    # quads.append(new_quad)
-    new_quad = quad.generate_quad("=", tmp_y, "STACK 0. pop", stackO.pop())  # stackO.pop() has to be the original ID
-    quads.append(new_quad)
-    final = stackJumps.pop()
-    ret = stackJumps.pop()
-    new_quad = quad.generate_quad("GOTO", None, None, ret)
-    quads.append(new_quad)
-    tmp_quad = quads[final]
-    tmp_quad.fill_quad(len(quads) + 1)
-    stack_type.pop()
 
 
 ###############################
@@ -1471,6 +1351,7 @@ def p_verify_coherence_of_params_method(p):
         pass
     else:
         error("Amount of parameters is incorrect for scope " + current_scope)
+    # TODO check if we can send params!!!
 
 
 def p_np_end_func(p):
