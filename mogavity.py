@@ -561,13 +561,13 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
-                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
+    """llamada  :    ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
+                |    ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
 
 
 def p_llamada_void(p):
-    """llamada_void  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON
-                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method SEMICOLON"""
+    """llamada_void  : ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub SEMICOLON
+                |    ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method SEMICOLON"""
 
 
 def p_method_detection_class_save(p):
@@ -1744,7 +1744,7 @@ def compile_and_run(file_name, show_quadruples, show_tables):
         f.close()
     except FileNotFoundError:
         error("No hay archivo para probar")
-    parser.parse(r, debug=False)
+    parser.parse(r, debug=True)
 
     print("Code Compiled Successfully!")
 
