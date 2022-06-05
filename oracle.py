@@ -56,10 +56,10 @@ semantic_oracle[1][1][9] = 1    # Float y Float (ASSIGN)
 semantic_oracle[1][1][10] = 4   # Float y Float (EQUAL)
 semantic_oracle[1][1][11] = 4   # Float y Float (EQUAL GREATER THAN)
 semantic_oracle[1][1][12] = 4   # Float y Float (EQUAL LESS THAN)
-semantic_oracle[0][1][0] = 0    # Int y Float (Sum)
-semantic_oracle[0][1][1] = 0    # Int y Float (Subtract)
+semantic_oracle[0][1][0] = 1    # Int y Float (Sum)
+semantic_oracle[0][1][1] = 1    # Int y Float (Subtract)
 semantic_oracle[0][1][2] = 1    # Int y Float (Multiply)
-semantic_oracle[0][1][3] = 0    # Int y Float (Divide)
+semantic_oracle[0][1][3] = 1    # Int y Float (Divide)
 semantic_oracle[0][1][4] = 4    # Int y Float (Greater Than)
 semantic_oracle[0][1][5] = 4    # Int y Float (Less Than)
 semantic_oracle[0][1][6] = 4    # Int y Float (Not Equal)
@@ -70,9 +70,9 @@ semantic_oracle[0][1][10] = 4   # Int y Float (EQUAL)
 semantic_oracle[0][1][11] = 4   # Int y Float (EQUAL GREATER THAN)
 semantic_oracle[0][1][12] = 4   # Int y Float (EQUAL LESS THAN)
 semantic_oracle[1][0][0] = 0    # Float y Int (Sum)
-semantic_oracle[1][0][1] = 0    # Float y Int (Subtract)
+semantic_oracle[1][0][1] = 1    # Float y Int (Subtract)
 semantic_oracle[1][0][2] = 1    # Float y Int (Multiply)
-semantic_oracle[1][0][3] = 0    # Float y Int (Divide)
+semantic_oracle[1][0][3] = 1    # Float y Int (Divide)
 semantic_oracle[1][0][4] = 4    # Float y Int (Greater Than)
 semantic_oracle[1][0][5] = 4    # Float y Int (Less Than)
 semantic_oracle[1][0][6] = 4    # Float y Int (Not Equal)
@@ -261,6 +261,8 @@ def convert_string_name_to_number_type(name):
             return 2
         elif name == "bool":
             return 4
+        else:
+            error("Type" + name + " not supported.")
 
 
 def convert_string_name_to_number_operand(name):

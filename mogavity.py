@@ -561,8 +561,8 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :    ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
-                |    ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
+    """llamada  :    UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
+                |    UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
 
 
 def p_llamada_void(p):
@@ -665,11 +665,11 @@ def p_expAND(p):
 
 # <ExpB>
 def p_expB(p):
-    """expB :   expC add_operator_loop expLOOP"""
+    """expB :   expC add_operator_rop expROP"""
 
 
-def p_expLOOP(p):
-    """expLOOP  :   LESSTHAN save_op expB
+def p_expROP(p):
+    """expROP  :   LESSTHAN save_op expB
                 |   GREATERTHAN save_op expB
                 |   EQUALLESSTHAN save_op expB
                 |   EQUALGREATERTHAN save_op expB
@@ -718,7 +718,6 @@ def p_factor(p):
                 |   LEFTPARENTHESIS add_fake_bottom exp delete_fake_bottom RIGHTPARENTHESIS
                 |   CTE_INT save_pvar_int save_constant_int
                 |   CTE_FLOAT save_pvar_float save_constant_float
-                |   CTE_CHAR save_pvar_int save_constant_int
                 |   variable save_pvar_var save_id
                 '''
     pass
@@ -917,8 +916,8 @@ def p_add_operator_multiplydivide(p):
             error("Type Mismatched")
 
 
-def p_add_operator_loop(p):
-    """add_operator_loop :"""
+def p_add_operator_rop(p):
+    """add_operator_rop :"""
     global cont_temporals
     if poper.top() == '<=' or poper.top() == '<' or poper.top() == '>' or poper.top() == '>=' \
             or poper.top() == '==' or poper.top() == '!=':
@@ -1102,7 +1101,6 @@ def p_for_declaration_control(p):
 
 def p_for_exp_assign(p):
     """for_exp_assign : """
-    global v_control_tmp
     _type = stack_type.pop()
     op_addr = stackO.pop()
     if _type != "int":
@@ -1116,9 +1114,10 @@ def p_for_exp_assign(p):
     _quad = quad.generate_quad("=", op_addr, None, v_control)  # TODO REMOVE
     quads.append(_quad)
 
-    v_control_tmp = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    _quad = quad.generate_quad("=", v_control, None, v_control_tmp)
-    quads.append(_quad)
+    
+    #v_control_tmp = fD.function_table[current_scope].memory_manager.assign_new_temp()
+    #_quad = quad.generate_quad("=", v_control, None, v_control_tmp)
+    #quads.append(_quad)
 
     control_var = p[-4]
     print("CONTROL VAR", control_var)
@@ -1136,7 +1135,6 @@ def p_for_exp_assign(p):
 
 def p_for_exp_comp(p):
     """for_exp_comp : """
-    global v_control_tmp
     op = stackO.pop()
     _type = stack_type.pop()
     print("TYPE", _type, op)
@@ -1150,7 +1148,7 @@ def p_for_exp_comp(p):
 
     v_control = stackO.top()
     addr = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    _quad_2 = quad.generate_quad("<", v_control_tmp, v_final, addr)
+    _quad_2 = quad.generate_quad("<", v_control, v_final, addr)
     quads.append(_quad_2)
     stackJumps.push(_quad_2.id)
     _quad_3 = quad.generate_quad("GOTOF", addr, None, None)
@@ -1160,23 +1158,25 @@ def p_for_exp_comp(p):
 
 def p_for_update(p):
     """for_update : """
-    global cont_temporals, v_control_tmp
+    global cont_temporals
     tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()  ## replaced temp.get_temp("int")
     if current_scope != "global":
         cont_temporals += 1
 
-    vcontrol = stackO.top()
+    vcontrol = stackO.pop()
+    v_control_type = stack_type.pop()
 
     for_updater_constant = fD.get_constant(int(for_updater))
-    new_quad = quad.generate_quad(for_op, v_control_tmp, for_updater_constant, tmp_y)
+    new_quad = quad.generate_quad(for_op, vcontrol, for_updater_constant, tmp_y)
 
     quads.append(new_quad)
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
-    new_quad = quad.generate_quad("=", tmp_y, None, v_control_tmp)
+    print("VCONTROL", vcontrol)
+    new_quad = quad.generate_quad("=", tmp_y, None, vcontrol)
     quads.append(new_quad)
-    stackO.pop()
-    stackO.pop()
-    original_id = stackO.pop()
+    print("STACKKKKKKKKK")
+    stackO.show_all()
+    original_id = stackO.top()
     print("ORIGNAL FOR ID", original_id)
     new_quad = quad.generate_quad("=", tmp_y, None, original_id)  # stackO.pop() has to be the original ID
     quads.append(new_quad)
@@ -1187,6 +1187,7 @@ def p_for_update(p):
     tmp_quad = quads[final]
     tmp_quad.fill_quad(len(quads) + 1)
     stack_type.pop()
+    stackO.pop()
 
 
 
@@ -1744,7 +1745,7 @@ def compile_and_run(file_name, show_quadruples, show_tables):
         f.close()
     except FileNotFoundError:
         error("No hay archivo para probar")
-    parser.parse(r, debug=True)
+    parser.parse(r, debug=False)
 
     print("Code Compiled Successfully!")
 
