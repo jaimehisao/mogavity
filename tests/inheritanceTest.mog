@@ -40,8 +40,8 @@ main {
     perro.a = 1;
     perro.b = 2;
     output -> perro.a;
-    _pelos();
-    _perro.que_soy();
+    pelos();
+    perro.que_soy();
     output -> perro.b;
     return 0;
 }

@@ -462,7 +462,8 @@ def p_estatuto(p):
 
 # <Asignación>
 def p_asignacion(p):
-    '''asignacion   :   variable ASSIGNMENT exp SEMICOLON'''
+    '''asignacion   :   variable ASSIGNMENT llamada
+                    |   variable ASSIGNMENT exp SEMICOLON '''
     # print(p[1])
     #print("STACK")
     #stackO.show_all()
@@ -561,8 +562,8 @@ def p_lectura(p):
 
 # <Llamada>
 def p_llamada(p):
-    """llamada  :   UNDERSCORE ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
-                |   UNDERSCORE ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
+    """llamada  :    ID function_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub
+                |    ID method_detection_class_save DOT ID method_detection LEFTPARENTHESIS llamada2 verify_coherence_of_params RIGHTPARENTHESIS function_gosub_method"""
 
 
 def p_llamada_void(p):
@@ -622,7 +623,7 @@ def p_cicloFor(p):
 # TODO: update assign diagram
 # <Assign>
 def p_assign_for(p):
-    """assign_for   :   ID for_declaration ASSIGNMENT exp for_exp_assign"""
+    """assign_for   :   ID for_declaration ASSIGNMENT exp for_exp_assign """
 
 
 # <Update>
