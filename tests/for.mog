@@ -10,9 +10,3 @@ main{
     }
     return 0;
 }
-
-for (a = 0; c; a+=1){
-        output -> a;
-        A[a] = a*5;
-        output -> A[a];
-    }

@@ -1,11 +1,12 @@
 program test;
 
-var int i, a, b, c, result;
+var int i, a, b, c, d, result;
 var int A[100];
 
 instr int search(int to_find){
     for (i = 1; 100; i+=1){
-        if (to_find == A[i]){
+        d = i;
+        if (to_find == A[d]){
             return i;
         }
     }
@@ -14,9 +15,9 @@ instr int search(int to_find){
 main{
     b = 100;
     for (a = 0; 100; a+=1){
-      output -> "holaaaaa";
-      A[a] = a*5;
-      output -> a;
+      c = a+1;
+      output -> c;
+      A[c] = c;
     }
     input <- b;
     result = _search(b);

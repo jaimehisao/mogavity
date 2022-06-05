@@ -876,8 +876,6 @@ def p_add_operator_plusminus(p):
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             # tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            res = temp.get_temp(result_type)
-            print("RES", res)
             if current_scope != "global":
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
@@ -885,7 +883,7 @@ def p_add_operator_plusminus(p):
             # new_quad.print_quad()
             quads.append(new_quad)
             stackO.push(temporal)
-            stack_type.push(res[1])
+            stack_type.push(result_type)
         else:
             error("Type mismatch at " + str(p.lexer.lineno))
 
@@ -905,8 +903,6 @@ def p_add_operator_multiplydivide(p):
         result_type = oracle.use_oracle(left_type, right_type, op)
         if result_type != -1:
             # tmp_type = oracle.convert_number_type_to_string_name(result_type)
-            # res = temp.get_temp(tmp_type)
-            # print("RES", res)
             if current_scope != "global":
                 cont_temporals += 1
             temporal = fD.function_table[current_scope].memory_manager.assign_new_temp()
@@ -1125,6 +1121,7 @@ def p_for_exp_assign(p):
     quads.append(_quad)
 
     control_var = p[-4]
+    print("CONTROL VAR", control_var)
 
     # Check if control var exists in either the local or global scope
     address = fD.get_variable_address(control_var, current_scope)
@@ -1177,7 +1174,11 @@ def p_for_update(p):
     # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
     new_quad = quad.generate_quad("=", tmp_y, None, v_control_tmp)
     quads.append(new_quad)
-    new_quad = quad.generate_quad("=", tmp_y, None, stackO.pop())  # stackO.pop() has to be the original ID
+    stackO.pop()
+    stackO.pop()
+    original_id = stackO.pop()
+    print("ORIGNAL FOR ID", original_id)
+    new_quad = quad.generate_quad("=", tmp_y, None, original_id)  # stackO.pop() has to be the original ID
     quads.append(new_quad)
     final = stackJumps.pop()
     ret = stackJumps.pop()
