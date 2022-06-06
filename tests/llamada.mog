@@ -1,0 +1,20 @@
+program test;
+
+var int a;
+
+instr int local()
+{
+    var int a, b;
+    a = 2;
+    return a;
+}
+
+main{
+    output -> "Should output 1";
+    a = 1;
+    output -> a;
+    a = local();
+    output -> "Should output 2";
+    output -> a;
+    return 0;
+}
