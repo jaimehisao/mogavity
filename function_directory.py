@@ -32,7 +32,8 @@ class Class:
         self.methods = {}
 
     def add_class_method(self, _id, return_type):
-        tmp_method = Function(_id, return_type)
+        tmp_method = Function(_id, return_type, is_method=True, parent_class=self.id)
+        print("SELF ID", self.id)
         self.methods[_id] = tmp_method
 
     def add_class_constructor(self):
@@ -71,7 +72,7 @@ class Function:
             self.parameter_table = []
             self.id = _id
             self.return_type = return_type
-            self.parent_class = parent_class
+            self.type = parent_class
         else:
             self.variable_table = {}
             self.constants_table = {}

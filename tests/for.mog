@@ -1,5 +1,6 @@
 program test;
 
+
 var int a,b,c, D[10];
 
 main{
@@ -7,7 +8,6 @@ main{
     for (a = 0; 10; a+=1){
       D[a] = a;
       output -> D[a];
-
     }
     return 0;
 }

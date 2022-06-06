@@ -344,6 +344,8 @@ def start_virtual_machine(function_directory: FunctionDirectory, quadruples: [Qu
                 res = int(res)
             elif is_float(res):
                 res = float(res)
+            else:
+                error("Inputted unsupported type")
             save_to_memory(quadruples[instruction_pointer][4], res)
             instruction_pointer += 1
 
@@ -364,39 +366,37 @@ def is_pointer(address):  ## TODO HACER MAS ELEGANTE
 ###########
 # HELPERS #
 ###########
-## TODO validate no trash in var
-def get_var_from_address2(address):
-    global current_local_memory
-    #print("global", global_memory.return_val())
-    #print("local", current_local_memory.return_val())
-
-    if is_global_variable(address):
-        return global_memory.get_value_by_address(address)
-    else:
-        return current_local_memory.get_value_by_address(address)
-
-
 def get_var_from_address(address, not_assign=True):
     global current_local_memory
     #print("global", global_memory.return_val())
     #print("local", current_local_memory.return_val())
-    if not_assign:
-        if is_global_variable(address):
-            """"""
-            if is_pointer(address):
-                return global_memory.get_value_by_address(global_memory.get_value_by_address(address))
+    try:
+        if not_assign:
+            if is_global_variable(address):
+                if is_pointer(address):
+                    pntr = global_memory.get_value_by_address(address)
+                    if is_global_variable(pntr):
+                        return global_memory.get_value_by_address(pntr)
+                    else:
+                        return current_local_memory.get_value_by_address(pntr)
+                else:
+                    return global_memory.get_value_by_address(address)
             else:
-                return global_memory.get_value_by_address(address)
+                if is_pointer(address):
+                    pntr = current_local_memory.get_value_by_address(address)
+                    if is_global_variable(pntr):
+                        return global_memory.get_value_by_address(pntr)
+                    else:
+                        return current_local_memory.get_value_by_address(pntr)
+                else:
+                    return current_local_memory.get_value_by_address(address)
         else:
-            if is_pointer(address):
-                return current_local_memory.get_value_by_address(current_local_memory.get_value_by_address(address))
+            if is_global_variable(address):
+                return global_memory.get_value_by_address(address)
             else:
                 return current_local_memory.get_value_by_address(address)
-    else:
-        if is_global_variable(address):
-            return global_memory.get_value_by_address(address)
-        else:
-            return current_local_memory.get_value_by_address(address)
+    except KeyError:
+        error("Variable you are trying to access has not been declared previously!")
 
 
 def save_to_memory(address, val):

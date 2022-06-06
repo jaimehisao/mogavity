@@ -20,13 +20,11 @@ class MemoryManager:
     is_global: bool
     assigned_ints: int
     assigned_floats: int
-    assigned_chars: int
     assigned_temps: int
     assigned_constants: int
     assigned_poiners: int
     MAX_INTS: int
     MAX_FLOATS: int
-    MAX_CHARS: int
     MAX_TEMPS: int
     MAX_CONSTANTS: int
     MAX_POINTERS: int
@@ -40,63 +38,47 @@ class MemoryManager:
         self.MAX_INTS = self.assigned_ints + MAX_PER_VAR - 1
         self.assigned_floats = self.MAX_INTS + 1
         self.MAX_FLOATS = self.assigned_floats + MAX_PER_VAR - 1
-        self.assigned_chars = self.MAX_FLOATS + 1
-        self.MAX_CHARS = self.assigned_chars + MAX_PER_VAR - 1
-        self.assigned_temps = self.MAX_CHARS + 1
+        self.assigned_temps = self.MAX_FLOATS + 1
         self.MAX_TEMPS = self.assigned_temps + MAX_PER_VAR - 1
         self.assigned_constants = self.MAX_TEMPS + 1
         self.MAX_CONSTANTS = self.assigned_constants + MAX_PER_VAR - 1
         self.assigned_poiners = self.MAX_CONSTANTS + 1
         self.MAX_POINTERS = self.assigned_poiners + MAX_PER_VAR - 1
 
-        #print("int", str(self.assigned_ints), str(self.MAX_INTS))
-        #print("float", str(self.assigned_floats), str(self.MAX_FLOATS))
-        #print("char", str(self.assigned_chars), str(self.MAX_CHARS))
-        #print("tmp", str(self.assigned_temps), str(self.MAX_TEMPS))
-        #print("CTE", str(self.assigned_constants), str(self.MAX_CONSTANTS))
-        #print("POINTERS", str(self.assigned_poiners), str(self.MAX_POINTERS))
-
     def assign_new_int_address(self):
         if self.assigned_ints < self.MAX_INTS:
             assigned = self.assigned_ints
             self.assigned_ints += 1
             return assigned
-        error("Too much Integer variables, please optimize!")
+        error("Too many Integer variables, please optimize!")
 
     def assign_new_float(self):
         if self.assigned_floats < self.MAX_FLOATS:
             assigned = self.assigned_floats
             self.assigned_floats += 1
             return assigned
-        error("Too much Float variables, please optimize!")
-
-    def assign_new_char(self):
-        if self.assigned_chars < self.MAX_CHARS:
-            assigned = self.assigned_chars
-            self.assigned_chars += 1
-            return assigned
-        error("Too much Char variables, please optimize!")
+        error("Too many Float variables, please optimize!")
 
     def assign_new_temp(self):
         if self.assigned_temps < self.MAX_TEMPS:
             assigned = self.assigned_temps
             self.assigned_temps += 1
             return assigned
-        error("Too much Temporary variables, please optimize your operations!")
+        error("Too many Temporary variables, please optimize your operations!")
 
     def assign_new_constant(self):
         if self.assigned_constants < self.MAX_CONSTANTS:
             assigned = self.assigned_constants
             self.assigned_constants += 1
             return assigned
-        error("Too much Constants, please optimize your operations!")
+        error("Too many Constants, please optimize your operations!")
 
     def assign_new_pointer(self):
         if self.assigned_poiners < self.MAX_POINTERS:
             assigned = self.assigned_poiners
             self.assigned_poiners += 1
             return assigned
-        error("Too much Pointers!")
+        error("Too many Pointers!")
 
     """
         def set_new_virtual_address(self, _type, new_address):
@@ -121,10 +103,8 @@ class MemoryManager:
             return "int"
         elif self.MAX_INTS + 1 <= address <= self.MAX_FLOATS:
             return "float"
-        elif self.MAX_FLOATS + 1 <= address <= self.MAX_CHARS:
+        elif self.MAX_FLOATS + 1 <= address <= self.MAX_TEMPS:
             return "char"
-        elif self.MAX_CHARS + 1 <= address <= self.MAX_TEMPS:
-            return "temp"
         elif self.MAX_TEMPS + 1 <= address <= self.MAX_CONSTANTS:
             return "CTE"
         elif self.MAX_CONSTANTS + 1 <= address <= self.MAX_POINTERS:
@@ -139,10 +119,9 @@ class MemoryManager:
         """
         number_of_int_variables = self.assigned_ints - STARTING_ADDRESS
         number_of_float_variables = self.assigned_floats - (self.MAX_INTS + 1)
-        number_of_char_variables = self.assigned_chars - (self.MAX_FLOATS + 1)
-        number_of_tmp_variables = self.assigned_temps - (self.MAX_CHARS + 1)
+        number_of_tmp_variables = self.assigned_temps - (self.MAX_FLOATS + 1)
         number_of_constants = self.assigned_constants - (self.MAX_TEMPS + 1)
-        return number_of_int_variables, number_of_float_variables, number_of_char_variables, number_of_tmp_variables, number_of_constants
+        return number_of_int_variables, number_of_float_variables, number_of_tmp_variables, number_of_constants
 
     def is_address_global(self, address):
         if address < STARTING_ADDRESS + GLOBAL_OFFSET:
