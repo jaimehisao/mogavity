@@ -1,4 +1,4 @@
-# Mogavity Compiler
+# Mogavity Compiler Quick Reference
 
 Using the Mogavity compiler is simple. Below you will find simple commands and statements that you can use to implement your code.
 
@@ -81,4 +81,64 @@ Functions are declared using the **instr** command, followed by the return type 
 Inside the parenthesis, parameters can be added by declaring the type and the parameter name. A function can have
 more than one parameter and can also have more than one return inside it. Variables instantiated inside a Function
 will only be available inside that particular scope.
+
+## Conditionals and Loops
+```
+program test;
+
+var int a, b, c, d;
+
+main {
+    
+    a = 1;
+    b = 2;
+    c = 3;
+    d = 4;
+
+    if ((a > b or c < d) and (c < d and a < d)) {
+        output -> "negro";
+    }
+    otherwise {
+        output -> "blanco";
+    }
+}
+```
+Conditional operators are similar to other programming languanges, we use the standard operators **<**, **>**,
+**or** and, **and** which can be used together as seen above. 
+
+The IF statement evaluates boolean operations and executes accordingly (yes or no). If you want to have an "else"
+condition, in Mogavity you state it as **otherwise**.
+
+## Object Creation
+```
+program test;
+
+var int a, b, c, d;
+
+main {
+    
+    a = 1;
+    b = 2;
+    c = 3;
+    d = 4;
+
+    if ((a > b or c < d) and (c < d and a < d)) {
+        output -> "negro";
+    }
+    otherwise {
+        output -> "blanco";
+    }
+}
+```
+Mogavity supports user-created objects, they behave a lot like structs from other languages. But they can also have
+their own functions.
+
+Conditional operators are similar to other programming languanges, we use the standard operators **<**, **>**,
+**or** and, **and** which can be used together as seen above. 
+
+The IF statement evaluates boolean operations and executes accordingly (yes or no). If you want to have an "else"
+condition, in Mogavity you state it as **otherwise**.
+
+## TL;DR
+- Supported simple types **int**, and **float**. We also support objects of the user's creation.
 

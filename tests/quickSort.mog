@@ -1,0 +1,73 @@
+program test;
+
+var int A[20];
+var int a,b,c,LEN;
+
+instr void sort() {
+    var int pivot, low, high, temp, pv;
+    pv = LEN/2;
+    pivot = A[pv];
+    low = 0;
+    high = LEN - 1;
+    a = 1;
+
+    while (a == 1) {
+        while (low < (LEN - 1) and A[low] < pivot) {
+            low = low + 1;
+        }
+        while (high > 0 and A[high] > pivot) {
+            high = high - 1;
+        }
+
+        if (low >= high) {
+            a = 0;
+        } otherwise {
+            temp = A[low];
+            A[low] = A[high];
+            A[high] = temp;
+        }
+    }
+}
+
+main{
+    LEN = 20;
+A[0] = 20;
+A[1] = 19;
+A[2] = 18;
+A[3] = 17;
+A[4] = 16;
+A[5] = 15;
+A[6] = 14;
+A[7] = 13;
+A[8] = 12;
+A[9] = 11;
+A[10] = 10;
+A[11] = 9;
+A[12] = 8;
+A[13] = 7;
+A[14] = 6;
+A[15] = 5;
+A[16] = 4;
+A[17] = 3;
+A[18] = 2;
+A[19] = 1;
+
+    a = 0;
+    while(a<LEN){
+        output -> A[a];
+        a = a+1;
+    }
+
+    _sort();
+    output -> "============SORTING==============";
+
+    a = 0;
+    while(a<LEN){
+        output -> A[a];
+        a = a+1;
+    }
+
+
+
+    return 0;
+}
