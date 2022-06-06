@@ -5,7 +5,8 @@ class Perro {
         int a, b;
     constr:
         Perro(){
-
+            Perro.a = 1;
+            Perro.b = 2;
         }
     methods:
         method void pelos(){
@@ -23,10 +24,8 @@ instr void pelos(){
 
 main {
     perro.a = 1;
-    perro.b = 2;
     output -> perro.a;
     _pelos();
     _perro.pelos();
-    output -> perro.b;
     return 0;
 }
