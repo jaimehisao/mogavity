@@ -1,0 +1,13 @@
+program test;
+
+var int a,b,c, D[10];
+
+main{
+    b = 0;
+    for (a = 0; 10; a+=1){
+      D[a] = a;
+      output -> D[a];
+
+    }
+    return 0;
+}

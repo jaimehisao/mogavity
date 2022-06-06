@@ -4,14 +4,15 @@ from memory_manager import MemoryManager
 
 from error_handling import error, warning, info
 
-class NodeArray:
+
+class NodeArray:  # TODO More descriptive name
     m: int
     k: int
     lim_inf: int
     lim_sup: int
     next_node = None
-    
-    def __init__(self, r = 0, m = 0, k = 0, lim_inf = 0, lim_sup = 0, next_node = None) -> None:
+
+    def __init__(self, r=0, m=0, k=0, lim_inf=0, lim_sup=0, next_node=None) -> None:
         self.r = r
         self.m = m
         self.k = k
@@ -19,11 +20,40 @@ class NodeArray:
         self.lim_sup = lim_sup
         self.next_node = next_node
 
+
+class Class:
+    id: str
+    attributes: {}
+    methods: {}
+
+    def __init__(self, _id):
+        self.id = _id
+        self.attributes = {}
+        self.methods = {}
+
+    def add_class_method(self, _id, return_type):
+        tmp_method = Function(_id, return_type)
+        self.methods[_id] = tmp_method
+
+    def add_class_constructor(self):
+        self.methods[self.id] = Function(self.id, "void", is_method=True)
+
+    def add_class_attributes(self, identifier, _type, _class):
+        self.attributes[identifier] = _type
+
+    def check_if_method_exists(self, identifier):
+        if identifier in self.methods.keys():
+            return True
+        else:
+            return False
+
+
 class Function:
     id: str
     return_type: str
 
     #  Tables
+    class_table = {}
     variable_table = {}  # id: Variable(id, type, address)
     constants_table = {}  # key(constant): address (only in global)
     parameter_table_types = []  # [type1 ... typeN]
@@ -35,17 +65,33 @@ class Function:
     number_of_ints: int
     number_of_floats: int
 
-    def __init__(self, _id, return_type):
-        self.variable_table = {}
-        self.constants_table = {}
-        self.parameter_table_types = []
-        self.parameter_table = []
-        self.id = _id
-        self.return_type = return_type
-        if _id == "global":
-            self.memory_manager = MemoryManager(True)
+    def __init__(self, _id, return_type, is_method=False, parent_class=None):
+        if is_method:
+            self.parameter_table_types = []
+            self.parameter_table = []
+            self.id = _id
+            self.return_type = return_type
+            self.parent_class = parent_class
         else:
-            self.memory_manager = MemoryManager(False)
+            self.variable_table = {}
+            self.constants_table = {}
+            self.parameter_table_types = []
+            self.parameter_table = []
+            self.class_table = {}
+            self.id = _id
+            self.return_type = return_type
+            if _id == "global":
+                self.memory_manager = MemoryManager(True)
+            else:
+                self.memory_manager = MemoryManager(False)
+
+    def add_class(self, identifier):
+        tmp_class = Class(identifier)
+        self.class_table[identifier] = tmp_class
+
+    def add_class_attribute_instantiation(self, attr_name, _type, address):
+        tmp_attr = Variable(attr_name, _type, address)
+        self.variable_table[tmp_attr.id] = tmp_attr
 
     def add_variable(self, identifier, _type):
         address = ""
@@ -57,7 +103,7 @@ class Function:
             address = self.memory_manager.assign_new_float()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
-        elif _type == "char":
+        else:
             address = self.memory_manager.assign_new_char()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
@@ -93,7 +139,7 @@ class Function:
     # Deletes the local var table
     def release_var_table(self):
         pass
-        #self.variable_table.clear()
+        # self.variable_table.clear()
 
     # Set the amount of local variables defined
     def set_vars(self):
@@ -119,7 +165,7 @@ class Function:
         self.variable_table[identifier].has_dimensions = True
 
     # Store the node within the array variable
-    def add_node(self, identifier, node : NodeArray):
+    def add_node(self, identifier, node: NodeArray):
         self.variable_table[identifier].nodes.append(node)
 
     # Get the first node of the array varible
@@ -138,7 +184,7 @@ class Variable:
     has_dimensions: bool
     nodes = []  # NodeArray
 
-    def __init__(self, _id, _type, address, has_dimensions = False):
+    def __init__(self, _id, _type, address, has_dimensions=False):
         self.id = _id
         self.type = _type
         self.address = address
@@ -175,8 +221,7 @@ class FunctionDirectory:
         # self.function_table[scope].variable_table[identifier].address)
 
     def print_variable_table(self, current_scope):
-        pass
-        #info(str(self.function_table[current_scope].variable_table))
+        print(str(self.function_table[current_scope].variable_table))
 
     def print_all_variable_tables(self):
         pass
@@ -192,6 +237,13 @@ class FunctionDirectory:
     def check_if_exists(self, identifier):
         """Will verify if the given scope exists in the function table"""
         if identifier in self.function_table.keys():
+            return True
+        else:
+            return False
+
+    def check_if_exists_vars(self, identifier, scope):
+        """Will verify if the given scope exists in the function table"""
+        if identifier in self.function_table[scope].variable_table.keys():
             return True
         else:
             return False
@@ -247,20 +299,23 @@ class FunctionDirectory:
 
     def get_variable_address(self, identifier, scope):
         # Check for variable in global scope
-        print("SCOPE", scope, "ID", identifier)
-        #print(self.function_table["global"].variable_table.keys())
+        # print("SCOPE", scope, "ID", identifier)
+        # print(self.function_table["global"].variable_table.keys())
+        #split_id = identifier.split(".")
+        #print(split_id)
+        #if len(split_id) == 1:  # Traditional Variables
         var_in_global_scope_address = None
         var_in_local_scope_address = None
         if scope != "global":
             if identifier in self.function_table["global"].variable_table.keys():
                 var_in_global_scope_address = self.function_table["global"].variable_table[identifier].address
-                #print("var_in_global_scope_address", var_in_global_scope_address)
+                # print("var_in_global_scope_address", var_in_global_scope_address)
             else:
                 info("Var " + identifier + " is not in global scope!")
         # Check for variable in local scope
         if identifier in self.function_table[scope].variable_table.keys():
             var_in_local_scope_address = self.function_table[scope].variable_table[identifier].address
-            #print("var_in_local_scope_address", var_in_local_scope_address)
+            # print("var_in_local_scope_address", var_in_local_scope_address)
         if scope == "global":
             return var_in_local_scope_address
         else:
@@ -277,12 +332,12 @@ class FunctionDirectory:
             else:
                 error("Variable " + identifier + " has not been declared previously!")
 
-
     def get_var_from_address(self, scope, address):
         for key, item in self.function_table[scope].variable_table.items():
-            #print("KEY AND ITEM", key, item.address)
+            # print("KEY AND ITEM", key, item.address)
             if str(item.address) == str(address):
                 return item
+
     #  TODO move to Function class
 
     def get_constant(self, cte_value):

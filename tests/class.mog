@@ -1,0 +1,32 @@
+program test;
+
+class Perro {
+    attr:
+        int a, b;
+    constr:
+        Perro(){
+
+        }
+    methods:
+        method void pelos(){
+            output -> "Hola, pelos de perro";
+        }
+}
+
+var Perro perro;
+var int a;
+
+instr void pelos(){
+     output -> "Hola Pelos pero no de perro";
+     return 0;
+}
+
+main {
+    perro.a = 1;
+    perro.b = 2;
+    output -> perro.a;
+    _pelos();
+    _perro.pelos();
+    output -> perro.b;
+    return 0;
+}

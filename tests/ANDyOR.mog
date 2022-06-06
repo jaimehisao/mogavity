@@ -1,0 +1,18 @@
+program test;
+
+var int a, b, c, d;
+
+main {
+    
+    a = 1;
+    b = 2;
+    c = 3;
+    d = 4;
+
+    if ((a > b or c < d) and (c < d and a < d)) {
+        output -> "negro";
+    }
+    otherwise {
+        output -> "blanco";
+    }
+}

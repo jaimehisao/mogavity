@@ -1,0 +1,31 @@
+program test;
+
+var int a,b,c;
+
+instr int local()
+{
+    var int a, b;
+    a = 2;
+    return a;
+}
+
+main{
+    output -> "Should output 1";
+    a = 1;
+    output -> a;
+    a = _local();
+    output -> "Should output 2 (3 times in different lines)";
+    output -> a;
+    a = _local();
+    output -> a;
+    a = _local();
+    output -> a;
+
+    output -> "Should output 6";
+    a = _local();
+    b = _local();
+    c = _local();
+    a = a+c+b;
+    output -> a;
+    return 0;
+}

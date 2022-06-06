@@ -1,0 +1,18 @@
+program test;
+
+var int a, b;
+
+instr int local()
+{
+    output -> "HOLA";
+    a = 1;
+    return a;
+}
+
+main{
+    b = 1 + 56;
+    a = local();
+    output -> a;
+    output -> b;
+    return 0;
+}
