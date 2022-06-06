@@ -913,7 +913,7 @@ def p_add_operator_multiplydivide(p):
             # stackO.push(res[0])
             # stack_type.push(res[1])
         else:
-            error("Type Mismatched")
+            error("Type mismatch at " + str(p.lexer.lineno))
 
 
 def p_add_operator_rop(p):
@@ -939,7 +939,7 @@ def p_add_operator_rop(p):
             stackO.push(temporal)
             stack_type.push(res[1])
         else:
-            error("Type Mismatched")
+            error("Type mismatch at " + str(p.lexer.lineno))
 
 
 def p_add_operator_and(p):
@@ -967,7 +967,7 @@ def p_add_operator_and(p):
             stack_type.push(res[1])
             print(res[1])
         else:
-            error("Type Mismatched")
+            error("Type mismatch at " + str(p.lexer.lineno))
 
 
 def p_add_operator_or(p):
@@ -992,7 +992,7 @@ def p_add_operator_or(p):
             stackO.push(temporal)
             stack_type.push(res[1])
         else:
-            error("Operator type mismatched at line: " + str(p.lineno()))
+            error("Type mismatch at " + str(p.lexer.lineno))
 
 
 def p_generate_write_quad(p):
@@ -1744,7 +1744,7 @@ def compile_and_run(file_name, show_quadruples, show_tables):
         r = f.read()
         f.close()
     except FileNotFoundError:
-        error("No hay archivo para probar")
+        error("There's no file with that name")
     parser.parse(r, debug=False)
 
     print("Code Compiled Successfully!")
