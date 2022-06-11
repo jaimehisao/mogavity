@@ -141,4 +141,4 @@ condition, in Mogavity you state it as **otherwise**.
 
 ## TL;DR
 - Supported simple types **int**, and **float**. We also support objects of the user's creation.
-
+- To run, use the command ```./mogavity.sh fileName``` and replace fileName with your code.
