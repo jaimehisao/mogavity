@@ -1,13 +1,15 @@
 program test;
 
-
 var int a,b,c, D[10];
 
 main{
     b = 0;
-    for (a = 0; 10; a+=1){
-      D[a] = a;
-      output -> D[a];
+    for (a = 0; 2; a+=1){
+      for (b = 0; 2; b+=1) {
+        output -> a;
+        output -> b;
+      }
+    output -> "FIN DE FOR";
     }
     return 0;
 }

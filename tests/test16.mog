@@ -1,7 +1,0 @@
-program test;
-
-var int A[7];
-
-main {
-    output-> 5*5,5*5, "Hola como estas";
-}

@@ -33,7 +33,6 @@ class Class:
 
     def add_class_method(self, _id, return_type):
         tmp_method = Function(_id, return_type, is_method=True, parent_class=self.id)
-        print("SELF ID", self.id)
         self.methods[_id] = tmp_method
 
     def add_class_constructor(self):
@@ -105,7 +104,7 @@ class Function:
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
         else:
-            address = self.memory_manager.assign_new_char()
+            address = self.memory_manager.assign_new_temp()
             self.variable_table[identifier] = Variable(
                 identifier, _type, address)
         logging.info(

@@ -3,11 +3,6 @@ program test;
 class Perro {
     attr:
         int a, b;
-    constr:
-        Perro(){
-            Perro.a = 1;
-            Perro.b = 2;
-        }
     methods:
         method void pelos(){
             output -> "Hola, pelos de perro";
@@ -21,6 +16,7 @@ instr void pelos(){
      output -> "Hola Pelos pero no de perro";
      return 0;
 }
+
 
 main {
     perro.a = 1;

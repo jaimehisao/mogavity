@@ -3,10 +3,6 @@ program test;
 class Animal {
     attr:
         int animal;
-    constr:
-        Animal(){
-            output -> "Un animal nace!";
-        }
     methods:
         method void que_soy(){
             output -> "Hola, soy un animal";
@@ -17,10 +13,6 @@ class Animal {
 class Perro inherits Animal {
     attr:
         int a, b;
-    constr:
-        Perro(){
-
-        }
     methods:
         method void pelos2(){
             output -> "Hola, pelos de perro";
@@ -40,8 +32,12 @@ main {
     perro.a = 1;
     perro.b = 2;
     output -> perro.a;
-    pelos();
-    perro.que_soy();
+    _pelos();
+    _perro.que_soy();
+    _perro.pelos2();
     output -> perro.b;
     return 0;
 }
+
+
+
