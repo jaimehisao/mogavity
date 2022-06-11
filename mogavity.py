@@ -4,8 +4,6 @@ Created by Clarissa V, and Hisao Y
 March 2022
 Usage for the Compiler´s Design Course
 """
-from audioop import mul
-from re import M
 import ply.yacc as yacc
 import ply.lex as lex
 from function_directory import FunctionDirectory as fD, NodeArray
@@ -203,7 +201,7 @@ def p_empty(p):
 ## GRAMATICA CLASES ##
 ######################
 def p_class(p):
-    """class : CLASS ID declare_class INHERITS ID inherits_init LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET end_class_declaration class
+    """class : CLASS ID declare_class INHERITS ID inherits_init LEFTCURLYBRACKET ATTR COLON attrs METHODS COLON class_method RIGHTCURLYBRACKET end_class_declaration class
     | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor METHODS COLON class_method RIGHTCURLYBRACKET end_class_declaration class
     | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs METHODS COLON class_method RIGHTCURLYBRACKET end_class_declaration class
     | CLASS ID declare_class LEFTCURLYBRACKET ATTR COLON attrs CONSTR COLON constructor RIGHTCURLYBRACKET end_class_declaration class
@@ -218,9 +216,11 @@ def p_inherits_init(p):
         error("Class you are trying to inherit does not exist!")
     info("CURR CLASS " + current_class + " INHERITS " + class_to_inherit)
 
-    for attr in fD.function_table["global"].class_table[class_to_inherit].attributes:
+    for attr, item in fD.function_table["global"].class_table[class_to_inherit].attributes.items():
         fD.function_table["global"].class_table[current_class].attributes[attr] = \
             fD.function_table["global"].class_table[class_to_inherit].attributes[attr]
+        original = fD.function_table[current_scope].variable_table[class_to_inherit + "." + attr]
+        fD.function_table[current_scope].variable_table[current_class + "." + attr] = original
 
     for method in fD.function_table["global"].class_table[class_to_inherit].methods:
         if method != class_to_inherit:
@@ -236,7 +236,6 @@ def p_declare_class(p):
     """declare_class : """
     global current_class, is_class_declaration
     is_class_declaration = True
-    print("Declaring new class with name", p[-1])
     fD.function_table[current_scope].add_class(p[-1])
     current_class = p[-1]
 
@@ -287,10 +286,8 @@ def p_new_attr_set_type(p):
 def p_new_attribute(p):
     """new_attribute : """
     attr_name = p[-1]
-    print("Adding new attribute on ", current_class, "ATTR", attr_name)
     fD.function_table[current_scope].class_table[current_class].add_class_attributes(attr_name, tmp_type, current_class)
     name_of_class_attribute = current_class + "." + attr_name
-    print(name_of_class_attribute)
     fD.function_table["global"].add_variable(name_of_class_attribute, tmp_type)
 
 
@@ -349,9 +346,7 @@ def p_np_end_method(p):
 def p_new_variable_from_class(p):
     """new_variable_from_class : """
     tmp_name = p[-1]
-    print("Adding new variable from class", current_class, "CURRENT SCOPE", current_scope, "VAR", tmp_name)
     address = fD.function_table[current_scope].add_variable(tmp_name, current_class)
-    print("New variable address", address)
 
     _class = fD.function_table[current_scope].class_table[curr_class_var_declaration]
 
@@ -359,7 +354,7 @@ def p_new_variable_from_class(p):
         check_name = curr_class_var_declaration + "." + attribute
         attr_name = tmp_name + "." + attribute
         if _class.attributes[attribute] == "int":
-            address_global = fD.function_table["global"].variable_table[check_name].address
+            address_global = fD.function_table[current_scope].variable_table[check_name].address
             address = fD.function_table[current_scope].memory_manager.assign_new_int_address()
             fD.function_table[current_scope].add_class_attribute_instantiation(attr_name, "int", address)
             new_quad = quad.generate_quad('=', address_global, None, address)
@@ -370,13 +365,6 @@ def p_new_variable_from_class(p):
             fD.function_table[current_scope].add_class_attribute_instantiation(attr_name, "float", address)
             new_quad = quad.generate_quad('=', address_global, None, address)
             quads.append(new_quad)
-
-    main = stackJumps.pop()
-    new_quad = quad.generate_quad("GOTO", None, None, None)
-    stackJumps.push(new_quad.id - 1)
-    quads.append(new_quad)
-    tmp_quad = quads[main]
-    tmp_quad.fill_quad(len(quads) + 1)
 
 
 # <VARS>
@@ -1076,17 +1064,19 @@ def p_for_exp_assign(p):
     _quad = quad.generate_quad("=", v_control, None, v_control_tmp)
     quads.append(_quad)
 
+    stackO.push(v_control_tmp)
+
     control_var = p[-4]
 
     # Check if control var exists in either the local or global scope
-    address = fD.get_variable_address(control_var, current_scope)
-    _type = fD.get_var_type(control_var, current_scope)
+    # address = fD.get_variable_address(control_var, current_scope)
+    # _type = fD.get_var_type(control_var, current_scope)
 
-    if _type != "int":
-        error("2 Type mismatch on FOR statement in line " + str(p.lexer.lineno))
+    # if _type != "int":
+    #     error("2 Type mismatch on FOR statement in line " + str(p.lexer.lineno))
 
-    stackO.push(address)
-    stack_type.push(_type)
+    # stackO.push(address)
+    # stack_type.push(_type)
 
 
 def p_for_exp_comp(p):
@@ -1104,7 +1094,7 @@ def p_for_exp_comp(p):
 
     v_control = stackO.top()
     addr = fD.function_table[current_scope].memory_manager.assign_new_temp()
-    _quad_2 = quad.generate_quad("<", v_control_tmp, v_final, addr)
+    _quad_2 = quad.generate_quad("<", v_control, v_final, addr)
     quads.append(_quad_2)
     stackJumps.push(_quad_2.id)
     _quad_3 = quad.generate_quad("GOTOF", addr, None, None)
@@ -1118,13 +1108,13 @@ def p_for_update(p):
     tmp_y = fD.function_table[current_scope].memory_manager.assign_new_temp()
     if current_scope != "global":
         cont_temporals += 1
-    vcontrol = stackO.top()
+    vcontrol = stackO.pop()
     for_updater_constant = fD.get_constant(int(for_updater))
-    new_quad = quad.generate_quad(for_op, v_control_tmp, for_updater_constant, tmp_y)
+    new_quad = quad.generate_quad(for_op, vcontrol, for_updater_constant, tmp_y)
 
     quads.append(new_quad)
-    # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC 
-    new_quad = quad.generate_quad("=", tmp_y, None, v_control_tmp)
+    # TODO: we have a duplicate quad but it's based on the FOR of the teacher ---> ASK WHAT'S WITH VC
+    new_quad = quad.generate_quad("=", tmp_y, None, vcontrol)
     quads.append(new_quad)
 
     original_id = stackO.pop()
@@ -1608,7 +1598,7 @@ def compile_and_run(file_name, show_quadruples, show_tables):
         f.close()
     except FileNotFoundError:
         error("No hay archivo para probar")
-    parser.parse(r, debug=True)
+    parser.parse(r, debug=False)
 
     print("Code Compiled Successfully!")
 

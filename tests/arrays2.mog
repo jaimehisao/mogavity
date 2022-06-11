@@ -1,9 +1,0 @@
-program test;
-
-var int A[5], a;
-
-main {
-    a = 0;
-    A[a] = a*5;
-    return 0;
-}

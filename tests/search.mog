@@ -1,35 +1,42 @@
-program test;
+program search;
 
-var int a, b, LEN, result;
 var int A[10];
+var int result, LEN, a, b;
 
 instr int search(int to_find){
     a = 0;
-    while (a<LEN){
-        if (to_find == A[a]){
+    while(a<LEN){
+        if(A[a] == to_find){
             return a;
         }
         a = a + 1;
     }
-    return 9999999;
+    return 999999;
 }
+
 main{
     LEN = 10;
     a = 0;
-    while (a<LEN){
+    while(a<LEN){
         A[a] = a*a;
         a = a + 1;
     }
+
     a = 0;
-    while (a<LEN){
-        output-> A[a];
+    while(a<LEN){
+        output -> A[a];
         a = a + 1;
     }
 
     input <- b;
     result = _search(b);
-    output -> "The result is in box #";
-    output -> result;
+
+    if(result == 999999){
+        output -> "Not found";
+    }otherwise{
+        output -> "The result is in index #";
+        output -> result;
+    }
 
     return 0;
 }

@@ -13,7 +13,7 @@ main{
     matrixA[0][0] = res;
     output -> "matrixA[0][1]";
     input <- res;
-    matrixA[0][1] = res;
+    matrixA[0][10] = res;
     output -> "matrixA[1][0]";
     input <- res;
     matrixA[1][0] = res;

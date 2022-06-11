@@ -27,12 +27,23 @@ instr int fibo_iterative(int num){
     return sequence[num];
 }
 
+instr int fiboX(int num){
+    if(num == 1){
+        return 1;
+    }otherwise{
+        return _fiboX(num-1) + _fiboX(num-2);
+    }
+}
+
 main{
     output -> "Recursive";
-    a = _fibo_recursive(9,0,1);
+    a = _fibo_recursive(20,0,1);
     output -> a;
     output -> "Iterative";
-    a = _fibo_iterative(9);
+    a = _fibo_iterative(20);
+    output -> a;
+    output -> "Iterative";
+    a = _fiboX(10);
     output -> a;
     return 0;
 }
